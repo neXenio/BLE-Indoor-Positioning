@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioning;
+package com.nexenio.bleindoorpositioningdemo;
 
 import org.junit.Test;
 

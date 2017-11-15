@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioning;
+package com.nexenio.bleindoorpositioningdemo;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
