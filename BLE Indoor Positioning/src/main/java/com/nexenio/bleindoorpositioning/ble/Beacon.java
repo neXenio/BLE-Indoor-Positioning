@@ -1,5 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble;
 
+import com.nexenio.bleindoorpositioning.location.Location;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -8,13 +10,18 @@ import java.util.UUID;
  * Created by steppschuh on 15.11.17.
  */
 
-public class Beacon {
+public abstract class Beacon {
 
     protected UUID uuid;
     protected List<AdvertisingPacket> advertisingPackets;
+    protected Location location;
 
     public Beacon() {
 
+    }
+
+    public boolean hasLocation() {
+        return location != null;
     }
 
     public boolean hasAnyAdvertisingPacket() {
