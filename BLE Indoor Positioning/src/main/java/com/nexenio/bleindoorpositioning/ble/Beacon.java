@@ -74,4 +74,55 @@ public abstract class Beacon {
         advertisingPackets.removeAll(removableAdvertisingPackets);
     }
 
+    /*
+        Getter & Setter
+     */
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public int getRssi() {
+        return rssi;
+    }
+
+    public void setRssi(int rssi) {
+        this.rssi = rssi;
+    }
+
+    public int getMajor() {
+        return major;
+    }
+
+    public void setMajor(int major) {
+        this.major = major;
+    }
+
+    public int getMinor() {
+        return minor;
+    }
+
+    public void setMinor(int minor) {
+        this.minor = minor;
+    }
+
+    public List<AdvertisingPacket> getAdvertisingPackets() {
+        return advertisingPackets;
+    }
+
+    public void setAdvertisingPackets(List<AdvertisingPacket> advertisingPackets) {
+        this.advertisingPackets = advertisingPackets;
+    }
+
+    public LocationProvider getLocationProvider() {
+        return locationProvider;
+    }
+
+    public void setLocationProvider(LocationProvider locationProvider) {
+        this.locationProvider = locationProvider;
+    }
 }

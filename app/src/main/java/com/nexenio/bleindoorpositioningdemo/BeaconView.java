@@ -5,7 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -13,6 +12,7 @@ import android.view.View;
 
 import com.nexenio.bleindoorpositioning.ble.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.projection.PixelProjection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +25,7 @@ public abstract class BeaconView extends View {
 
     protected Paint backgroundPaint;
     protected Paint textPaint;
+    protected Paint devicePaint;
     protected int textColor;
 
     protected Location deviceLocation;
@@ -32,6 +33,10 @@ public abstract class BeaconView extends View {
 
     protected int width;
     protected int height;
+    protected int centerX;
+    protected int centerY;
+
+    protected PixelProjection projection = new PixelProjection();
 
     public BeaconView(Context context) {
         super(context);
@@ -64,14 +69,27 @@ public abstract class BeaconView extends View {
         backgroundPaint = new Paint();
         backgroundPaint.setColor(Color.WHITE);
         backgroundPaint.setStyle(Paint.Style.FILL);
+
+        devicePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        devicePaint.setColor(Color.BLACK);
+        devicePaint.setStyle(Paint.Style.STROKE);
     }
 
     @CallSuper
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        this.width = w;
-        this.height = h;
+    protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight);
+        this.width = width;
+        this.height = height;
+
+        this.centerX = width / 2;
+        this.centerY = height / 2;
+
+        //projection.setCanvasWidth(width);
+        //projection.setCanvasHeight(height);
+
+        projection.setCanvasWidth(1000 * 1000 * 10);
+        projection.setCanvasHeight(1000 * 1000 * 10);
     }
 
     @CallSuper
@@ -88,7 +106,8 @@ public abstract class BeaconView extends View {
     }
 
     protected void drawDevice(Canvas canvas) {
-
+        Point point = getPointFromLocation(deviceLocation);
+        canvas.drawCircle(point.x, point.y, 10f, devicePaint);
     }
 
     protected void drawBeacons(Canvas canvas) {
@@ -98,13 +117,30 @@ public abstract class BeaconView extends View {
     }
 
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
-
+        Point point = getPointFromLocation(beacon.getLocation());
+        canvas.drawCircle(point.x, point.y, 5f, devicePaint);
     }
 
     protected Point getPointFromLocation(Location location) {
-        int x = 0;
-        int y = 0;
-        return new Point(x, y);
+        double locationWidth = projection.getWidthFromLongitude(location.getLongitude());
+        double locationHeight = projection.getHeightFromLatitude(location.getLatitude());
+
+        double topLeftWidth = projection.getWidthFromLongitude(TestLocations.GENDAMENMARKT_TOP_LEFT.getLongitude());
+        double topLeftHeight = projection.getHeightFromLatitude(TestLocations.GENDAMENMARKT_TOP_RIGHT.getLatitude());
+
+        double bottomRightWidth = projection.getWidthFromLongitude(TestLocations.GENDAMENMARKT_BOTTOM_RIGHT.getLongitude());
+        double bottomRightHeight = projection.getHeightFromLatitude(TestLocations.GENDAMENMARKT_BOTTOM_RIGHT.getLatitude());
+
+        double mappedWidth = bottomRightWidth - topLeftWidth;
+        double mappedHeight = bottomRightHeight - topLeftHeight;
+
+        double mappedLocationWidth = locationWidth - topLeftWidth;
+        double mappedLocationHeight = locationHeight - topLeftHeight;
+
+        double x = (mappedLocationWidth * width) / mappedWidth;
+        double y = (mappedLocationHeight * height) / mappedHeight;
+
+        return new Point((int) x, (int) y);
     }
 
     public Location getDeviceLocation() {
