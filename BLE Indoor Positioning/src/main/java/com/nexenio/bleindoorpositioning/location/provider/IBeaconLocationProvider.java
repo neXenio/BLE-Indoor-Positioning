@@ -15,14 +15,10 @@ public class IBeaconLocationProvider extends BeaconLocationProvider<IBeacon> {
     }
 
     @Override
-    public Location updateLocation() {
-        if (!beacon.hasAnyAdvertisingPacket()) {
-            return null;
-        }
+    public void updateLocation() {
         AdvertisingPacket advertisingPacket = beacon.getLatestAdvertisingPacket();
-        Location location = new Location();
+        location = new Location();
         // TODO: get location from advertising packets
-        return location;
     }
 
 }

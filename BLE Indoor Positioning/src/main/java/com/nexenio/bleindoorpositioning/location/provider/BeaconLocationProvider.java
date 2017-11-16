@@ -16,16 +16,20 @@ public abstract class BeaconLocationProvider<T extends Beacon> implements Locati
         this.beacon = beacon;
     }
 
-    public abstract Location updateLocation();
+    protected abstract void updateLocation();
 
-    public boolean shouldUpdateLocation() {
+    protected boolean shouldUpdateLocation() {
         return location == null;
+    }
+
+    protected boolean canUpdateLocation() {
+        return beacon.hasAnyAdvertisingPacket();
     }
 
     @Override
     public Location getLocation() {
-        if (shouldUpdateLocation()) {
-            location = updateLocation();
+        if (shouldUpdateLocation() && canUpdateLocation()) {
+            updateLocation();
         }
         return location;
     }

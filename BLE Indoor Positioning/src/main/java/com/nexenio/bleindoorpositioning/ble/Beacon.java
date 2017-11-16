@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble;
 
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,16 +14,25 @@ import java.util.UUID;
 public abstract class Beacon {
 
     protected UUID uuid;
+    protected int rssi;
+    protected int major;
+    protected int minor;
     protected List<AdvertisingPacket> advertisingPackets;
-    protected Location location;
+    protected LocationProvider locationProvider;
 
     public Beacon() {
-
+        this.locationProvider = createLocationProvider();
     }
 
     public boolean hasLocation() {
-        return location != null;
+        return locationProvider.getLocation() != null;
     }
+
+    public Location getLocation() {
+        return locationProvider.getLocation();
+    }
+
+    public abstract LocationProvider createLocationProvider();
 
     public boolean hasAnyAdvertisingPacket() {
         return advertisingPackets != null && !advertisingPackets.isEmpty();

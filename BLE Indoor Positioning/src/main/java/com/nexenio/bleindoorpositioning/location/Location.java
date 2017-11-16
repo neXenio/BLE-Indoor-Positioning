@@ -5,4 +5,37 @@ package com.nexenio.bleindoorpositioning.location;
  */
 
 public class Location {
+
+    public static double VALUE_NOT_SET = 0;
+
+    private double latitude = VALUE_NOT_SET;
+    private double longitude = VALUE_NOT_SET;
+    private double altitude = VALUE_NOT_SET;
+
+    public Location() {
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(double altitude) {
+        this.altitude = altitude;
+    }
 }
