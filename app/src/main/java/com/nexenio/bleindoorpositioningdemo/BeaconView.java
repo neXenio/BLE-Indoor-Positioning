@@ -1,11 +1,10 @@
 package com.nexenio.bleindoorpositioningdemo;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
+import android.graphics.PointF;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -18,7 +17,6 @@ import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by steppschuh on 16.11.17.
@@ -42,7 +40,7 @@ public abstract class BeaconView extends View {
     protected double canvasAspectRatio;
     protected int canvasWidth;
     protected int canvasHeight;
-    protected Point canvasCenter;
+    protected PointF canvasCenter;
 
     protected CanvasProjection projection = new CanvasProjection();
 
@@ -51,10 +49,7 @@ public abstract class BeaconView extends View {
     protected double offsetOriginWidth;
     protected double offsetOriginHeight;
 
-    protected float deviceRadius;
     protected float pixelsPerDip = DisplayUtil.convertDipToPixels(1);
-
-    ValueAnimator valueAnimator;
 
     public BeaconView(Context context) {
         super(context);
@@ -105,8 +100,6 @@ public abstract class BeaconView extends View {
         backgroundPaint = new Paint();
         backgroundPaint.setColor(Color.WHITE);
         backgroundPaint.setStyle(Paint.Style.FILL);
-
-        startAnimating();
     }
 
     @CallSuper
@@ -115,7 +108,7 @@ public abstract class BeaconView extends View {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
         this.canvasWidth = width;
         this.canvasHeight = height;
-        this.canvasCenter = new Point(width / 2, height / 2);
+        this.canvasCenter = new PointF(width / 2, height / 2);
         this.canvasAspectRatio = width / (float) height;
         //projection.setCanvasWidth(1000 * 1000 * 10);
         //projection.setCanvasHeight(1000 * 1000 * 10);
@@ -145,32 +138,23 @@ public abstract class BeaconView extends View {
 
     protected abstract void drawBeacon(Canvas canvas, Beacon beacon);
 
-    protected void startAnimating() {
-        valueAnimator = ValueAnimator.ofFloat(0, 1);
-        valueAnimator.setDuration(TimeUnit.SECONDS.toMillis(1));
-        valueAnimator.setRepeatCount(ValueAnimator.INFINITE);
-        valueAnimator.setRepeatMode(ValueAnimator.REVERSE);
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                float animationValue = (float) valueAnimator.getAnimatedValue();
-                deviceRadius = pixelsPerDip * 25 * animationValue;
-                invalidate();
-            }
-        });
-        valueAnimator.start();
-    }
-
     protected abstract void updateMapping();
 
-    protected Point getPointFromLocation(Location location) {
+    protected PointF getPointFromLocation(Location location) {
         double locationWidth = projection.getWidthFromLongitude(location.getLongitude());
         double locationHeight = projection.getHeightFromLatitude(location.getLatitude());
         double mappedLocationWidth = locationWidth - offsetOriginWidth;
         double mappedLocationHeight = locationHeight - offsetOriginHeight;
         double x = (mappedLocationWidth * canvasWidth) / mappedCanvasWidth;
         double y = (mappedLocationHeight * canvasHeight) / mappedCanvasHeight;
-        return new Point((int) x, (int) y);
+        return new PointF((float) x, (float) y);
+    }
+
+    public void fitToCurrentLocations() {
+        topLeftLocation = null;
+        bottomRightLocation = null;
+        updateEdgeLocations();
+        onLocationsChanged();
     }
 
     private void updateEdgeLocations() {
@@ -211,6 +195,16 @@ public abstract class BeaconView extends View {
         return new Location(minimumLatitude, maximumLongitude);
     }
 
+    public void onLocationsChanged() {
+        updateEdgeLocations();
+        updateMapping();
+        invalidate();
+    }
+
+    public void onDeviceLocationChanged() {
+        onLocationsChanged();
+    }
+
     /*
         Getter & Setter
      */
@@ -221,9 +215,7 @@ public abstract class BeaconView extends View {
 
     public void setDeviceLocation(Location deviceLocation) {
         this.deviceLocation = deviceLocation;
-        updateEdgeLocations();
-        updateMapping();
-        invalidate();
+        onDeviceLocationChanged();
     }
 
     public List<Beacon> getBeacons() {
@@ -232,9 +224,7 @@ public abstract class BeaconView extends View {
 
     public void setBeacons(List<Beacon> beacons) {
         this.beacons = beacons;
-        updateEdgeLocations();
-        updateMapping();
-        invalidate();
+        onLocationsChanged();
     }
 
 }
