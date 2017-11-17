@@ -1,11 +1,11 @@
 package com.nexenio.bleindoorpositioningdemo;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.RectF;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -18,6 +18,7 @@ import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by steppschuh on 16.11.17.
@@ -33,8 +34,6 @@ public abstract class BeaconView extends View {
     protected Paint whiteStrokePaint;
     protected Paint deviceRadiusPaint;
 
-    protected int textColor;
-
     protected Location deviceLocation;
     protected Location topLeftLocation;
     protected Location bottomRightLocation;
@@ -43,17 +42,19 @@ public abstract class BeaconView extends View {
     protected double canvasAspectRatio;
     protected int canvasWidth;
     protected int canvasHeight;
-    protected int canvasCenterX;
-    protected int canvasCenterY;
+    protected Point canvasCenter;
+
+    protected CanvasProjection projection = new CanvasProjection();
 
     protected double mappedCanvasWidth;
     protected double mappedCanvasHeight;
     protected double offsetOriginWidth;
     protected double offsetOriginHeight;
 
+    protected float deviceRadius;
     protected float pixelsPerDip = DisplayUtil.convertDipToPixels(1);
 
-    protected CanvasProjection projection = new CanvasProjection();
+    ValueAnimator valueAnimator;
 
     public BeaconView(Context context) {
         super(context);
@@ -77,12 +78,8 @@ public abstract class BeaconView extends View {
 
     @CallSuper
     public void initialize() {
-        // colors
-        textColor = Color.BLACK;
-
-        // paints
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        textPaint.setColor(textColor);
+        textPaint.setColor(Color.BLACK);
         //textPaint.setTextSize(12);
 
         primaryFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -108,6 +105,8 @@ public abstract class BeaconView extends View {
         backgroundPaint = new Paint();
         backgroundPaint.setColor(Color.WHITE);
         backgroundPaint.setStyle(Paint.Style.FILL);
+
+        startAnimating();
     }
 
     @CallSuper
@@ -116,11 +115,8 @@ public abstract class BeaconView extends View {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
         this.canvasWidth = width;
         this.canvasHeight = height;
-        this.canvasCenterX = width / 2;
-        this.canvasCenterY = height / 2;
+        this.canvasCenter = new Point(width / 2, height / 2);
         this.canvasAspectRatio = width / (float) height;
-
-
         //projection.setCanvasWidth(1000 * 1000 * 10);
         //projection.setCanvasHeight(1000 * 1000 * 10);
         updateMapping();
@@ -139,13 +135,7 @@ public abstract class BeaconView extends View {
         canvas.drawRect(0, 0, canvasWidth, canvasHeight, backgroundPaint);
     }
 
-    protected void drawDevice(Canvas canvas) {
-        Point point = getPointFromLocation(deviceLocation);
-        canvas.drawCircle(point.x, point.y, pixelsPerDip * 25, deviceRadiusPaint);
-        canvas.drawCircle(point.x, point.y, pixelsPerDip * 10, whiteFillPaint);
-        canvas.drawCircle(point.x, point.y, pixelsPerDip * 10, primaryStrokePaint);
-        canvas.drawCircle(point.x, point.y, pixelsPerDip * 8, primaryFillPaint);
-    }
+    protected abstract void drawDevice(Canvas canvas);
 
     protected void drawBeacons(Canvas canvas) {
         for (Beacon beacon : beacons) {
@@ -153,61 +143,25 @@ public abstract class BeaconView extends View {
         }
     }
 
-    protected void drawBeacon(Canvas canvas, Beacon beacon) {
-        Point point = getPointFromLocation(beacon.getLocation());
-        canvas.drawCircle(point.x, point.y, pixelsPerDip * 250, deviceRadiusPaint);
+    protected abstract void drawBeacon(Canvas canvas, Beacon beacon);
 
-        float beaconRadius = pixelsPerDip * 8;
-        int beaconCornerRadius = (int) pixelsPerDip * 2;
-        RectF rect = new RectF(point.x - beaconRadius, point.y - beaconRadius, point.x + beaconRadius, point.y + beaconRadius);
-        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, whiteFillPaint);
-        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryStrokePaint);
-
-        beaconRadius = beaconRadius - pixelsPerDip * 2;
-        rect = new RectF(point.x - beaconRadius, point.y - beaconRadius, point.x + beaconRadius, point.y + beaconRadius);
-        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryFillPaint);
+    protected void startAnimating() {
+        valueAnimator = ValueAnimator.ofFloat(0, 1);
+        valueAnimator.setDuration(TimeUnit.SECONDS.toMillis(1));
+        valueAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        valueAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float animationValue = (float) valueAnimator.getAnimatedValue();
+                deviceRadius = pixelsPerDip * 25 * animationValue;
+                invalidate();
+            }
+        });
+        valueAnimator.start();
     }
 
-    protected void updateMapping() {
-        if (canvasWidth == 0 && canvasHeight == 0) {
-            return;
-        }
-
-        // get the projected width and height for the top left and bottom right location
-        double topLeftLocationWidth = projection.getWidthFromLongitude(topLeftLocation.getLongitude());
-        double topLeftLocationHeight = projection.getHeightFromLatitude(topLeftLocation.getLatitude());
-        double bottomRightLocationWidth = projection.getWidthFromLongitude(bottomRightLocation.getLongitude());
-        double bottomRightLocationHeight = projection.getHeightFromLatitude(bottomRightLocation.getLatitude());
-
-        // get the minimum width and height that should be mapped in order to
-        // display the top left and bottom right location on the canvas
-        double minimumWidth = bottomRightLocationWidth - topLeftLocationWidth;
-        double minimumHeight = bottomRightLocationHeight - topLeftLocationHeight;
-
-        // add some padding
-        double padding = Math.max(minimumWidth, minimumHeight) * 0.5;
-        minimumWidth += padding;
-        minimumHeight += padding;
-
-        // get the mapped width and height equivalent to the pixel dimensions of the canvas
-        mappedCanvasWidth = minimumWidth;
-        mappedCanvasHeight = minimumHeight;
-        if (canvasAspectRatio > (minimumWidth / minimumHeight)) {
-            mappedCanvasWidth = minimumHeight * canvasAspectRatio;
-        } else {
-            mappedCanvasHeight = minimumWidth / canvasAspectRatio;
-        }
-
-        // get the offsets that should be applied to mappings in order
-        // to center the locations on the canvas
-        double offsetWidth = (mappedCanvasWidth - minimumWidth + padding) / 2;
-        double offsetHeight = (mappedCanvasHeight - minimumHeight + padding) / 2;
-
-        // get the origin width and height (equivalent to the canvas origin 0,0) including
-        // the calculated mapping offset
-        offsetOriginWidth = topLeftLocationWidth - offsetWidth;
-        offsetOriginHeight = topLeftLocationHeight - offsetHeight;
-    }
+    protected abstract void updateMapping();
 
     protected Point getPointFromLocation(Location location) {
         double locationWidth = projection.getWidthFromLongitude(location.getLongitude());
@@ -225,6 +179,8 @@ public abstract class BeaconView extends View {
             locations.add(beacon.getLocation());
         }
         locations.add(deviceLocation);
+        locations.add(topLeftLocation);
+        locations.add(bottomRightLocation);
         topLeftLocation = getTopLeftLocation(locations);
         bottomRightLocation = getBottomRightLocation(locations);
     }
