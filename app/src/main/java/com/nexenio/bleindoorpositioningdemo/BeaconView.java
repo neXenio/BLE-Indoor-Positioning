@@ -12,7 +12,7 @@ import android.view.View;
 
 import com.nexenio.bleindoorpositioning.ble.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.projection.PixelProjection;
+import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,14 +29,23 @@ public abstract class BeaconView extends View {
     protected int textColor;
 
     protected Location deviceLocation;
+    protected Location topLeftLocation;
+    protected Location bottomRightLocation;
     protected List<Beacon> beacons = new ArrayList<>();
 
-    protected int width;
-    protected int height;
-    protected int centerX;
-    protected int centerY;
+    protected double canvasAspectRatio;
+    protected int canvasWidth;
+    protected int canvasHeight;
+    protected int canvasCenterX;
+    protected int canvasCenterY;
 
-    protected PixelProjection projection = new PixelProjection();
+    double mappedCanvasWidth;
+    double mappedCanvasHeight;
+    double offsetOriginWidth;
+    double offsetOriginHeight;
+
+
+    protected CanvasProjection projection = new CanvasProjection();
 
     public BeaconView(Context context) {
         super(context);
@@ -72,24 +81,23 @@ public abstract class BeaconView extends View {
 
         devicePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         devicePaint.setColor(Color.BLACK);
-        devicePaint.setStyle(Paint.Style.STROKE);
+        devicePaint.setStyle(Paint.Style.FILL_AND_STROKE);
     }
 
     @CallSuper
     @Override
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
-        this.width = width;
-        this.height = height;
+        this.canvasWidth = width;
+        this.canvasHeight = height;
+        this.canvasCenterX = width / 2;
+        this.canvasCenterY = height / 2;
+        this.canvasAspectRatio = width / (float) height;
 
-        this.centerX = width / 2;
-        this.centerY = height / 2;
 
-        //projection.setCanvasWidth(width);
-        //projection.setCanvasHeight(height);
-
-        projection.setCanvasWidth(1000 * 1000 * 10);
-        projection.setCanvasHeight(1000 * 1000 * 10);
+        //projection.setCanvasWidth(1000 * 1000 * 10);
+        //projection.setCanvasHeight(1000 * 1000 * 10);
+        updateMapping();
     }
 
     @CallSuper
@@ -102,12 +110,12 @@ public abstract class BeaconView extends View {
     }
 
     protected void drawBackground(Canvas canvas) {
-        canvas.drawRect(0, 0, width, height, backgroundPaint);
+        canvas.drawRect(0, 0, canvasWidth, canvasHeight, backgroundPaint);
     }
 
     protected void drawDevice(Canvas canvas) {
         Point point = getPointFromLocation(deviceLocation);
-        canvas.drawCircle(point.x, point.y, 10f, devicePaint);
+        canvas.drawCircle(point.x, point.y, 20f, devicePaint);
     }
 
     protected void drawBeacons(Canvas canvas) {
@@ -118,30 +126,94 @@ public abstract class BeaconView extends View {
 
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
         Point point = getPointFromLocation(beacon.getLocation());
-        canvas.drawCircle(point.x, point.y, 5f, devicePaint);
+        canvas.drawCircle(point.x, point.y, 15f, devicePaint);
+    }
+
+    protected void updateMapping() {
+        if (canvasWidth == 0 && canvasHeight == 0) {
+            return;
+        }
+
+        // get the projected width and height for the top left and bottom right location
+        double topLeftLocationWidth = projection.getWidthFromLongitude(topLeftLocation.getLongitude());
+        double topLeftLocationHeight = projection.getHeightFromLatitude(topLeftLocation.getLatitude());
+        double bottomRightLocationWidth = projection.getWidthFromLongitude(bottomRightLocation.getLongitude());
+        double bottomRightLocationHeight = projection.getHeightFromLatitude(bottomRightLocation.getLatitude());
+
+        // get the minimum width and height that should be mapped in order to
+        // display the top left and bottom right location on the canvas
+        double minimumWidth = bottomRightLocationWidth - topLeftLocationWidth;
+        double minimumHeight = bottomRightLocationHeight - topLeftLocationHeight;
+
+        // get the mapped width and height equivalent to the pixel dimensions of the canvas
+        mappedCanvasWidth = minimumWidth;
+        mappedCanvasHeight = minimumHeight;
+        if (canvasAspectRatio > (minimumWidth / minimumHeight)) {
+            mappedCanvasWidth = minimumHeight * canvasAspectRatio;
+        } else {
+            mappedCanvasHeight = minimumWidth / canvasAspectRatio;
+        }
+
+        // get the offsets that should be applied to mappings in order
+        // to center the locations on the canvas
+        double offsetWidth = (mappedCanvasWidth - minimumWidth) / 2;
+        double offsetHeight = (mappedCanvasHeight - minimumHeight) / 2;
+
+        // get the origin width and height (equivalent to the canvas origin 0,0) including
+        // the calculated mapping offset
+        offsetOriginWidth = topLeftLocationWidth - offsetWidth;
+        offsetOriginHeight = topLeftLocationHeight - offsetHeight;
     }
 
     protected Point getPointFromLocation(Location location) {
         double locationWidth = projection.getWidthFromLongitude(location.getLongitude());
         double locationHeight = projection.getHeightFromLatitude(location.getLatitude());
-
-        double topLeftWidth = projection.getWidthFromLongitude(TestLocations.GENDAMENMARKT_TOP_LEFT.getLongitude());
-        double topLeftHeight = projection.getHeightFromLatitude(TestLocations.GENDAMENMARKT_TOP_RIGHT.getLatitude());
-
-        double bottomRightWidth = projection.getWidthFromLongitude(TestLocations.GENDAMENMARKT_BOTTOM_RIGHT.getLongitude());
-        double bottomRightHeight = projection.getHeightFromLatitude(TestLocations.GENDAMENMARKT_BOTTOM_RIGHT.getLatitude());
-
-        double mappedWidth = bottomRightWidth - topLeftWidth;
-        double mappedHeight = bottomRightHeight - topLeftHeight;
-
-        double mappedLocationWidth = locationWidth - topLeftWidth;
-        double mappedLocationHeight = locationHeight - topLeftHeight;
-
-        double x = (mappedLocationWidth * width) / mappedWidth;
-        double y = (mappedLocationHeight * height) / mappedHeight;
-
+        double mappedLocationWidth = locationWidth - offsetOriginWidth;
+        double mappedLocationHeight = locationHeight - offsetOriginHeight;
+        double x = (mappedLocationWidth * canvasWidth) / mappedCanvasWidth;
+        double y = (mappedLocationHeight * canvasHeight) / mappedCanvasHeight;
         return new Point((int) x, (int) y);
     }
+
+    private void updateEdgeLocations() {
+        List<Location> locations = new ArrayList<>();
+        for (Beacon beacon : beacons) {
+            locations.add(beacon.getLocation());
+        }
+        locations.add(deviceLocation);
+        topLeftLocation = getTopLeftLocation(locations);
+        bottomRightLocation = getBottomRightLocation(locations);
+    }
+
+    private static Location getTopLeftLocation(List<Location> locations) {
+        double maximumLatitude = -Double.MAX_VALUE;
+        double minimumLongitude = Double.MAX_VALUE;
+        for (Location location : locations) {
+            if (location == null) {
+                continue;
+            }
+            maximumLatitude = Math.max(maximumLatitude, location.getLatitude());
+            minimumLongitude = Math.min(minimumLongitude, location.getLongitude());
+        }
+        return new Location(maximumLatitude, minimumLongitude);
+    }
+
+    private static Location getBottomRightLocation(List<Location> locations) {
+        double minimumLatitude = Double.MAX_VALUE;
+        double maximumLongitude = -Double.MAX_VALUE;
+        for (Location location : locations) {
+            if (location == null) {
+                continue;
+            }
+            maximumLongitude = Math.max(maximumLongitude, location.getLongitude());
+            minimumLatitude = Math.min(minimumLatitude, location.getLatitude());
+        }
+        return new Location(minimumLatitude, maximumLongitude);
+    }
+
+    /*
+        Getter & Setter
+     */
 
     public Location getDeviceLocation() {
         return deviceLocation;
@@ -149,6 +221,8 @@ public abstract class BeaconView extends View {
 
     public void setDeviceLocation(Location deviceLocation) {
         this.deviceLocation = deviceLocation;
+        updateEdgeLocations();
+        updateMapping();
         invalidate();
     }
 
@@ -158,6 +232,8 @@ public abstract class BeaconView extends View {
 
     public void setBeacons(List<Beacon> beacons) {
         this.beacons = beacons;
+        updateEdgeLocations();
+        updateMapping();
         invalidate();
     }
 

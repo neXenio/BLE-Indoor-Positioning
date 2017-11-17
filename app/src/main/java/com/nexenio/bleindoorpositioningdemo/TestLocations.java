@@ -4,11 +4,15 @@ import com.nexenio.bleindoorpositioning.location.Location;
 
 /**
  * Some locations that might be useful for testing. Latitudes and longitudes are real values
- * obtained from <a href="https://goo.gl/maps/PmmdX3sQAXR2">Google Maps</a>.
+ * obtained from Google Maps.
  */
 
 public abstract class TestLocations {
 
+    /*
+        Berlin Genamenmarkt
+        https://goo.gl/maps/PmmdX3sQAXR2
+     */
     public static final Location GENDAMENMARKT_COURT_TOP_LEFT = new Location(52.513925, 13.392239);
     public static final Location GENDAMENMARKT_COURT_TOP_RIGHT = new Location(52.513968, 13.392971);
     public static final Location GENDAMENMARKT_COURT_BOTTOM_LEFT = new Location(52.513298, 13.392340);

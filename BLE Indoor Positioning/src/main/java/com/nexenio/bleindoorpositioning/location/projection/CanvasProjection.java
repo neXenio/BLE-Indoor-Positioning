@@ -6,15 +6,15 @@ import com.nexenio.bleindoorpositioning.location.Location;
  * Created by steppschuh on 16.11.17.
  */
 
-public class PixelProjection {
+public class CanvasProjection {
 
-    private int canvasWidth;
-    private int canvasHeight;
+    private int canvasWidth = 1000;
+    private int canvasHeight = 1000;
 
     private Location topLeftLocation;
     private Location bottomRightLocation;
 
-    public PixelProjection() {
+    public CanvasProjection() {
     }
 
     public double getWidthFromLongitude(double longitude) {
