@@ -5,8 +5,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.RectF;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -25,7 +27,12 @@ public abstract class BeaconView extends View {
 
     protected Paint backgroundPaint;
     protected Paint textPaint;
-    protected Paint devicePaint;
+    protected Paint primaryFillPaint;
+    protected Paint primaryStrokePaint;
+    protected Paint whiteFillPaint;
+    protected Paint whiteStrokePaint;
+    protected Paint deviceRadiusPaint;
+
     protected int textColor;
 
     protected Location deviceLocation;
@@ -39,11 +46,12 @@ public abstract class BeaconView extends View {
     protected int canvasCenterX;
     protected int canvasCenterY;
 
-    double mappedCanvasWidth;
-    double mappedCanvasHeight;
-    double offsetOriginWidth;
-    double offsetOriginHeight;
+    protected double mappedCanvasWidth;
+    protected double mappedCanvasHeight;
+    protected double offsetOriginWidth;
+    protected double offsetOriginHeight;
 
+    protected float pixelsPerDip = DisplayUtil.convertDipToPixels(1);
 
     protected CanvasProjection projection = new CanvasProjection();
 
@@ -69,19 +77,37 @@ public abstract class BeaconView extends View {
 
     @CallSuper
     public void initialize() {
+        // colors
         textColor = Color.BLACK;
 
+        // paints
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setColor(textColor);
         //textPaint.setTextSize(12);
 
+        primaryFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        primaryFillPaint.setStyle(Paint.Style.FILL);
+        primaryFillPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+
+        primaryStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        primaryStrokePaint.setStyle(Paint.Style.STROKE);
+        primaryStrokePaint.setStrokeWidth(pixelsPerDip);
+        primaryStrokePaint.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+
+        whiteFillPaint = new Paint(primaryFillPaint);
+        whiteFillPaint.setColor(Color.WHITE);
+
+        whiteStrokePaint = new Paint(primaryStrokePaint);
+        whiteStrokePaint.setColor(Color.WHITE);
+
+        deviceRadiusPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        deviceRadiusPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+        deviceRadiusPaint.setAlpha(25);
+        deviceRadiusPaint.setStyle(Paint.Style.FILL);
+
         backgroundPaint = new Paint();
         backgroundPaint.setColor(Color.WHITE);
         backgroundPaint.setStyle(Paint.Style.FILL);
-
-        devicePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        devicePaint.setColor(Color.BLACK);
-        devicePaint.setStyle(Paint.Style.FILL_AND_STROKE);
     }
 
     @CallSuper
@@ -115,7 +141,10 @@ public abstract class BeaconView extends View {
 
     protected void drawDevice(Canvas canvas) {
         Point point = getPointFromLocation(deviceLocation);
-        canvas.drawCircle(point.x, point.y, 20f, devicePaint);
+        canvas.drawCircle(point.x, point.y, pixelsPerDip * 25, deviceRadiusPaint);
+        canvas.drawCircle(point.x, point.y, pixelsPerDip * 10, whiteFillPaint);
+        canvas.drawCircle(point.x, point.y, pixelsPerDip * 10, primaryStrokePaint);
+        canvas.drawCircle(point.x, point.y, pixelsPerDip * 8, primaryFillPaint);
     }
 
     protected void drawBeacons(Canvas canvas) {
@@ -126,7 +155,17 @@ public abstract class BeaconView extends View {
 
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
         Point point = getPointFromLocation(beacon.getLocation());
-        canvas.drawCircle(point.x, point.y, 15f, devicePaint);
+        canvas.drawCircle(point.x, point.y, pixelsPerDip * 250, deviceRadiusPaint);
+
+        float beaconRadius = pixelsPerDip * 8;
+        int beaconCornerRadius = (int) pixelsPerDip * 2;
+        RectF rect = new RectF(point.x - beaconRadius, point.y - beaconRadius, point.x + beaconRadius, point.y + beaconRadius);
+        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, whiteFillPaint);
+        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryStrokePaint);
+
+        beaconRadius = beaconRadius - pixelsPerDip * 2;
+        rect = new RectF(point.x - beaconRadius, point.y - beaconRadius, point.x + beaconRadius, point.y + beaconRadius);
+        canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryFillPaint);
     }
 
     protected void updateMapping() {
@@ -145,6 +184,11 @@ public abstract class BeaconView extends View {
         double minimumWidth = bottomRightLocationWidth - topLeftLocationWidth;
         double minimumHeight = bottomRightLocationHeight - topLeftLocationHeight;
 
+        // add some padding
+        double padding = Math.max(minimumWidth, minimumHeight) * 0.5;
+        minimumWidth += padding;
+        minimumHeight += padding;
+
         // get the mapped width and height equivalent to the pixel dimensions of the canvas
         mappedCanvasWidth = minimumWidth;
         mappedCanvasHeight = minimumHeight;
@@ -156,8 +200,8 @@ public abstract class BeaconView extends View {
 
         // get the offsets that should be applied to mappings in order
         // to center the locations on the canvas
-        double offsetWidth = (mappedCanvasWidth - minimumWidth) / 2;
-        double offsetHeight = (mappedCanvasHeight - minimumHeight) / 2;
+        double offsetWidth = (mappedCanvasWidth - minimumWidth + padding) / 2;
+        double offsetHeight = (mappedCanvasHeight - minimumHeight + padding) / 2;
 
         // get the origin width and height (equivalent to the canvas origin 0,0) including
         // the calculated mapping offset
