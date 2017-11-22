@@ -36,8 +36,6 @@ public abstract class BeaconView extends View {
 
     protected Location deviceLocation;
     protected LocationAnimator deviceLocationAnimator;
-    protected Location topLeftLocation;
-    protected Location bottomRightLocation;
     protected List<Beacon> beacons = new ArrayList<>();
 
     protected double canvasAspectRatio;
@@ -141,10 +139,6 @@ public abstract class BeaconView extends View {
 
     protected abstract void drawBeacon(Canvas canvas, Beacon beacon);
 
-    protected void startLocationAnimation() {
-        //dgfh
-    }
-
     protected abstract void updateMapping();
 
     protected PointF getPointFromLocation(Location location) {
@@ -157,55 +151,7 @@ public abstract class BeaconView extends View {
         return new PointF((float) x, (float) y);
     }
 
-    public void fitToCurrentLocations() {
-        topLeftLocation = null;
-        bottomRightLocation = null;
-        updateEdgeLocations();
-        onLocationsChanged();
-    }
-
-    private void updateEdgeLocations() {
-        List<Location> locations = new ArrayList<>();
-        for (Beacon beacon : beacons) {
-            locations.add(beacon.getLocation());
-        }
-        if (deviceLocationAnimator != null) {
-            locations.add(deviceLocationAnimator.getLocation());
-        }
-        locations.add(topLeftLocation);
-        locations.add(bottomRightLocation);
-        topLeftLocation = getTopLeftLocation(locations);
-        bottomRightLocation = getBottomRightLocation(locations);
-    }
-
-    private static Location getTopLeftLocation(List<Location> locations) {
-        double maximumLatitude = -Double.MAX_VALUE;
-        double minimumLongitude = Double.MAX_VALUE;
-        for (Location location : locations) {
-            if (location == null) {
-                continue;
-            }
-            maximumLatitude = Math.max(maximumLatitude, location.getLatitude());
-            minimumLongitude = Math.min(minimumLongitude, location.getLongitude());
-        }
-        return new Location(maximumLatitude, minimumLongitude);
-    }
-
-    private static Location getBottomRightLocation(List<Location> locations) {
-        double minimumLatitude = Double.MAX_VALUE;
-        double maximumLongitude = -Double.MAX_VALUE;
-        for (Location location : locations) {
-            if (location == null) {
-                continue;
-            }
-            maximumLongitude = Math.max(maximumLongitude, location.getLongitude());
-            minimumLatitude = Math.min(minimumLatitude, location.getLatitude());
-        }
-        return new Location(minimumLatitude, maximumLongitude);
-    }
-
     public void onLocationsChanged() {
-        updateEdgeLocations();
         updateMapping();
         invalidate();
     }

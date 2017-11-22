@@ -43,6 +43,10 @@ public class Location {
         return LocationDistanceCalculator.calculateDistanceBetween(this, location, false);
     }
 
+    public boolean latitudeAndLongitudeEquals(Location location) {
+        return latitude == location.latitude && longitude == location.longitude;
+    }
+
     public boolean hasLatitudeAndLongitude() {
         return latitude != VALUE_NOT_SET && longitude != VALUE_NOT_SET;
     }
