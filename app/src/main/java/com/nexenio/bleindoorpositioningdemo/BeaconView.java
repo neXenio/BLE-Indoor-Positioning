@@ -1,5 +1,6 @@
 package com.nexenio.bleindoorpositioningdemo;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -137,6 +138,10 @@ public abstract class BeaconView extends View {
     }
 
     protected abstract void drawBeacon(Canvas canvas, Beacon beacon);
+
+    protected void startLocationAnimation() {
+        //dgfh
+    }
 
     protected abstract void updateMapping();
 

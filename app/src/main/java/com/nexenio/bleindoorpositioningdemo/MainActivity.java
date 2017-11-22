@@ -1,19 +1,15 @@
 package com.nexenio.bleindoorpositioningdemo;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.nexenio.bleindoorpositioning.ble.Beacon;
 import com.nexenio.bleindoorpositioning.ble.Eddystone;
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
@@ -22,8 +18,10 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int REQUEST_CODE_LOCATION_PERMISSIONS = 1;
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private BeaconMap beaconMap;
+    private LocationListener deviceLocationListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,72 +30,47 @@ public class MainActivity extends AppCompatActivity {
 
         beaconMap = findViewById(R.id.beaconMap);
         beaconMap.setBeacons(createTestBeacons());
-        beaconMap.setDeviceLocation(TestLocations.GENDAMENMARKT_COURT_CENTER);
+        //beaconMap.setDeviceLocation(TestLocations.GENDAMENMARKT_COURT_CENTER);
+
+        LocationUtil.initialize(this);
+        deviceLocationListener = new LocationListener() {
+            @Override
+            public void onLocationUpdated(LocationProvider locationProvider, Location location) {
+                beaconMap.setDeviceLocation(location);
+                beaconMap.fitToCurrentLocations();
+            }
+        };
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        requestDeviceLocationUpdates();
+        if (!LocationUtil.hasLocationPermission(this)) {
+            LocationUtil.requestLocationPermission(this);
+        }
+        LocationUtil.registerLocationListener(deviceLocationListener);
+        LocationUtil.requestLastKnownLocation();
     }
 
     @Override
     protected void onPause() {
+        LocationUtil.unregisterLocationListener(deviceLocationListener);
         super.onPause();
-    }
-
-    @SuppressLint("MissingPermission")
-    private void requestDeviceLocationUpdates() {
-        if (hasLocationPermission()) {
-            requestLocationPermission();
-            return;
-        }
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        LocationListener locationListener = new LocationListener() {
-
-            @Override
-            public void onLocationChanged(android.location.Location location) {
-                Location deviceLocation = new Location();
-                deviceLocation.setLatitude(location.getLatitude());
-                deviceLocation.setLongitude(location.getLongitude());
-                deviceLocation.setAltitude(deviceLocation.getAltitude());
-                beaconMap.setDeviceLocation(deviceLocation);
-                beaconMap.fitToCurrentLocations();
-            }
-
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-
-            public void onProviderEnabled(String provider) {
-            }
-
-            public void onProviderDisabled(String provider) {
-            }
-
-        };
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-    }
-
-    private boolean hasLocationPermission() {
-        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestLocationPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-        }, REQUEST_CODE_LOCATION_PERMISSIONS);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE_LOCATION_PERMISSIONS) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                requestDeviceLocationUpdates();
-            } else {
-                requestLocationPermission();
+        switch (requestCode) {
+            case LocationUtil.REQUEST_CODE_LOCATION_PERMISSIONS: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "Location permission granted");
+                    LocationUtil.startRequestingLocationUpdates();
+                } else {
+                    Log.d(TAG, "Location permission not granted. Wut?");
+                    LocationUtil.requestLocationPermission(this);
+                }
+                break;
             }
         }
     }
@@ -119,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
                 return location;
             }
         });
+        beacon.setTransmissionPower(-8);
+        beacon.setRssi(-80);
+        beacon.setCalibratedRssi(-37);
         return beacon;
     }
 

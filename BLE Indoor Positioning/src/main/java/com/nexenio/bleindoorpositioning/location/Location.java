@@ -1,6 +1,9 @@
 package com.nexenio.bleindoorpositioning.location;
 
-import com.nexenio.bleindoorpositioning.location.distance.DistanceCalculator;
+import com.nexenio.bleindoorpositioning.location.distance.LocationDistanceCalculator;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Created by steppschuh on 15.11.17.
@@ -18,8 +21,16 @@ public class Location {
     }
 
     public Location(double latitude, double longitude) {
+        this();
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public Location(Location location) {
+        this();
+        this.latitude = location.latitude;
+        this.longitude = location.longitude;
+        this.altitude = location.altitude;
     }
 
     /**
@@ -29,7 +40,38 @@ public class Location {
      * @return distance in meters
      */
     public double getDistanceTo(Location location) {
-        return DistanceCalculator.getDistanceBetween(this, location, false);
+        return LocationDistanceCalculator.calculateDistanceBetween(this, location, false);
+    }
+
+    public boolean hasLatitudeAndLongitude() {
+        return latitude != VALUE_NOT_SET && longitude != VALUE_NOT_SET;
+    }
+
+    public boolean hasAltitude() {
+        return altitude != VALUE_NOT_SET;
+    }
+
+    public URI generateGoogleMapsUri() {
+        try {
+            return new URI("https://www.google.com/maps/search/?api=1&query=" +
+                    String.valueOf(latitude) + "," + String.valueOf(longitude));
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Unable to generate Google Maps URI", e);
+        }
+    }
+
+    @Override
+    public String toString() {
+        if (!hasLatitudeAndLongitude()) {
+            return "Empty location";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("Latitude: ").append(latitude).append(" ");
+        sb.append("Longitude: ").append(longitude).append(" ");
+        if (hasAltitude()) {
+            sb.append("Altitude: ").append(altitude).append(" ");
+        }
+        return sb.toString();
     }
 
     /*

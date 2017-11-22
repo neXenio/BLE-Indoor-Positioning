@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble;
 
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
@@ -14,11 +15,15 @@ import java.util.UUID;
 public abstract class Beacon {
 
     protected UUID uuid;
-    protected int rssi;
+    protected int rssi; // in dBm
+    protected int calibratedRssi; // in dBm
+    protected int calibratedDistance; // in cm
+    protected int transmissionPower; // in dBm
     protected int major;
     protected int minor;
     protected List<AdvertisingPacket> advertisingPackets;
     protected LocationProvider locationProvider;
+
 
     public Beacon() {
         this.locationProvider = createLocationProvider();
@@ -74,6 +79,10 @@ public abstract class Beacon {
         advertisingPackets.removeAll(removableAdvertisingPackets);
     }
 
+    public float getDistance() {
+        return BeaconDistanceCalculator.calculateDistanceTo(this);
+    }
+
     /*
         Getter & Setter
      */
@@ -92,6 +101,30 @@ public abstract class Beacon {
 
     public void setRssi(int rssi) {
         this.rssi = rssi;
+    }
+
+    public int getCalibratedRssi() {
+        return calibratedRssi;
+    }
+
+    public void setCalibratedRssi(int calibratedRssi) {
+        this.calibratedRssi = calibratedRssi;
+    }
+
+    public int getCalibratedDistance() {
+        return calibratedDistance;
+    }
+
+    public void setCalibratedDistance(int calibratedDistance) {
+        this.calibratedDistance = calibratedDistance;
+    }
+
+    public int getTransmissionPower() {
+        return transmissionPower;
+    }
+
+    public void setTransmissionPower(int transmissionPower) {
+        this.transmissionPower = transmissionPower;
     }
 
     public int getMajor() {

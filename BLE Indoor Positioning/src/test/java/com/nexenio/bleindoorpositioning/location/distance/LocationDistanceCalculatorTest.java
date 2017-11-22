@@ -9,22 +9,22 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by steppschuh on 17.11.17.
  */
-public class DistanceCalculatorTest {
+public class LocationDistanceCalculatorTest {
 
     @Test
     public void getDistanceBetween_soccerFieldCorners_correctFieldDimensions() throws Exception {
         final double tolerableDelta = 1;
 
-        double calculatedFieldWidth = DistanceCalculator.getDistanceBetween(LocationTest.SOCCER_FIELD_TOP_LEFT, LocationTest.SOCCER_FIELD_TOP_RIGHT);
+        double calculatedFieldWidth = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.SOCCER_FIELD_TOP_LEFT, LocationTest.SOCCER_FIELD_TOP_RIGHT);
         assertEquals(LocationTest.SOCKER_FIELD_WIDTH, calculatedFieldWidth, tolerableDelta);
 
-        calculatedFieldWidth = DistanceCalculator.getDistanceBetween(LocationTest.SOCCER_FIELD_BOTTOM_LEFT, LocationTest.SOCCER_FIELD_BOTTOM_RIGHT);
+        calculatedFieldWidth = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.SOCCER_FIELD_BOTTOM_LEFT, LocationTest.SOCCER_FIELD_BOTTOM_RIGHT);
         assertEquals(LocationTest.SOCKER_FIELD_WIDTH, calculatedFieldWidth, tolerableDelta);
 
-        double calculatedFieldHeight = DistanceCalculator.getDistanceBetween(LocationTest.SOCCER_FIELD_TOP_LEFT, LocationTest.SOCCER_FIELD_BOTTOM_LEFT);
+        double calculatedFieldHeight = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.SOCCER_FIELD_TOP_LEFT, LocationTest.SOCCER_FIELD_BOTTOM_LEFT);
         assertEquals(LocationTest.SOCKER_FIELD_HEIGHT, calculatedFieldHeight, tolerableDelta);
 
-        calculatedFieldHeight = DistanceCalculator.getDistanceBetween(LocationTest.SOCCER_FIELD_TOP_RIGHT, LocationTest.SOCCER_FIELD_BOTTOM_RIGHT);
+        calculatedFieldHeight = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.SOCCER_FIELD_TOP_RIGHT, LocationTest.SOCCER_FIELD_BOTTOM_RIGHT);
         assertEquals(LocationTest.SOCKER_FIELD_HEIGHT, calculatedFieldHeight, tolerableDelta);
     }
 
@@ -32,17 +32,17 @@ public class DistanceCalculatorTest {
     public void getDistanceBetween_newYorkBerlin_correctDistance() throws Exception {
         final double tolerableDelta = 5000;
 
-        double calculatedDistance = DistanceCalculator.getDistanceBetween(LocationTest.NEW_YORK_CITY, LocationTest.BERLIN);
+        double calculatedDistance = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.NEW_YORK_CITY, LocationTest.BERLIN);
         assertEquals(LocationTest.DISTANCE_NYC_BERLIN, calculatedDistance, tolerableDelta);
 
-        calculatedDistance = DistanceCalculator.getDistanceBetween(LocationTest.BERLIN, LocationTest.NEW_YORK_CITY);
+        calculatedDistance = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.BERLIN, LocationTest.NEW_YORK_CITY);
         assertEquals(LocationTest.DISTANCE_NYC_BERLIN, calculatedDistance, tolerableDelta);
     }
 
     @Test
     public void getDistanceBetween_swappedLocations_sameDistance() throws Exception {
-        double calculatedDistance1 = DistanceCalculator.getDistanceBetween(LocationTest.NEW_YORK_CITY, LocationTest.BERLIN);
-        double calculatedDistance2 = DistanceCalculator.getDistanceBetween(LocationTest.BERLIN, LocationTest.NEW_YORK_CITY);
+        double calculatedDistance1 = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.NEW_YORK_CITY, LocationTest.BERLIN);
+        double calculatedDistance2 = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.BERLIN, LocationTest.NEW_YORK_CITY);
         assertEquals(calculatedDistance1, calculatedDistance2, 0);
     }
 

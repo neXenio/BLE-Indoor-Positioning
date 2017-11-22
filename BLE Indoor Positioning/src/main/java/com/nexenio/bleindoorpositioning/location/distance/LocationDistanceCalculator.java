@@ -6,22 +6,22 @@ import com.nexenio.bleindoorpositioning.location.Location;
  * Created by steppschuh on 17.11.17.
  */
 
-public abstract class DistanceCalculator {
+public abstract class LocationDistanceCalculator {
 
     public static final int EARTH_RADIUS = 6371; // in km
 
-    public static double getDistanceBetween(Location fromLocation, Location toLocation) {
-        return getDistanceBetween(fromLocation, toLocation, false);
+    public static double calculateDistanceBetween(Location fromLocation, Location toLocation) {
+        return calculateDistanceBetween(fromLocation, toLocation, false);
     }
 
-    public static double getDistanceBetween(Location fromLocation, Location toLocation, boolean includeElevation) {
+    public static double calculateDistanceBetween(Location fromLocation, Location toLocation, boolean includeElevation) {
         if (includeElevation) {
-            return getDistanceBetween(
+            return calculateDistanceBetween(
                     fromLocation.getLatitude(), fromLocation.getLongitude(), fromLocation.getAltitude(),
                     toLocation.getLatitude(), toLocation.getLongitude(), toLocation.getAltitude()
             );
         } else {
-            return getDistanceBetween(
+            return calculateDistanceBetween(
                     fromLocation.getLatitude(), fromLocation.getLongitude(), 0,
                     toLocation.getLatitude(), toLocation.getLongitude(), 0
             );
@@ -35,8 +35,8 @@ public abstract class DistanceCalculator {
      * @returns Distance in Meters
      * @see <a href="https://stackoverflow.com/a/16794680/1188330">StackOverflow</a>
      */
-    public static double getDistanceBetween(double fromLatitude, double fromLongitude, double fromElevation,
-                                            double toLatitude, double toLongitude, double toElevation) {
+    public static double calculateDistanceBetween(double fromLatitude, double fromLongitude, double fromElevation,
+                                                  double toLatitude, double toLongitude, double toElevation) {
         double latDistance = Math.toRadians(toLatitude - fromLatitude);
         double lonDistance = Math.toRadians(toLongitude - fromLongitude);
         double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
