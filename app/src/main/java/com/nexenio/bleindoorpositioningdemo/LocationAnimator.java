@@ -119,4 +119,56 @@ public class LocationAnimator implements LocationProvider {
         return currentLocation;
     }
 
+    /*
+        Getter & Setter
+     */
+
+    public Location getOriginLocation() {
+        return originLocation;
+    }
+
+    public void setOriginLocation(Location originLocation) {
+        this.originLocation = originLocation;
+    }
+
+    public Location getTargetLocation() {
+        return targetLocation;
+    }
+
+    public void setTargetLocation(Location targetLocation) {
+        this.targetLocation = targetLocation;
+    }
+
+    public ValueAnimator getLatitudeAnimator() {
+        return latitudeAnimator;
+    }
+
+    public void setLatitudeAnimator(ValueAnimator latitudeAnimator) {
+        this.latitudeAnimator = latitudeAnimator;
+    }
+
+    public ValueAnimator getLongitudeAnimator() {
+        return longitudeAnimator;
+    }
+
+    public void setLongitudeAnimator(ValueAnimator longitudeAnimator) {
+        this.longitudeAnimator = longitudeAnimator;
+    }
+
+    public long getAnimationDuration() {
+        return animationDuration;
+    }
+
+    public void setAnimationDuration(long animationDuration) {
+        this.animationDuration = animationDuration;
+    }
+
+    public LocationListener getLocationListener() {
+        return locationListener;
+    }
+
+    public void setLocationListener(LocationListener locationListener) {
+        this.locationListener = locationListener;
+    }
+
 }

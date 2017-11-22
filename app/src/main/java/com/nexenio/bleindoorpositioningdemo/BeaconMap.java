@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
 import com.nexenio.bleindoorpositioning.ble.Beacon;
-import com.nexenio.bleindoorpositioning.location.Location;
 
 /**
  * Created by steppschuh on 16.11.17.
@@ -18,11 +17,8 @@ import com.nexenio.bleindoorpositioning.location.Location;
 public class BeaconMap extends BeaconView {
 
     protected ValueAnimator deviceRadiusAnimator;
-    protected ValueAnimator deviceLocationXAnimator;
-    protected ValueAnimator deviceLocationYAnimator;
 
     protected float deviceRadius;
-    protected Location lastRenderedDeviceLocation;
 
     public BeaconMap(Context context) {
         super(context);
@@ -42,13 +38,12 @@ public class BeaconMap extends BeaconView {
 
     @Override
     protected void drawDevice(Canvas canvas) {
-        PointF point = (deviceLocation == null) ? canvasCenter : getPointFromLocation(deviceLocation);
+        PointF point = (deviceLocationAnimator == null) ? canvasCenter : getPointFromLocation(deviceLocationAnimator.getLocation());
         canvas.drawCircle(point.x, point.y, deviceRadius, deviceRadiusPaint);
         canvas.drawCircle(point.x, point.y, pixelsPerDip * 32, deviceRadiusPaint);
         canvas.drawCircle(point.x, point.y, pixelsPerDip * 10, whiteFillPaint);
         canvas.drawCircle(point.x, point.y, pixelsPerDip * 10, primaryStrokePaint);
         canvas.drawCircle(point.x, point.y, pixelsPerDip * 8, primaryFillPaint);
-        lastRenderedDeviceLocation = deviceLocation;
     }
 
     @Override
@@ -118,7 +113,6 @@ public class BeaconMap extends BeaconView {
     @Override
     public void onDeviceLocationChanged() {
         startDeviceRadiusAnimation();
-        startDeviceLocationAnimation();
         super.onDeviceLocationChanged();
     }
 
@@ -136,48 +130,6 @@ public class BeaconMap extends BeaconView {
             }
         });
         deviceRadiusAnimator.start();
-    }
-
-    protected void startDeviceLocationAnimation() {
-        // cancel ongoing animations, if any
-        cancelDeviceLocationAnimation();
-
-        if (lastRenderedDeviceLocation == null || deviceLocation == null) {
-            return;
-        }
-
-        // x
-        deviceLocationXAnimator = ValueAnimator.ofFloat((float) lastRenderedDeviceLocation.getLatitude(), (float) deviceLocation.getLatitude());
-        deviceLocationXAnimator.setDuration(1000);
-        deviceLocationXAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                deviceLocation.setLatitude((float) valueAnimator.getAnimatedValue());
-                onLocationsChanged();
-            }
-        });
-        deviceLocationXAnimator.start();
-
-        // y
-        deviceLocationYAnimator = ValueAnimator.ofFloat((float) lastRenderedDeviceLocation.getLongitude(), (float) deviceLocation.getLongitude());
-        deviceLocationYAnimator.setDuration(1000);
-        deviceLocationYAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                deviceLocation.setLongitude((float) valueAnimator.getAnimatedValue());
-                onLocationsChanged();
-            }
-        });
-        deviceLocationYAnimator.start();
-    }
-
-    private void cancelDeviceLocationAnimation() {
-        if (deviceLocationYAnimator != null) {
-            deviceLocationYAnimator.cancel();
-        }
-        if (deviceLocationXAnimator != null) {
-            deviceLocationXAnimator.cancel();
-        }
     }
 
 }

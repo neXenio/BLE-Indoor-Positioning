@@ -1,6 +1,5 @@
 package com.nexenio.bleindoorpositioningdemo;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -14,7 +13,9 @@ import android.view.View;
 
 import com.nexenio.bleindoorpositioning.ble.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
+import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ public abstract class BeaconView extends View {
     protected Paint deviceRadiusPaint;
 
     protected Location deviceLocation;
+    protected LocationAnimator deviceLocationAnimator;
     protected Location topLeftLocation;
     protected Location bottomRightLocation;
     protected List<Beacon> beacons = new ArrayList<>();
@@ -167,7 +169,9 @@ public abstract class BeaconView extends View {
         for (Beacon beacon : beacons) {
             locations.add(beacon.getLocation());
         }
-        locations.add(deviceLocation);
+        if (deviceLocationAnimator != null) {
+            locations.add(deviceLocationAnimator.getLocation());
+        }
         locations.add(topLeftLocation);
         locations.add(bottomRightLocation);
         topLeftLocation = getTopLeftLocation(locations);
@@ -207,7 +211,29 @@ public abstract class BeaconView extends View {
     }
 
     public void onDeviceLocationChanged() {
-        onLocationsChanged();
+        deviceLocationAnimator = startLocationAnimation(deviceLocationAnimator, deviceLocation, new LocationListener() {
+            @Override
+            public void onLocationUpdated(LocationProvider locationProvider, Location location) {
+                onLocationsChanged();
+            }
+        });
+    }
+
+    protected LocationAnimator startLocationAnimation(LocationAnimator locationAnimator, Location targetLocation, LocationListener locationListener) {
+        if (targetLocation == null) {
+            return locationAnimator;
+        }
+
+        Location originLocation = targetLocation;
+        if (locationAnimator != null) {
+            locationAnimator.cancel();
+            originLocation = locationAnimator.getLocation();
+        }
+
+        locationAnimator = new LocationAnimator(originLocation, targetLocation);
+        locationAnimator.setLocationListener(locationListener);
+        locationAnimator.start();
+        return locationAnimator;
     }
 
     /*
