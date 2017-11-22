@@ -23,7 +23,6 @@ import java.util.List;
 public class BeaconMap extends BeaconView {
 
     protected ValueAnimator deviceRadiusAnimator;
-    protected float deviceRadius;
 
     protected Location topLeftLocation;
     protected Location bottomRightLocation;
@@ -49,6 +48,8 @@ public class BeaconMap extends BeaconView {
     @Override
     protected void drawDevice(Canvas canvas) {
         PointF point = (deviceLocationAnimator == null) ? canvasCenter : getPointFromLocation(deviceLocationAnimator.getLocation());
+        float animationValue = (deviceRadiusAnimator == null) ? 0 : (float) deviceRadiusAnimator.getAnimatedValue();
+        float deviceRadius = (pixelsPerDip * 8) + (pixelsPerDip * 24 * animationValue);
         canvas.drawCircle(point.x, point.y, deviceRadius, deviceRadiusPaint);
         canvas.drawCircle(point.x, point.y, pixelsPerDip * 32, deviceRadiusPaint);
         canvas.drawCircle(point.x, point.y, pixelsPerDip * 10, whiteFillPaint);
@@ -147,7 +148,7 @@ public class BeaconMap extends BeaconView {
             LocationListener locationListener = new LocationListener() {
                 @Override
                 public void onLocationUpdated(LocationProvider locationProvider, Location location) {
-
+                    invalidate();
                 }
             };
             topLeftLocationAnimator = startLocationAnimation(topLeftLocationAnimator, topLeftLocation, locationListener);
@@ -204,14 +205,12 @@ public class BeaconMap extends BeaconView {
 
     protected void startDeviceRadiusAnimation() {
         deviceRadiusAnimator = ValueAnimator.ofFloat(0, 1);
-        deviceRadiusAnimator.setDuration(500);
+        deviceRadiusAnimator.setDuration(LocationAnimator.ANIMATION_DURATION_LONG);
         deviceRadiusAnimator.setRepeatCount(1);
         deviceRadiusAnimator.setRepeatMode(ValueAnimator.REVERSE);
         deviceRadiusAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                float animationValue = (float) valueAnimator.getAnimatedValue();
-                deviceRadius = (pixelsPerDip * 8) + (pixelsPerDip * 24 * animationValue);
                 invalidate();
             }
         });
