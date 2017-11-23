@@ -11,6 +11,8 @@ import android.util.AttributeSet;
 import com.nexenio.bleindoorpositioning.ble.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
+import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
+import com.nexenio.bleindoorpositioning.location.projection.EquirectangularProjection;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
@@ -29,6 +31,8 @@ public class BeaconMap extends BeaconView {
     protected LocationAnimator topLeftLocationAnimator;
     protected LocationAnimator bottomRightLocationAnimator;
 
+    protected CanvasProjection canvasProjection;
+
     public BeaconMap(Context context) {
         super(context);
     }
@@ -43,6 +47,19 @@ public class BeaconMap extends BeaconView {
 
     public BeaconMap(Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        canvasProjection = new CanvasProjection();
+    }
+
+    @Override
+    protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight);
+        canvasProjection.setCanvasWidth(canvasWidth);
+        canvasProjection.setCanvasHeight(canvasHeight);
     }
 
     @Override
@@ -73,52 +90,10 @@ public class BeaconMap extends BeaconView {
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryFillPaint);
     }
 
-    @Override
-    protected void updateMapping() {
-        // check if the canvas has been initialized
-        if (canvasWidth == 0 || canvasHeight == 0) {
-            return;
-        }
-
-        // check if edge locations are available
-        if (topLeftLocationAnimator == null || bottomRightLocationAnimator == null) {
-            return;
-        }
-
-        // get the projected width and height for the top left and bottom right location
-        double topLeftLocationWidth = projection.getWidthFromLongitude(topLeftLocationAnimator.getLocation().getLongitude());
-        double topLeftLocationHeight = projection.getHeightFromLatitude(topLeftLocationAnimator.getLocation().getLatitude());
-        double bottomRightLocationWidth = projection.getWidthFromLongitude(bottomRightLocationAnimator.getLocation().getLongitude());
-        double bottomRightLocationHeight = projection.getHeightFromLatitude(bottomRightLocationAnimator.getLocation().getLatitude());
-
-        // get the minimum width and height that should be mapped in order to
-        // display the top left and bottom right location on the canvas
-        double minimumWidth = bottomRightLocationWidth - topLeftLocationWidth;
-        double minimumHeight = bottomRightLocationHeight - topLeftLocationHeight;
-
-        // add some padding
-        double padding = Math.max(minimumWidth, minimumHeight) * 0.2;
-        minimumWidth += padding;
-        minimumHeight += padding;
-
-        // get the mapped width and height equivalent to the pixel dimensions of the canvas
-        projectedCanvasWidth = minimumWidth;
-        projectedCanvasHeight = minimumHeight;
-        if (canvasAspectRatio > (minimumWidth / minimumHeight)) {
-            projectedCanvasWidth = minimumHeight * canvasAspectRatio;
-        } else {
-            projectedCanvasHeight = minimumWidth / canvasAspectRatio;
-        }
-
-        // get the offsets that should be applied to mappings in order
-        // to center the locations on the canvas
-        double offsetWidth = (projectedCanvasWidth - minimumWidth + padding) / 2;
-        double offsetHeight = (projectedCanvasHeight - minimumHeight + padding) / 2;
-
-        // get the origin width and height (equivalent to the canvas origin 0,0) including
-        // the calculated mapping offset
-        offsetOriginWidth = topLeftLocationWidth - offsetWidth;
-        offsetOriginHeight = topLeftLocationHeight - offsetHeight;
+    protected PointF getPointFromLocation(Location location) {
+        float x = canvasProjection.getXFromLocation(location);
+        float y = canvasProjection.getYFromLocation(location);
+        return new PointF(x, y);
     }
 
     public void fitToCurrentLocations() {
@@ -141,13 +116,18 @@ public class BeaconMap extends BeaconView {
         if (bottomRightLocationAnimator != null) {
             locations.add(bottomRightLocationAnimator.getLocation());
         }
-        topLeftLocation = getTopLeftLocation(locations);
-        bottomRightLocation = getBottomRightLocation(locations);
+        topLeftLocation = EquirectangularProjection.getTopLeftLocation(locations);
+        bottomRightLocation = EquirectangularProjection.getBottomRightLocation(locations);
 
         if (edgeLocationsChanged()) {
             LocationListener locationListener = new LocationListener() {
                 @Override
                 public void onLocationUpdated(LocationProvider locationProvider, Location location) {
+                    if (locationProvider == topLeftLocationAnimator) {
+                        canvasProjection.setTopLeftLocation(location);
+                    } else if (locationProvider == bottomRightLocationAnimator) {
+                        canvasProjection.setBottomRightLocation(location);
+                    }
                     invalidate();
                 }
             };
@@ -163,32 +143,6 @@ public class BeaconMap extends BeaconView {
         boolean topLeftChanged = !topLeftLocation.latitudeAndLongitudeEquals(topLeftLocationAnimator.getTargetLocation());
         boolean bottomRightChanged = !bottomRightLocation.latitudeAndLongitudeEquals(bottomRightLocationAnimator.getTargetLocation());
         return topLeftChanged || bottomRightChanged;
-    }
-
-    private static Location getTopLeftLocation(List<Location> locations) {
-        double maximumLatitude = -Double.MAX_VALUE;
-        double minimumLongitude = Double.MAX_VALUE;
-        for (Location location : locations) {
-            if (location == null) {
-                continue;
-            }
-            maximumLatitude = Math.max(maximumLatitude, location.getLatitude());
-            minimumLongitude = Math.min(minimumLongitude, location.getLongitude());
-        }
-        return new Location(maximumLatitude, minimumLongitude);
-    }
-
-    private static Location getBottomRightLocation(List<Location> locations) {
-        double minimumLatitude = Double.MAX_VALUE;
-        double maximumLongitude = -Double.MAX_VALUE;
-        for (Location location : locations) {
-            if (location == null) {
-                continue;
-            }
-            maximumLongitude = Math.max(maximumLongitude, location.getLongitude());
-            minimumLatitude = Math.min(minimumLatitude, location.getLatitude());
-        }
-        return new Location(minimumLatitude, maximumLongitude);
     }
 
     @Override

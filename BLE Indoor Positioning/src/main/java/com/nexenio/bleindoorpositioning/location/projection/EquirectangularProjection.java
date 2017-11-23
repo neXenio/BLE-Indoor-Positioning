@@ -2,6 +2,8 @@ package com.nexenio.bleindoorpositioning.location.projection;
 
 import com.nexenio.bleindoorpositioning.location.Location;
 
+import java.util.List;
+
 /**
  * The equirectangular projection (also called the equidistant cylindrical projection, geographic
  * projection) maps meridians to vertical straight lines of constant spacing (for meridional
@@ -40,6 +42,32 @@ public class EquirectangularProjection {
 
     public static double getHeightFromLatitude(double latitude, int canvasHeight) {
         return ((canvasHeight / (float) 180) * (90 - latitude));
+    }
+
+    public static Location getTopLeftLocation(List<Location> locations) {
+        double maximumLatitude = -Double.MAX_VALUE;
+        double minimumLongitude = Double.MAX_VALUE;
+        for (Location location : locations) {
+            if (location == null) {
+                continue;
+            }
+            maximumLatitude = Math.max(maximumLatitude, location.getLatitude());
+            minimumLongitude = Math.min(minimumLongitude, location.getLongitude());
+        }
+        return new Location(maximumLatitude, minimumLongitude);
+    }
+
+    public static Location getBottomRightLocation(List<Location> locations) {
+        double minimumLatitude = Double.MAX_VALUE;
+        double maximumLongitude = -Double.MAX_VALUE;
+        for (Location location : locations) {
+            if (location == null) {
+                continue;
+            }
+            maximumLongitude = Math.max(maximumLongitude, location.getLongitude());
+            minimumLatitude = Math.min(minimumLatitude, location.getLatitude());
+        }
+        return new Location(minimumLatitude, maximumLongitude);
     }
 
     /*

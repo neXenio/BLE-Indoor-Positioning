@@ -16,23 +16,19 @@ public class CanvasProjection {
     private float canvasWidth;
     private float canvasHeight;
 
-    protected double projectedCanvasWidth;
-    protected double projectedCanvasHeight;
+    private double projectedCanvasWidth;
+    private double projectedCanvasHeight;
 
-    protected double offsetOriginWidth;
-    protected double offsetOriginHeight;
+    private double offsetOriginWidth;
+    private double offsetOriginHeight;
 
     private boolean shouldUpdateMapping;
 
     public CanvasProjection() {
+        geographicProjection = new EquirectangularProjection();
     }
 
-    public CanvasProjection(EquirectangularProjection geographicProjection) {
-        this();
-        this.geographicProjection = geographicProjection;
-    }
-
-    protected float getXFromLocation(Location location) {
+    public float getXFromLocation(Location location) {
         updateMappingIfRequired();
         double locationWidth = geographicProjection.getWidthFromLongitude(location.getLongitude());
         double projectedLocationWidth = locationWidth - offsetOriginWidth;
@@ -40,7 +36,7 @@ public class CanvasProjection {
         return (float) x;
     }
 
-    protected float getYFromLocation(Location location) {
+    public float getYFromLocation(Location location) {
         updateMappingIfRequired();
         double locationHeight = geographicProjection.getHeightFromLatitude(location.getLatitude());
         double projectedLocationHeight = locationHeight - offsetOriginHeight;

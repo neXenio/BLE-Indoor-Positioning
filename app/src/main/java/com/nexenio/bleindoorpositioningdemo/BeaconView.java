@@ -14,7 +14,7 @@ import android.view.View;
 import com.nexenio.bleindoorpositioning.ble.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
-import com.nexenio.bleindoorpositioning.location.projection.EquirectangularProjection;
+import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
@@ -38,17 +38,9 @@ public abstract class BeaconView extends View {
     protected LocationAnimator deviceLocationAnimator;
     protected List<Beacon> beacons = new ArrayList<>();
 
-    protected double canvasAspectRatio;
     protected int canvasWidth;
     protected int canvasHeight;
     protected PointF canvasCenter;
-
-    protected EquirectangularProjection projection = new EquirectangularProjection();
-
-    protected double projectedCanvasWidth;
-    protected double projectedCanvasHeight;
-    protected double offsetOriginWidth;
-    protected double offsetOriginHeight;
 
     protected float pixelsPerDip = DisplayUtil.convertDipToPixels(1);
 
@@ -110,10 +102,6 @@ public abstract class BeaconView extends View {
         this.canvasWidth = width;
         this.canvasHeight = height;
         this.canvasCenter = new PointF(width / 2, height / 2);
-        this.canvasAspectRatio = width / (float) height;
-        //projection.setCanvasWidth(1000 * 1000 * 10);
-        //projection.setCanvasHeight(1000 * 1000 * 10);
-        updateMapping();
     }
 
     @CallSuper
@@ -139,20 +127,9 @@ public abstract class BeaconView extends View {
 
     protected abstract void drawBeacon(Canvas canvas, Beacon beacon);
 
-    protected abstract void updateMapping();
-
-    protected PointF getPointFromLocation(Location location) {
-        double locationWidth = projection.getWidthFromLongitude(location.getLongitude());
-        double locationHeight = projection.getHeightFromLatitude(location.getLatitude());
-        double projectedLocationWidth = locationWidth - offsetOriginWidth;
-        double projectedLocationHeight = locationHeight - offsetOriginHeight;
-        double x = (projectedLocationWidth * canvasWidth) / projectedCanvasWidth;
-        double y = (projectedLocationHeight * canvasHeight) / projectedCanvasHeight;
-        return new PointF((float) x, (float) y);
-    }
+    protected abstract PointF getPointFromLocation(Location location);
 
     public void onLocationsChanged() {
-        updateMapping();
         invalidate();
     }
 
