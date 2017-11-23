@@ -77,7 +77,9 @@ public class BeaconMap extends BeaconView {
     @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
         PointF point = getPointFromLocation(beacon.getLocation());
-        //canvas.drawCircle(point.x, point.y, pixelsPerDip * 250, deviceRadiusPaint);
+        float beaconAdvertisingRange = 50; // TODO: get real value based on tx power
+        float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(beaconAdvertisingRange);
+        canvas.drawCircle(point.x, point.y, advertisingRadius, deviceRadiusPaint);
 
         float beaconRadius = pixelsPerDip * 8;
         int beaconCornerRadius = (int) pixelsPerDip * 2;
