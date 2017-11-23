@@ -14,7 +14,7 @@ import android.view.View;
 import com.nexenio.bleindoorpositioning.ble.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
-import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
+import com.nexenio.bleindoorpositioning.location.projection.EquirectangularProjection;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
@@ -43,10 +43,10 @@ public abstract class BeaconView extends View {
     protected int canvasHeight;
     protected PointF canvasCenter;
 
-    protected CanvasProjection projection = new CanvasProjection();
+    protected EquirectangularProjection projection = new EquirectangularProjection();
 
-    protected double mappedCanvasWidth;
-    protected double mappedCanvasHeight;
+    protected double projectedCanvasWidth;
+    protected double projectedCanvasHeight;
     protected double offsetOriginWidth;
     protected double offsetOriginHeight;
 
@@ -144,10 +144,10 @@ public abstract class BeaconView extends View {
     protected PointF getPointFromLocation(Location location) {
         double locationWidth = projection.getWidthFromLongitude(location.getLongitude());
         double locationHeight = projection.getHeightFromLatitude(location.getLatitude());
-        double mappedLocationWidth = locationWidth - offsetOriginWidth;
-        double mappedLocationHeight = locationHeight - offsetOriginHeight;
-        double x = (mappedLocationWidth * canvasWidth) / mappedCanvasWidth;
-        double y = (mappedLocationHeight * canvasHeight) / mappedCanvasHeight;
+        double projectedLocationWidth = locationWidth - offsetOriginWidth;
+        double projectedLocationHeight = locationHeight - offsetOriginHeight;
+        double x = (projectedLocationWidth * canvasWidth) / projectedCanvasWidth;
+        double y = (projectedLocationHeight * canvasHeight) / projectedCanvasHeight;
         return new PointF((float) x, (float) y);
     }
 

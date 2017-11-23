@@ -97,23 +97,23 @@ public class BeaconMap extends BeaconView {
         double minimumHeight = bottomRightLocationHeight - topLeftLocationHeight;
 
         // add some padding
-        double padding = Math.max(minimumWidth, minimumHeight) * 0.5;
+        double padding = Math.max(minimumWidth, minimumHeight) * 0.2;
         minimumWidth += padding;
         minimumHeight += padding;
 
         // get the mapped width and height equivalent to the pixel dimensions of the canvas
-        mappedCanvasWidth = minimumWidth;
-        mappedCanvasHeight = minimumHeight;
+        projectedCanvasWidth = minimumWidth;
+        projectedCanvasHeight = minimumHeight;
         if (canvasAspectRatio > (minimumWidth / minimumHeight)) {
-            mappedCanvasWidth = minimumHeight * canvasAspectRatio;
+            projectedCanvasWidth = minimumHeight * canvasAspectRatio;
         } else {
-            mappedCanvasHeight = minimumWidth / canvasAspectRatio;
+            projectedCanvasHeight = minimumWidth / canvasAspectRatio;
         }
 
         // get the offsets that should be applied to mappings in order
         // to center the locations on the canvas
-        double offsetWidth = (mappedCanvasWidth - minimumWidth + padding) / 2;
-        double offsetHeight = (mappedCanvasHeight - minimumHeight + padding) / 2;
+        double offsetWidth = (projectedCanvasWidth - minimumWidth + padding) / 2;
+        double offsetHeight = (projectedCanvasHeight - minimumHeight + padding) / 2;
 
         // get the origin width and height (equivalent to the canvas origin 0,0) including
         // the calculated mapping offset
