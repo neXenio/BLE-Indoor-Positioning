@@ -3,6 +3,7 @@ package com.nexenio.bleindoorpositioningdemo;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
@@ -63,6 +64,12 @@ public class BeaconMap extends BeaconView {
     }
 
     @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        drawLegend(canvas);
+    }
+
+    @Override
     protected void drawDevice(Canvas canvas) {
         PointF point = (deviceLocationAnimator == null) ? canvasCenter : getPointFromLocation(deviceLocationAnimator.getLocation());
         float animationValue = (deviceRadiusAnimator == null) ? 0 : (float) deviceRadiusAnimator.getAnimatedValue();
@@ -77,7 +84,7 @@ public class BeaconMap extends BeaconView {
     @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
         PointF point = getPointFromLocation(beacon.getLocation());
-        float beaconAdvertisingRange = 50; // TODO: get real value based on tx power
+        float beaconAdvertisingRange = 50; // in meters TODO: get real value based on tx power
         float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(beaconAdvertisingRange);
         canvas.drawCircle(point.x, point.y, advertisingRadius, deviceRadiusPaint);
 
@@ -90,6 +97,57 @@ public class BeaconMap extends BeaconView {
         beaconRadius = beaconRadius - pixelsPerDip * 2;
         rect = new RectF(point.x - beaconRadius, point.y - beaconRadius, point.x + beaconRadius, point.y + beaconRadius);
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryFillPaint);
+    }
+
+    protected void drawLegend(Canvas canvas) {
+        float canvasPadding = canvasWidth * canvasProjection.getPaddingFactor();
+        float referenceCanvasWidth = canvasWidth - (2 * canvasPadding);
+
+        Paint legendPaint = new Paint(textPaint);
+        legendPaint.setAlpha(50);
+        legendPaint.setTextSize(pixelsPerDip * 12);
+
+        float referenceYOffset = canvasHeight - (pixelsPerDip * 16);
+        PointF referenceStartPoint = new PointF(canvasPadding, referenceYOffset);
+        PointF referenceEndPoint = new PointF(canvasWidth - canvasPadding, referenceYOffset);
+
+        // horizontal line
+        canvas.drawRect(
+                referenceStartPoint.x,
+                referenceStartPoint.y,
+                referenceEndPoint.x,
+                referenceEndPoint.y - pixelsPerDip,
+                legendPaint
+        );
+
+        // left vertical line
+        canvas.drawRect(
+                referenceStartPoint.x,
+                referenceStartPoint.y - (pixelsPerDip * 8),
+                referenceStartPoint.x + pixelsPerDip,
+                referenceStartPoint.y,
+                legendPaint
+        );
+
+        // right vertical line
+        canvas.drawRect(
+                referenceEndPoint.x,
+                referenceEndPoint.y - (pixelsPerDip * 8),
+                referenceEndPoint.x + pixelsPerDip,
+                referenceEndPoint.y,
+                legendPaint
+        );
+
+        // text
+        float referenceDistance = (float) canvasProjection.getMetersFromCanvasUnits(referenceCanvasWidth);
+        String referenceText = String.valueOf(Math.round(referenceDistance)) + " meters";
+        float referenceTextWidth = legendPaint.measureText(referenceText);
+        canvas.drawText(
+                referenceText,
+                (canvasWidth / 2) - (referenceTextWidth / 2),
+                referenceStartPoint.y - (pixelsPerDip * 4),
+                legendPaint
+        );
     }
 
     protected PointF getPointFromLocation(Location location) {

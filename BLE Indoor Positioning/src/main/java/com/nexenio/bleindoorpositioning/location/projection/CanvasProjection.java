@@ -13,7 +13,7 @@ public class CanvasProjection {
     private Location topLeftLocation;
     private Location bottomRightLocation;
 
-    private float paddingFactor = 0.2f;
+    private float paddingFactor = 0.1f;
 
     private float canvasWidth;
     private float canvasHeight;
@@ -95,7 +95,7 @@ public class CanvasProjection {
         double projectedMinimumDiagonal = Math.sqrt((projectedMinimumWidth * projectedMinimumWidth) + (projectedMinimumHeight * projectedMinimumHeight));
 
         // add some padding
-        double projectedPadding = Math.max(projectedMinimumWidth, projectedMinimumHeight) * paddingFactor;
+        double projectedPadding = 2 * (Math.max(projectedMinimumWidth, projectedMinimumHeight) * paddingFactor);
         projectedMinimumWidth += projectedPadding;
         projectedMinimumHeight += projectedPadding;
 

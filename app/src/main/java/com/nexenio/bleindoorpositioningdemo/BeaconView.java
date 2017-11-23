@@ -68,7 +68,7 @@ public abstract class BeaconView extends View {
     public void initialize() {
         textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         textPaint.setColor(Color.BLACK);
-        //textPaint.setTextSize(12);
+        textPaint.setTextSize(pixelsPerDip * 8);
 
         primaryFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         primaryFillPaint.setStyle(Paint.Style.FILL);
