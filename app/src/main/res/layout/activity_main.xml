@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         tools:context="com.nexenio.bleindoorpositioningdemo.MainActivity">
 
-    <com.nexenio.bleindoorpositioningdemo.BeaconMap
+    <com.nexenio.bleindoorpositioningdemo.ui.BeaconMap
             android:id="@+id/beaconMap"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>

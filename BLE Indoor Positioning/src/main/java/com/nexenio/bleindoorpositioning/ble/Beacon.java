@@ -24,7 +24,6 @@ public abstract class Beacon {
     protected List<AdvertisingPacket> advertisingPackets;
     protected LocationProvider locationProvider;
 
-
     public Beacon() {
         this.locationProvider = createLocationProvider();
     }
@@ -81,6 +80,10 @@ public abstract class Beacon {
 
     public float getDistance() {
         return BeaconDistanceCalculator.calculateDistanceTo(this);
+    }
+
+    public float getEstimatedAdvertisingRange() {
+        return BeaconUtil.getAdvertisingRange(transmissionPower);
     }
 
     /*

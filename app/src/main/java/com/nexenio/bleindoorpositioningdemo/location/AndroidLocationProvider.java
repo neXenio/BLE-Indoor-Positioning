@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioningdemo;
+package com.nexenio.bleindoorpositioningdemo.location;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;

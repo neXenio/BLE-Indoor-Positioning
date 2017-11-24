@@ -11,6 +11,10 @@ import com.nexenio.bleindoorpositioning.ble.Eddystone;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
+import com.nexenio.bleindoorpositioningdemo.bluetooth.BluetoothClient;
+import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
+import com.nexenio.bleindoorpositioningdemo.location.TestLocations;
+import com.nexenio.bleindoorpositioningdemo.ui.BeaconMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
         beaconMap = findViewById(R.id.beaconMap);
         beaconMap.setBeacons(createTestBeacons());
 
+        // setup location
         AndroidLocationProvider.initialize(this);
         deviceLocationListener = new LocationListener() {
             @Override
@@ -43,21 +48,34 @@ public class MainActivity extends AppCompatActivity {
                 beaconMap.fitToCurrentLocations();
             }
         };
+
+        // setup bluetooth
+        BluetoothClient.initialize(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        // observe location
         if (!AndroidLocationProvider.hasLocationPermission(this)) {
             AndroidLocationProvider.requestLocationPermission(this);
         }
         AndroidLocationProvider.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.requestLastKnownLocation();
+
+        // observe bluetooth
+        //BluetoothClient.
     }
 
     @Override
     protected void onPause() {
+        // stop observing location
         AndroidLocationProvider.unregisterLocationListener(deviceLocationListener);
+
+        // stop observing bluetooth
+        //BluetoothClient.
+
         super.onPause();
     }
 
@@ -95,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 return location;
             }
         });
-        beacon.setTransmissionPower(-8);
+        beacon.setTransmissionPower(0);
         beacon.setRssi(-80);
         beacon.setCalibratedRssi(-37);
         return beacon;

@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioningdemo;
+package com.nexenio.bleindoorpositioningdemo.ui;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -26,8 +26,7 @@ public abstract class DisplayUtil {
      * @return A float value to represent px equivalent to dp depending on device density
      */
     public static float convertDipToPixels(float dip, DisplayMetrics displayMetrics) {
-        float px = dip * ((float) displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-        return px;
+        return dip * ((float) displayMetrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
     /**
@@ -40,8 +39,7 @@ public abstract class DisplayUtil {
     public static float convertPixelsToDip(float pixels, Context context) {
         Resources resources = context.getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
-        float dip = pixels / ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-        return dip;
+        return pixels / ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioningdemo;
+package com.nexenio.bleindoorpositioningdemo.ui;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -20,7 +20,9 @@ import com.nexenio.bleindoorpositioning.location.projection.EquirectangularProje
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by steppschuh on 16.11.17.
@@ -90,10 +92,33 @@ public class BeaconMap extends BeaconView {
     }
 
     @Override
+    protected void drawBeacons(Canvas canvas) {
+        Map<Beacon, PointF> beaconCenterMap = new HashMap<>();
+        // draw all backgrounds
+        for (Beacon beacon : beacons) {
+            PointF beaconCenter = getPointFromLocation(beacon.getLocation());
+            beaconCenterMap.put(beacon, beaconCenter);
+            drawBeaconBackground(canvas, beacon, beaconCenter);
+        }
+        // draw all foregrounds
+        for (Beacon beacon : beacons) {
+            drawBeaconForeground(canvas, beacon, beaconCenterMap.get(beacon));
+        }
+    }
+
+    /**
+     * This shouldn't be called, because the created beacon background may overlay existing beacon
+     * foregrounds. Use {@link #drawBeacons(Canvas)} instead.
+     */
+    @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
         PointF beaconCenter = getPointFromLocation(beacon.getLocation());
-        float beaconAdvertisingRange = 50; // in meters TODO: get real value based on tx power
-        float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(beaconAdvertisingRange);
+        drawBeaconBackground(canvas, beacon, beaconCenter);
+        drawBeaconForeground(canvas, beacon, beaconCenter);
+    }
+
+    protected void drawBeaconBackground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
+        float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(beacon.getEstimatedAdvertisingRange());
 
         Paint innerBeaconRangePaint = new Paint(beaconRangePaint);
         innerBeaconRangePaint.setAlpha(100);
@@ -107,7 +132,9 @@ public class BeaconMap extends BeaconView {
         innerBeaconRangePaint.setShader(rangeShader);
         //canvas.drawCircle(beaconCenter.x, beaconCenter.y, advertisingRadius, innerBeaconRangePaint);
         canvas.drawCircle(beaconCenter.x, beaconCenter.y, advertisingRadius, beaconRangePaint);
+    }
 
+    protected void drawBeaconForeground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
         float beaconRadius = pixelsPerDip * 8;
         int beaconCornerRadius = (int) pixelsPerDip * 2;
         RectF rect = new RectF(beaconCenter.x - beaconRadius, beaconCenter.y - beaconRadius, beaconCenter.x + beaconRadius, beaconCenter.y + beaconRadius);

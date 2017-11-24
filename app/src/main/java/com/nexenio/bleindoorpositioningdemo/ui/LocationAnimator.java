@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioningdemo;
+package com.nexenio.bleindoorpositioningdemo.ui;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;

@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioningdemo;
+package com.nexenio.bleindoorpositioningdemo.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -15,6 +15,7 @@ import com.nexenio.bleindoorpositioning.ble.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
+import com.nexenio.bleindoorpositioningdemo.R;
 
 import java.util.ArrayList;
 import java.util.List;
