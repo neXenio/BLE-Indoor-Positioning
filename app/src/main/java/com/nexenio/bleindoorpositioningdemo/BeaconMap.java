@@ -11,6 +11,7 @@ import android.util.AttributeSet;
 
 import com.nexenio.bleindoorpositioning.ble.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 import com.nexenio.bleindoorpositioning.location.projection.EquirectangularProjection;
@@ -25,7 +26,7 @@ import java.util.List;
 
 public class BeaconMap extends BeaconView {
 
-    protected ValueAnimator deviceRadiusAnimator;
+    protected ValueAnimator deviceAccuracyAnimator;
 
     protected Location topLeftLocation;
     protected Location bottomRightLocation;
@@ -71,45 +72,58 @@ public class BeaconMap extends BeaconView {
 
     @Override
     protected void drawDevice(Canvas canvas) {
-        PointF point = (deviceLocationAnimator == null) ? canvasCenter : getPointFromLocation(deviceLocationAnimator.getLocation());
-        float animationValue = (deviceRadiusAnimator == null) ? 0 : (float) deviceRadiusAnimator.getAnimatedValue();
-        float deviceRadius = (pixelsPerDip * 8) + (pixelsPerDip * 24 * animationValue);
-        canvas.drawCircle(point.x, point.y, deviceRadius, deviceRadiusPaint);
-        canvas.drawCircle(point.x, point.y, pixelsPerDip * 32, deviceRadiusPaint);
-        canvas.drawCircle(point.x, point.y, pixelsPerDip * 10, whiteFillPaint);
-        canvas.drawCircle(point.x, point.y, pixelsPerDip * 10, primaryStrokePaint);
-        canvas.drawCircle(point.x, point.y, pixelsPerDip * 8, primaryFillPaint);
+        PointF deviceCenter = (deviceLocationAnimator == null) ? canvasCenter : getPointFromLocation(deviceLocationAnimator.getLocation());
+
+        float deviceAdvertisingRange = 20; // in meters TODO: get real value based on tx power
+        float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(deviceAdvertisingRange);
+
+        float animationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
+        float strokeRadius = (pixelsPerDip * 10) + (pixelsPerDip * 2 * animationValue);
+
+        //canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, deviceRangePaint);
+        canvas.drawCircle(deviceCenter.x, deviceCenter.y, advertisingRadius, deviceRangePaint);
+        canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, whiteFillPaint);
+        canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, secondaryStrokePaint);
+        canvas.drawCircle(deviceCenter.x, deviceCenter.y, pixelsPerDip * 8, secondaryFillPaint);
     }
 
     @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
-        PointF point = getPointFromLocation(beacon.getLocation());
+        PointF beaconCenter = getPointFromLocation(beacon.getLocation());
         float beaconAdvertisingRange = 50; // in meters TODO: get real value based on tx power
         float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(beaconAdvertisingRange);
-        canvas.drawCircle(point.x, point.y, advertisingRadius, deviceRadiusPaint);
+        canvas.drawCircle(beaconCenter.x, beaconCenter.y, advertisingRadius, beaconRangePaint);
 
         float beaconRadius = pixelsPerDip * 8;
         int beaconCornerRadius = (int) pixelsPerDip * 2;
-        RectF rect = new RectF(point.x - beaconRadius, point.y - beaconRadius, point.x + beaconRadius, point.y + beaconRadius);
+        RectF rect = new RectF(beaconCenter.x - beaconRadius, beaconCenter.y - beaconRadius, beaconCenter.x + beaconRadius, beaconCenter.y + beaconRadius);
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, whiteFillPaint);
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryStrokePaint);
 
         beaconRadius = beaconRadius - pixelsPerDip * 2;
-        rect = new RectF(point.x - beaconRadius, point.y - beaconRadius, point.x + beaconRadius, point.y + beaconRadius);
+        rect = new RectF(beaconCenter.x - beaconRadius, beaconCenter.y - beaconRadius, beaconCenter.x + beaconRadius, beaconCenter.y + beaconRadius);
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryFillPaint);
     }
 
     protected void drawLegend(Canvas canvas) {
+        drawReferenceLine(canvas);
+    }
+
+    protected void drawReferenceLine(Canvas canvas) {
         float canvasPadding = canvasWidth * canvasProjection.getPaddingFactor();
-        float referenceCanvasWidth = canvasWidth - (2 * canvasPadding);
+        float maximumReferenceLineWidth = canvasWidth - (2 * canvasPadding);
+        float maximumReferenceDistance = (float) canvasProjection.getMetersFromCanvasUnits(maximumReferenceLineWidth);
+        float referenceDistance = DistanceUtil.getReasonableSmallerEvenDistance(maximumReferenceDistance);
+        float referenceLineWidth = (float) canvasProjection.getCanvasUnitsFromMeters(referenceDistance);
+        float referenceLinePadding = (canvasWidth - referenceLineWidth) / 2;
 
         Paint legendPaint = new Paint(textPaint);
         legendPaint.setAlpha(50);
         legendPaint.setTextSize(pixelsPerDip * 12);
 
         float referenceYOffset = canvasHeight - (pixelsPerDip * 16);
-        PointF referenceStartPoint = new PointF(canvasPadding, referenceYOffset);
-        PointF referenceEndPoint = new PointF(canvasWidth - canvasPadding, referenceYOffset);
+        PointF referenceStartPoint = new PointF(referenceLinePadding, referenceYOffset);
+        PointF referenceEndPoint = new PointF(canvasWidth - referenceLinePadding, referenceYOffset);
 
         // horizontal line
         canvas.drawRect(
@@ -139,7 +153,7 @@ public class BeaconMap extends BeaconView {
         );
 
         // text
-        float referenceDistance = (float) canvasProjection.getMetersFromCanvasUnits(referenceCanvasWidth);
+
         String referenceText = String.valueOf(Math.round(referenceDistance)) + " meters";
         float referenceTextWidth = legendPaint.measureText(referenceText);
         canvas.drawText(
@@ -218,17 +232,17 @@ public class BeaconMap extends BeaconView {
     }
 
     protected void startDeviceRadiusAnimation() {
-        deviceRadiusAnimator = ValueAnimator.ofFloat(0, 1);
-        deviceRadiusAnimator.setDuration(LocationAnimator.ANIMATION_DURATION_LONG);
-        deviceRadiusAnimator.setRepeatCount(1);
-        deviceRadiusAnimator.setRepeatMode(ValueAnimator.REVERSE);
-        deviceRadiusAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        deviceAccuracyAnimator = ValueAnimator.ofFloat(0, 1);
+        deviceAccuracyAnimator.setDuration(LocationAnimator.ANIMATION_DURATION_LONG);
+        deviceAccuracyAnimator.setRepeatCount(1);
+        deviceAccuracyAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        deviceAccuracyAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 invalidate();
             }
         });
-        deviceRadiusAnimator.start();
+        deviceAccuracyAnimator.start();
     }
 
 }

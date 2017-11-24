@@ -38,13 +38,13 @@ import java.util.concurrent.TimeUnit;
  * Created by steppschuh on 21.11.17.
  */
 
-public final class LocationUtil implements LocationProvider {
+public final class AndroidLocationProvider implements LocationProvider {
 
-    private static final String TAG = LocationUtil.class.getSimpleName();
+    private static final String TAG = AndroidLocationProvider.class.getSimpleName();
     public static final int REQUEST_CODE_LOCATION_PERMISSIONS = 1;
     public static final int REQUEST_CODE_LOCATION_SETTINGS = 2;
 
-    private static LocationUtil instance;
+    private static AndroidLocationProvider instance;
     private Activity activity;
     private boolean isRequestingLocationUpdates;
     private LocationRequest locationRequest;
@@ -54,20 +54,20 @@ public final class LocationUtil implements LocationProvider {
     private Location lastKnownLocation;
     private Set<LocationListener> locationListeners = new HashSet<>();
 
-    private LocationUtil() {
+    private AndroidLocationProvider() {
 
     }
 
-    public static LocationUtil getInstance() {
+    public static AndroidLocationProvider getInstance() {
         if (instance == null) {
-            instance = new LocationUtil();
+            instance = new AndroidLocationProvider();
         }
         return instance;
     }
 
     public static void initialize(@NonNull Activity activity) {
         Log.v(TAG, "Initializing with context: " + activity);
-        LocationUtil instance = getInstance();
+        AndroidLocationProvider instance = getInstance();
         instance.activity = activity;
         instance.fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
         instance.setupLocationService();
@@ -111,7 +111,7 @@ public final class LocationUtil implements LocationProvider {
     }
 
     public static boolean registerLocationListener(@NonNull LocationListener locationListener) {
-        LocationUtil instance = getInstance();
+        AndroidLocationProvider instance = getInstance();
         boolean added = instance.locationListeners.add(locationListener);
         if (added && !instance.isRequestingLocationUpdates) {
             instance.startRequestingLocationUpdates();
@@ -120,7 +120,7 @@ public final class LocationUtil implements LocationProvider {
     }
 
     public static boolean unregisterLocationListener(@NonNull LocationListener locationListener) {
-        LocationUtil instance = getInstance();
+        AndroidLocationProvider instance = getInstance();
         boolean removed = instance.locationListeners.remove(locationListener);
         if (removed && instance.isRequestingLocationUpdates && instance.locationListeners.isEmpty()) {
             instance.stopRequestingLocationUpdates();
@@ -130,7 +130,7 @@ public final class LocationUtil implements LocationProvider {
 
     @SuppressLint("MissingPermission")
     public static void startRequestingLocationUpdates() {
-        LocationUtil instance = getInstance();
+        AndroidLocationProvider instance = getInstance();
         if (instance.isRequestingLocationUpdates) {
             return;
         }
@@ -146,7 +146,7 @@ public final class LocationUtil implements LocationProvider {
     }
 
     public static void stopRequestingLocationUpdates() {
-        LocationUtil instance = getInstance();
+        AndroidLocationProvider instance = getInstance();
         if (!instance.isRequestingLocationUpdates) {
             return;
         }
@@ -160,7 +160,7 @@ public final class LocationUtil implements LocationProvider {
 
     @SuppressLint("MissingPermission")
     public static void requestLastKnownLocation() {
-        final LocationUtil instance = getInstance();
+        final AndroidLocationProvider instance = getInstance();
         if (!instance.hasLocationPermission()) {
             return;
         }

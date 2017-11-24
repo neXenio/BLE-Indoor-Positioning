@@ -30,9 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
         beaconMap = findViewById(R.id.beaconMap);
         beaconMap.setBeacons(createTestBeacons());
-        //beaconMap.setDeviceLocation(TestLocations.GENDAMENMARKT_COURT_CENTER);
 
-        LocationUtil.initialize(this);
+        AndroidLocationProvider.initialize(this);
         deviceLocationListener = new LocationListener() {
             @Override
             public void onLocationUpdated(LocationProvider locationProvider, Location location) {
@@ -49,16 +48,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (!LocationUtil.hasLocationPermission(this)) {
-            LocationUtil.requestLocationPermission(this);
+        if (!AndroidLocationProvider.hasLocationPermission(this)) {
+            AndroidLocationProvider.requestLocationPermission(this);
         }
-        LocationUtil.registerLocationListener(deviceLocationListener);
-        LocationUtil.requestLastKnownLocation();
+        AndroidLocationProvider.registerLocationListener(deviceLocationListener);
+        AndroidLocationProvider.requestLastKnownLocation();
     }
 
     @Override
     protected void onPause() {
-        LocationUtil.unregisterLocationListener(deviceLocationListener);
+        AndroidLocationProvider.unregisterLocationListener(deviceLocationListener);
         super.onPause();
     }
 
@@ -66,13 +65,13 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case LocationUtil.REQUEST_CODE_LOCATION_PERMISSIONS: {
+            case AndroidLocationProvider.REQUEST_CODE_LOCATION_PERMISSIONS: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Log.d(TAG, "Location permission granted");
-                    LocationUtil.startRequestingLocationUpdates();
+                    AndroidLocationProvider.startRequestingLocationUpdates();
                 } else {
                     Log.d(TAG, "Location permission not granted. Wut?");
-                    LocationUtil.requestLocationPermission(this);
+                    AndroidLocationProvider.requestLocationPermission(this);
                 }
                 break;
             }

@@ -14,7 +14,6 @@ import android.view.View;
 import com.nexenio.bleindoorpositioning.ble.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
-import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
@@ -30,9 +29,12 @@ public abstract class BeaconView extends View {
     protected Paint textPaint;
     protected Paint primaryFillPaint;
     protected Paint primaryStrokePaint;
+    protected Paint secondaryFillPaint;
+    protected Paint secondaryStrokePaint;
     protected Paint whiteFillPaint;
     protected Paint whiteStrokePaint;
-    protected Paint deviceRadiusPaint;
+    protected Paint deviceRangePaint;
+    protected Paint beaconRangePaint;
 
     protected Location deviceLocation;
     protected LocationAnimator deviceLocationAnimator;
@@ -72,12 +74,17 @@ public abstract class BeaconView extends View {
 
         primaryFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         primaryFillPaint.setStyle(Paint.Style.FILL);
-        primaryFillPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+        primaryFillPaint.setColor(ContextCompat.getColor(getContext(), R.color.primary));
 
-        primaryStrokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        primaryStrokePaint = new Paint(primaryFillPaint);
         primaryStrokePaint.setStyle(Paint.Style.STROKE);
         primaryStrokePaint.setStrokeWidth(pixelsPerDip);
-        primaryStrokePaint.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+
+        secondaryFillPaint = new Paint(primaryFillPaint);
+        secondaryFillPaint.setColor(ContextCompat.getColor(getContext(), R.color.accent));
+
+        secondaryStrokePaint = new Paint(primaryStrokePaint);
+        secondaryStrokePaint.setColor(ContextCompat.getColor(getContext(), R.color.accent));
 
         whiteFillPaint = new Paint(primaryFillPaint);
         whiteFillPaint.setColor(Color.WHITE);
@@ -85,10 +92,11 @@ public abstract class BeaconView extends View {
         whiteStrokePaint = new Paint(primaryStrokePaint);
         whiteStrokePaint.setColor(Color.WHITE);
 
-        deviceRadiusPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        deviceRadiusPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-        deviceRadiusPaint.setAlpha(25);
-        deviceRadiusPaint.setStyle(Paint.Style.FILL);
+        beaconRangePaint = new Paint(primaryFillPaint);
+        beaconRangePaint.setAlpha(25);
+
+        deviceRangePaint = new Paint(secondaryFillPaint);
+        deviceRangePaint.setAlpha(25);
 
         backgroundPaint = new Paint();
         backgroundPaint.setColor(Color.WHITE);
