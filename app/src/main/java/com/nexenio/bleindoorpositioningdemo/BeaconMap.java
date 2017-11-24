@@ -5,7 +5,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.RadialGradient;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
@@ -92,6 +94,18 @@ public class BeaconMap extends BeaconView {
         PointF beaconCenter = getPointFromLocation(beacon.getLocation());
         float beaconAdvertisingRange = 50; // in meters TODO: get real value based on tx power
         float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(beaconAdvertisingRange);
+
+        Paint innerBeaconRangePaint = new Paint(beaconRangePaint);
+        innerBeaconRangePaint.setAlpha(100);
+        Shader rangeShader = new RadialGradient(
+                beaconCenter.x,
+                beaconCenter.y,
+                advertisingRadius - (pixelsPerDip * 0),
+                primaryFillPaint.getColor(), beaconRangePaint.getColor(),
+                Shader.TileMode.MIRROR);
+
+        innerBeaconRangePaint.setShader(rangeShader);
+        //canvas.drawCircle(beaconCenter.x, beaconCenter.y, advertisingRadius, innerBeaconRangePaint);
         canvas.drawCircle(beaconCenter.x, beaconCenter.y, advertisingRadius, beaconRangePaint);
 
         float beaconRadius = pixelsPerDip * 8;
@@ -153,7 +167,6 @@ public class BeaconMap extends BeaconView {
         );
 
         // text
-
         String referenceText = String.valueOf(Math.round(referenceDistance)) + " meters";
         float referenceTextWidth = legendPaint.measureText(referenceText);
         canvas.drawText(

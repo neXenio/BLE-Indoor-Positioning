@@ -36,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLocationUpdated(LocationProvider locationProvider, Location location) {
                 // TODO: remove artificial noise
-                location.setLatitude(location.getLatitude() + Math.random() * 0.0002);
-                location.setLongitude(location.getLongitude() + Math.random() * 0.0002);
+                //location.setLatitude(location.getLatitude() + Math.random() * 0.0002);
+                //location.setLongitude(location.getLongitude() + Math.random() * 0.0002);
 
                 beaconMap.setDeviceLocation(location);
                 beaconMap.fitToCurrentLocations();
