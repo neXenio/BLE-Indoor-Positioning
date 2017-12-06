@@ -73,5 +73,4 @@ public class BluetoothClient {
         activity.startActivityForResult(enableBtIntent, REQUEST_CODE_ENABLE_BLUETOOTH);
     }
 
-
 }

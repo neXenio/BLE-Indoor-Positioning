@@ -20,10 +20,14 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.nexenio.bleindoorpositioning.location.Location;
@@ -239,6 +243,28 @@ public final class AndroidLocationProvider implements LocationProvider {
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
         }, REQUEST_CODE_LOCATION_PERMISSIONS);
+    }
+
+    public static boolean isLocationEnabled(@NonNull Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            try {
+                int locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+                return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+            } catch (Settings.SettingNotFoundException e) {
+                Log.e(TAG, "Unable to get location mode");
+                e.printStackTrace();
+                return false;
+            }
+        } else {
+            String locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+    }
+
+    public static void requestLocationEnabling(@NonNull Activity activity) {
+        Log.d(TAG, "Requesting location enabling");
+        Intent locationSettings = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        activity.startActivity(locationSettings);
     }
 
     public static Location convertLocation(android.location.Location androidLocation) {
