@@ -8,8 +8,12 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.polidea.rxandroidble.RxBleClient;
+import com.polidea.rxandroidble.scan.ScanResult;
+import com.polidea.rxandroidble.scan.ScanSettings;
 
+import rx.Observer;
 import rx.Subscription;
 
 /**
@@ -53,13 +57,51 @@ public class BluetoothClient {
     }
 
     public static void startScanning() {
-        BluetoothClient instance = getInstance();
+        if (isScanning()) {
+            return;
+        }
+
+        final BluetoothClient instance = getInstance();
         Log.d(TAG, "Starting to scan for beacons");
+
+        ScanSettings scanSettings = new ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
+                .build();
+
+        instance.scanningSubscription = instance.rxBleClient.scanBleDevices(scanSettings)
+                .subscribe(new Observer<ScanResult>() {
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e(TAG, "Bluetooth scanning error: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(ScanResult scanResult) {
+                        instance.processScanResult(scanResult);
+                    }
+                });
     }
 
     public static void stopScanning() {
+        if (!isScanning()) {
+            return;
+        }
+
         BluetoothClient instance = getInstance();
         Log.d(TAG, "Stopping to scan for beacons");
+        instance.scanningSubscription.unsubscribe();
+    }
+
+    public static boolean isScanning() {
+        Subscription subscription = getInstance().scanningSubscription;
+        return subscription != null && !subscription.isUnsubscribed();
     }
 
     public static boolean isBluetoothEnabled() {
@@ -71,6 +113,21 @@ public class BluetoothClient {
         Log.d(TAG, "Requesting bluetooth enabling");
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         activity.startActivityForResult(enableBtIntent, REQUEST_CODE_ENABLE_BLUETOOTH);
+    }
+
+    private void processScanResult(@NonNull ScanResult scanResult) {
+        if (!"E2:38:2E:68:46:E9".equals(scanResult.getBleDevice().getMacAddress())) {
+            return; // TODO: don't ignore all devices
+        }
+
+        byte[] data = scanResult.getScanRecord().getBytes();
+        if (IBeaconAdvertisingPacket.meetsSpecification(data)) {
+            IBeaconAdvertisingPacket advertisingPacket = new IBeaconAdvertisingPacket(data);
+            Log.v(TAG, scanResult.getBleDevice().getMacAddress() + " advertised: " + advertisingPacket);
+        } else {
+            Log.v(TAG, "Unprocessed scan result: " + scanResult);
+        }
+
     }
 
 }

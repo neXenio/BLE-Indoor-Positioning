@@ -11,7 +11,7 @@ import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
-import com.nexenio.bleindoorpositioning.ble.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;

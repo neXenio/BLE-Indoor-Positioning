@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioning.ble;
+package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.location.provider.EddystoneLocationProvider;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;

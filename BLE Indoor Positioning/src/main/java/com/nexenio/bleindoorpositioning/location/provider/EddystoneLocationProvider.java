@@ -1,7 +1,7 @@
 package com.nexenio.bleindoorpositioning.location.provider;
 
-import com.nexenio.bleindoorpositioning.ble.AdvertisingPacket;
-import com.nexenio.bleindoorpositioning.ble.Eddystone;
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
 import com.nexenio.bleindoorpositioning.location.Location;
 
 /**

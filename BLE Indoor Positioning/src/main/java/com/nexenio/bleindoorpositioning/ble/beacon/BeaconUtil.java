@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioning.ble;
+package com.nexenio.bleindoorpositioning.ble.beacon;
 
 /**
  * Created by steppschuh on 24.11.17.

@@ -10,8 +10,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
-import com.nexenio.bleindoorpositioning.ble.Beacon;
-import com.nexenio.bleindoorpositioning.ble.Eddystone;
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
     private void requestLocationServices() {
         Snackbar snackbar = Snackbar.make(
                 coordinatorLayout,
-                R.string.request_location_service,
+                R.string.error_location_disabled,
                 Snackbar.LENGTH_INDEFINITE
         );
         snackbar.setAction(R.string.action_enable, new View.OnClickListener() {
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
     private void requestBluetooth() {
         Snackbar snackbar = Snackbar.make(
                 coordinatorLayout,
-                R.string.request_bluetooth,
+                R.string.error_bluetooth_disabled,
                 Snackbar.LENGTH_INDEFINITE
         );
         snackbar.setAction(R.string.action_enable, new View.OnClickListener() {
