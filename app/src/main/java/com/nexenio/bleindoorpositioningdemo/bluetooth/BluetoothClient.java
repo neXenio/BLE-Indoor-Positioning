@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
+import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.scan.ScanResult;
@@ -121,11 +123,16 @@ public class BluetoothClient {
         }
 
         byte[] data = scanResult.getScanRecord().getBytes();
+
         if (IBeaconAdvertisingPacket.meetsSpecification(data)) {
             IBeaconAdvertisingPacket advertisingPacket = new IBeaconAdvertisingPacket(data);
             Log.v(TAG, scanResult.getBleDevice().getMacAddress() + " advertised: " + advertisingPacket);
+        }
+        if (EddystoneAdvertisingPacket.meetsSpecification(data)) {
+            EddystoneAdvertisingPacket advertisingPacket = new EddystoneAdvertisingPacket(data);
+            Log.v(TAG, scanResult.getBleDevice().getMacAddress() + " advertised: " + advertisingPacket);
         } else {
-            Log.v(TAG, "Unprocessed scan result: " + scanResult);
+            Log.v(TAG, "Unprocessed scan result: " + scanResult + "\n" + AdvertisingPacketUtil.toHexadecimalString(data));
         }
 
     }

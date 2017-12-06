@@ -12,7 +12,7 @@ public abstract class AdvertisingPacketUtil {
 
     public static String toHexadecimalString(byte[] bytes) {
         BigInteger bigInteger = new BigInteger(bytes);
-        return "0x" + bigInteger.toString(16);
+        return "0x" + bigInteger.toString(16).toUpperCase();
     }
 
     public static UUID toUuid(byte[] bytes) {
