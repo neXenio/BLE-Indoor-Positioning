@@ -11,6 +11,7 @@ import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
@@ -135,13 +136,19 @@ public class BeaconMap extends BeaconView {
     }
 
     protected void drawBeaconForeground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
+        AdvertisingPacket latestAdvertisingPacket = beacon.getLatestAdvertisingPacket();
+        long timeSinceLastAdvertisement = latestAdvertisingPacket != null ? System.currentTimeMillis() - latestAdvertisingPacket.getTimestamp() : 0;
+
+        float animationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
+        animationValue *= Math.max(0, 1 - (timeSinceLastAdvertisement / 1000));
         float beaconRadius = pixelsPerDip * 8;
+        float strokeRadius = beaconRadius + (pixelsPerDip * 2) + (pixelsPerDip * 2 * animationValue);
+
         int beaconCornerRadius = (int) pixelsPerDip * 2;
-        RectF rect = new RectF(beaconCenter.x - beaconRadius, beaconCenter.y - beaconRadius, beaconCenter.x + beaconRadius, beaconCenter.y + beaconRadius);
+        RectF rect = new RectF(beaconCenter.x - strokeRadius, beaconCenter.y - strokeRadius, beaconCenter.x + strokeRadius, beaconCenter.y + strokeRadius);
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, whiteFillPaint);
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryStrokePaint);
 
-        beaconRadius = beaconRadius - pixelsPerDip * 2;
         rect = new RectF(beaconCenter.x - beaconRadius, beaconCenter.y - beaconRadius, beaconCenter.x + beaconRadius, beaconCenter.y + beaconRadius);
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryFillPaint);
     }
@@ -223,6 +230,16 @@ public class BeaconMap extends BeaconView {
         }
         if (deviceLocationAnimator != null) {
             locations.add(deviceLocationAnimator.getLocation());
+
+            Location deviceTopLeftLocation = new Location(deviceLocationAnimator.getLocation());
+            deviceTopLeftLocation.setLatitude(deviceTopLeftLocation.getLatitude() + 0.0002);
+            deviceTopLeftLocation.setLongitude(deviceTopLeftLocation.getLongitude() - 0.0004);
+            locations.add(deviceTopLeftLocation);
+
+            Location deviceBottomRightLocation = new Location(deviceLocationAnimator.getLocation());
+            deviceBottomRightLocation.setLatitude(deviceBottomRightLocation.getLatitude() - 0.0002);
+            deviceBottomRightLocation.setLongitude(deviceBottomRightLocation.getLongitude() + 0.0004);
+            locations.add(deviceBottomRightLocation);
         }
         if (topLeftLocationAnimator != null) {
             locations.add(topLeftLocationAnimator.getLocation());
@@ -237,6 +254,9 @@ public class BeaconMap extends BeaconView {
             LocationListener locationListener = new LocationListener() {
                 @Override
                 public void onLocationUpdated(LocationProvider locationProvider, Location location) {
+                    if (!location.hasLatitudeAndLongitude()) {
+                        return;
+                    }
                     if (locationProvider == topLeftLocationAnimator) {
                         canvasProjection.setTopLeftLocation(location);
                     } else if (locationProvider == bottomRightLocationAnimator) {

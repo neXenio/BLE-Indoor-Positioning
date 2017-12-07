@@ -48,7 +48,7 @@ public class EquirectangularProjection {
         double maximumLatitude = -Double.MAX_VALUE;
         double minimumLongitude = Double.MAX_VALUE;
         for (Location location : locations) {
-            if (location == null) {
+            if (location == null || !location.hasLatitudeAndLongitude()) {
                 continue;
             }
             maximumLatitude = Math.max(maximumLatitude, location.getLatitude());
@@ -61,7 +61,7 @@ public class EquirectangularProjection {
         double minimumLatitude = Double.MAX_VALUE;
         double maximumLongitude = -Double.MAX_VALUE;
         for (Location location : locations) {
-            if (location == null) {
+            if (location == null || !location.hasLatitudeAndLongitude()) {
                 continue;
             }
             maximumLongitude = Math.max(maximumLongitude, location.getLongitude());

@@ -35,6 +35,7 @@ public class BeaconManager {
             if (beacon == null) {
                 return;
             }
+            beacon.setMacAddress(macAddress);
             beaconMap.put(macAddress, beacon);
         }
         beacon.addAdvertisingPacket(advertisingPacket);

@@ -11,6 +11,8 @@ import android.util.Log;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
+import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.scan.ScanResult;
 import com.polidea.rxandroidble.scan.ScanSettings;
@@ -133,18 +135,23 @@ public class BluetoothClient {
             boolean isNewBeacon = beacon == null;
             boolean isNewAdvertisingData = lastAdvertisingPacket == null || !advertisingPacket.dataEquals(lastAdvertisingPacket);
 
+            beaconManager.processAdvertisingPacket(macAddress, advertisingPacket);
+
             if (isNewBeacon) {
+                beacon = beaconManager.getBeaconMap().get(macAddress);
+                beacon.setLocationProvider(new LocationProvider() {
+                    @Override
+                    public Location getLocation() {
+                        return new Location(52.512382, 13.390936);
+                    }
+                });
                 Log.i(TAG, macAddress + " data received for the first time: " + advertisingPacket);
             } else if (isNewAdvertisingData) {
                 Log.d(TAG, macAddress + " data changed to: " + advertisingPacket);
             } else {
-                if ("E2:38:2E:68:46:E9".equals(macAddress)) {
-                    // TODO: remove());
-                }
                 Log.v(TAG, macAddress + " data unchanged: " + advertisingPacket);
             }
 
-            beaconManager.processAdvertisingPacket(macAddress, advertisingPacket);
         }
 
     }

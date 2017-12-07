@@ -9,7 +9,7 @@ import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 public class Eddystone extends Beacon {
 
-    public static final int CALIBRATION_DISTANCE_DEFAULT = 100;
+    public static final int CALIBRATION_DISTANCE_DEFAULT = 0;
 
     public Eddystone() {
         this.calibratedDistance = CALIBRATION_DISTANCE_DEFAULT;

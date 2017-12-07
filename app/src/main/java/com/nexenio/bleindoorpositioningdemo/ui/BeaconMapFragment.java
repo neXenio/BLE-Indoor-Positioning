@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
@@ -24,6 +25,7 @@ import java.util.List;
 
 public class BeaconMapFragment extends Fragment {
 
+    private BeaconManager beaconManager = BeaconManager.getInstance();
     private BeaconMap beaconMap;
     private LocationListener deviceLocationListener;
 
@@ -38,6 +40,7 @@ public class BeaconMapFragment extends Fragment {
                 //location.setLongitude(location.getLongitude() + Math.random() * 0.0002);
 
                 beaconMap.setDeviceLocation(location);
+                beaconMap.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
                 beaconMap.fitToCurrentLocations();
             }
         };
@@ -64,7 +67,8 @@ public class BeaconMapFragment extends Fragment {
         View inflatedView = inflater.inflate(R.layout.fragment_beacon_map, container, false);
         coordinatorLayout = inflatedView.findViewById(R.id.coordinatorLayout);
         beaconMap = inflatedView.findViewById(R.id.beaconMap);
-        beaconMap.setBeacons(createTestBeacons());
+        //beaconMap.setBeacons(createTestBeacons());
+        beaconMap.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
         return inflatedView;
     }
 

@@ -75,7 +75,6 @@ public final class AndroidLocationProvider implements LocationProvider {
         instance.activity = activity;
         instance.fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
         instance.setupLocationService();
-
     }
 
     private void setupLocationService() {

@@ -65,6 +65,7 @@ public abstract class Beacon {
     }
 
     public void addAdvertisingPacket(AdvertisingPacket advertisingPacket) {
+        rssi = advertisingPacket.getRssi();
         advertisingPackets.add(advertisingPacket);
         trimAdvertisingPackets();
     }
@@ -88,6 +89,10 @@ public abstract class Beacon {
         }
 
         advertisingPackets.removeAll(removableAdvertisingPackets);
+    }
+
+    public boolean equalsLastAdvertisingPackage(AdvertisingPacket advertisingPacket) {
+        return hasAnyAdvertisingPacket() && getLatestAdvertisingPacket().equals(advertisingPacket);
     }
 
     public float getDistance() {

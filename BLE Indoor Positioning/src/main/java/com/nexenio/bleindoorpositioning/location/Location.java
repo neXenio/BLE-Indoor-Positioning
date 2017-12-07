@@ -63,11 +63,11 @@ public class Location {
     }
 
     public boolean hasLatitudeAndLongitude() {
-        return latitude != VALUE_NOT_SET && longitude != VALUE_NOT_SET;
+        return latitude != VALUE_NOT_SET && !Double.isNaN(latitude) && longitude != VALUE_NOT_SET && !Double.isNaN(longitude);
     }
 
     public boolean hasAltitude() {
-        return altitude != VALUE_NOT_SET;
+        return altitude != VALUE_NOT_SET && !Double.isNaN(altitude);
     }
 
     public URI generateGoogleMapsUri() {
