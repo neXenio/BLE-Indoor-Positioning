@@ -11,26 +11,37 @@ public class BeaconDistanceCalculatorTest {
 
     @Test
     public void calculateDistance() throws Exception {
-        int tx = -8;
-        int rssi = -80;
+        int txLevel = -8;
         int rssiAtZeroMeters = -55;
         int rssiAtOneMeter = -75;
+
+        int rssi = -90;
         int expectedDistance = 10;
 
-        float calculatedDistance = BeaconDistanceCalculator.calculateDistance(rssi, rssiAtZeroMeters);
-        assertEquals(calculatedDistance, expectedDistance, 1);
+        int rssiatFourMeters = -82;
+        int expectedFourMeters = 4;
 
-        calculatedDistance = BeaconDistanceCalculator.calculateDistance(rssi, rssiAtOneMeter);
-        assertEquals(calculatedDistance, expectedDistance, 1);
+        float calculatedDistance = BeaconDistanceCalculator.calculateDistance(rssiatFourMeters, rssiAtOneMeter, 1, txLevel);
+        System.out.println("Error: " + (expectedFourMeters - calculatedDistance));
+        assertEquals(calculatedDistance, expectedFourMeters, 3);
+
+        calculatedDistance = BeaconDistanceCalculator.calculateDistance(rssi, rssiAtOneMeter, 1, txLevel);
+        System.out.println("Error: " + (expectedDistance - calculatedDistance));
+        assertEquals(calculatedDistance, expectedDistance, 3);
+
+        calculatedDistance = BeaconDistanceCalculator.calculateDistance(rssi, rssiAtZeroMeters, 0, txLevel);
+        System.out.println("Error: " + (expectedDistance - calculatedDistance));
+        assertEquals(calculatedDistance, expectedDistance, 3);
     }
 
     @Test
     public void calculateDistance_calibratedRssi_calibratedDistance() throws Exception {
+        int txLevel = -8;
         int rssiAtZeroMeters = -55;
         int rssiAtOneMeter = -75;
-        float calculatedDistance = BeaconDistanceCalculator.calculateDistance(rssiAtZeroMeters, rssiAtZeroMeters);
+        float calculatedDistance = BeaconDistanceCalculator.calculateDistance(rssiAtZeroMeters, rssiAtZeroMeters, 0, txLevel);
         assertEquals(calculatedDistance, 0, 0);
-        calculatedDistance = BeaconDistanceCalculator.calculateDistance(rssiAtOneMeter, rssiAtOneMeter);
+        calculatedDistance = BeaconDistanceCalculator.calculateDistance(rssiAtOneMeter, rssiAtOneMeter, 1, txLevel);
         assertEquals(calculatedDistance, 1, 0);
     }
 
