@@ -118,7 +118,7 @@ public final class AndroidLocationProvider implements LocationProvider {
         AndroidLocationProvider instance = getInstance();
         boolean added = instance.locationListeners.add(locationListener);
         if (added && !instance.isRequestingLocationUpdates) {
-            instance.startRequestingLocationUpdates();
+            startRequestingLocationUpdates();
         }
         return added;
     }
@@ -127,7 +127,7 @@ public final class AndroidLocationProvider implements LocationProvider {
         AndroidLocationProvider instance = getInstance();
         boolean removed = instance.locationListeners.remove(locationListener);
         if (removed && instance.isRequestingLocationUpdates && instance.locationListeners.isEmpty()) {
-            instance.stopRequestingLocationUpdates();
+            stopRequestingLocationUpdates();
         }
         return removed;
     }

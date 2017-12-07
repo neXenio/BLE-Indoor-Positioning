@@ -4,61 +4,63 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 
-import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
-import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
-import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
-import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import com.nexenio.bleindoorpositioningdemo.bluetooth.BluetoothClient;
 import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
-import com.nexenio.bleindoorpositioningdemo.location.TestLocations;
-import com.nexenio.bleindoorpositioningdemo.ui.BeaconMap;
+import com.nexenio.bleindoorpositioningdemo.ui.BeaconMapFragment;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
-public class MainActivity extends AppCompatActivity {
-
-    private static final String TAG = MainActivity.class.getSimpleName();
-
-    private BeaconMap beaconMap;
-    private LocationListener deviceLocationListener;
+    private static final String TAG = HomeActivity.class.getSimpleName();
 
     private CoordinatorLayout coordinatorLayout;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_home);
 
+        // setup UI
         coordinatorLayout = findViewById(R.id.coordinatorLayout);
-
-        beaconMap = findViewById(R.id.beaconMap);
-        beaconMap.setBeacons(createTestBeacons());
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        bottomNavigationView.setOnNavigationItemSelectedListener(this);
+        bottomNavigationView.setSelectedItemId(R.id.navigation_map);
 
         // setup location
         AndroidLocationProvider.initialize(this);
-        deviceLocationListener = new LocationListener() {
-            @Override
-            public void onLocationUpdated(LocationProvider locationProvider, Location location) {
-                // TODO: remove artificial noise
-                //location.setLatitude(location.getLatitude() + Math.random() * 0.0002);
-                //location.setLongitude(location.getLongitude() + Math.random() * 0.0002);
-
-                beaconMap.setDeviceLocation(location);
-                beaconMap.fitToCurrentLocations();
-            }
-        };
 
         // setup bluetooth
         BluetoothClient.initialize(this);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        Fragment selectedFragment = null;
+        switch (item.getItemId()) {
+            case R.id.navigation_map: {
+                selectedFragment = BeaconMapFragment.newInstance();
+                break;
+            }
+            case R.id.navigation_radar: {
+                break;
+            }
+            case R.id.navigation_chart: {
+                break;
+            }
+        }
+        if (selectedFragment != null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.frameLayout, selectedFragment).commit();
+        }
+        return true;
     }
 
     @Override
@@ -71,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (!AndroidLocationProvider.isLocationEnabled(this)) {
             requestLocationServices();
         }
-        AndroidLocationProvider.registerLocationListener(deviceLocationListener);
+        AndroidLocationProvider.startRequestingLocationUpdates();
         AndroidLocationProvider.requestLastKnownLocation();
 
         // observe bluetooth
@@ -84,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         // stop observing location
-        AndroidLocationProvider.unregisterLocationListener(deviceLocationListener);
+        AndroidLocationProvider.stopRequestingLocationUpdates();
 
         // stop observing bluetooth
         BluetoothClient.stopScanning();
@@ -132,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         snackbar.setAction(R.string.action_enable, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AndroidLocationProvider.requestLocationEnabling(MainActivity.this);
+                AndroidLocationProvider.requestLocationEnabling(HomeActivity.this);
             }
         });
         snackbar.show();
@@ -147,33 +149,10 @@ public class MainActivity extends AppCompatActivity {
         snackbar.setAction(R.string.action_enable, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                BluetoothClient.requestBluetoothEnabling(MainActivity.this);
+                BluetoothClient.requestBluetoothEnabling(HomeActivity.this);
             }
         });
         snackbar.show();
-    }
-
-    private static List<Beacon> createTestBeacons() {
-        return new ArrayList<>(Arrays.asList(
-                createTestBeacon(TestLocations.GENDAMENMARKT_COURT_TOP_LEFT),
-                createTestBeacon(TestLocations.GENDAMENMARKT_COURT_TOP_RIGHT),
-                createTestBeacon(TestLocations.GENDAMENMARKT_COURT_BOTTOM_LEFT),
-                createTestBeacon(TestLocations.GENDAMENMARKT_COURT_BOTTOM_RIGHT)
-        ));
-    }
-
-    private static Beacon createTestBeacon(final Location location) {
-        Beacon beacon = new Eddystone();
-        beacon.setLocationProvider(new LocationProvider() {
-            @Override
-            public Location getLocation() {
-                return location;
-            }
-        });
-        beacon.setTransmissionPower(0);
-        beacon.setRssi(-80);
-        beacon.setCalibratedRssi(-37);
-        return beacon;
     }
 
 }
