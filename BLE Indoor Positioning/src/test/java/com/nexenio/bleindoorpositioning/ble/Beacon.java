@@ -17,7 +17,7 @@ public abstract class Beacon {
     protected int rssi;
     protected int major;
     protected int minor;
-    protected List<AdvertisingPacket> advertisingPackets;
+    protected List<com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket> advertisingPackets;
     protected LocationProvider locationProvider;
 
     public Beacon() {
@@ -38,14 +38,14 @@ public abstract class Beacon {
         return advertisingPackets != null && !advertisingPackets.isEmpty();
     }
 
-    public AdvertisingPacket getLatestAdvertisingPacket() {
+    public com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket getLatestAdvertisingPacket() {
         if (!hasAnyAdvertisingPacket()) {
             return null;
         }
         return advertisingPackets.get(advertisingPackets.size() - 1);
     }
 
-    public void addAdvertisingPacket(AdvertisingPacket advertisingPacket) {
+    public void addAdvertisingPacket(com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket advertisingPacket) {
         if (advertisingPackets == null) {
             advertisingPackets = new ArrayList<>();
         }
@@ -57,10 +57,10 @@ public abstract class Beacon {
         if (!hasAnyAdvertisingPacket()) {
             return;
         }
-        List<AdvertisingPacket> removableAdvertisingPackets = new ArrayList<>();
-        AdvertisingPacket latestAdvertisingPacket = getLatestAdvertisingPacket();
-        long minimumPacketTimestamp = System.currentTimeMillis() - AdvertisingPacket.MAXIMUM_PACKET_AGE;
-        for (AdvertisingPacket advertisingPacket : advertisingPackets) {
+        List<com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket> removableAdvertisingPackets = new ArrayList<>();
+        com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket latestAdvertisingPacket = getLatestAdvertisingPacket();
+        long minimumPacketTimestamp = System.currentTimeMillis() - com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket.MAXIMUM_PACKET_AGE;
+        for (com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket advertisingPacket : advertisingPackets) {
             if (advertisingPacket == latestAdvertisingPacket) {
                 // don't remove the latest packet
                 continue;
@@ -110,11 +110,11 @@ public abstract class Beacon {
         this.minor = minor;
     }
 
-    public List<AdvertisingPacket> getAdvertisingPackets() {
+    public List<com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket> getAdvertisingPackets() {
         return advertisingPackets;
     }
 
-    public void setAdvertisingPackets(List<AdvertisingPacket> advertisingPackets) {
+    public void setAdvertisingPackets(List<com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket> advertisingPackets) {
         this.advertisingPackets = advertisingPackets;
     }
 

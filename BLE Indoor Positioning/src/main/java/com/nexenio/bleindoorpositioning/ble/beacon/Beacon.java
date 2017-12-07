@@ -1,5 +1,6 @@
-package com.nexenio.bleindoorpositioning.ble;
+package com.nexenio.bleindoorpositioning.ble.beacon;
 
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -23,7 +24,6 @@ public abstract class Beacon {
     protected int minor;
     protected List<AdvertisingPacket> advertisingPackets;
     protected LocationProvider locationProvider;
-
 
     public Beacon() {
         this.locationProvider = createLocationProvider();
@@ -81,6 +81,10 @@ public abstract class Beacon {
 
     public float getDistance() {
         return BeaconDistanceCalculator.calculateDistanceTo(this);
+    }
+
+    public float getEstimatedAdvertisingRange() {
+        return BeaconUtil.getAdvertisingRange(transmissionPower);
     }
 
     /*

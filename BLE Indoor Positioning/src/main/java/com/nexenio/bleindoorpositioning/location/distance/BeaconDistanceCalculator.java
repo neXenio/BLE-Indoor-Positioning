@@ -1,6 +1,6 @@
 package com.nexenio.bleindoorpositioning.location.distance;
 
-import com.nexenio.bleindoorpositioning.ble.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 
 /**
  * Created by steppschuh on 22.11.17.

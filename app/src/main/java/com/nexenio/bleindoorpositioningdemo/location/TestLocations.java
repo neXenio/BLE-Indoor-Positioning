@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioningdemo;
+package com.nexenio.bleindoorpositioningdemo.location;
 
 import com.nexenio.bleindoorpositioning.location.Location;
 

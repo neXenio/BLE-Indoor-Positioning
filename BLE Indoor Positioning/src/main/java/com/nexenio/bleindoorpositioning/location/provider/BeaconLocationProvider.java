@@ -1,6 +1,6 @@
 package com.nexenio.bleindoorpositioning.location.provider;
 
-import com.nexenio.bleindoorpositioning.ble.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 
 /**

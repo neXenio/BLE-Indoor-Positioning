@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioningdemo;
+package com.nexenio.bleindoorpositioningdemo.location;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -20,10 +20,14 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.os.Build;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.nexenio.bleindoorpositioning.location.Location;
@@ -38,13 +42,13 @@ import java.util.concurrent.TimeUnit;
  * Created by steppschuh on 21.11.17.
  */
 
-public final class LocationUtil implements LocationProvider {
+public final class AndroidLocationProvider implements LocationProvider {
 
-    private static final String TAG = LocationUtil.class.getSimpleName();
+    private static final String TAG = AndroidLocationProvider.class.getSimpleName();
     public static final int REQUEST_CODE_LOCATION_PERMISSIONS = 1;
     public static final int REQUEST_CODE_LOCATION_SETTINGS = 2;
 
-    private static LocationUtil instance;
+    private static AndroidLocationProvider instance;
     private Activity activity;
     private boolean isRequestingLocationUpdates;
     private LocationRequest locationRequest;
@@ -54,20 +58,20 @@ public final class LocationUtil implements LocationProvider {
     private Location lastKnownLocation;
     private Set<LocationListener> locationListeners = new HashSet<>();
 
-    private LocationUtil() {
+    private AndroidLocationProvider() {
 
     }
 
-    public static LocationUtil getInstance() {
+    public static AndroidLocationProvider getInstance() {
         if (instance == null) {
-            instance = new LocationUtil();
+            instance = new AndroidLocationProvider();
         }
         return instance;
     }
 
     public static void initialize(@NonNull Activity activity) {
         Log.v(TAG, "Initializing with context: " + activity);
-        LocationUtil instance = getInstance();
+        AndroidLocationProvider instance = getInstance();
         instance.activity = activity;
         instance.fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity);
         instance.setupLocationService();
@@ -111,26 +115,26 @@ public final class LocationUtil implements LocationProvider {
     }
 
     public static boolean registerLocationListener(@NonNull LocationListener locationListener) {
-        LocationUtil instance = getInstance();
+        AndroidLocationProvider instance = getInstance();
         boolean added = instance.locationListeners.add(locationListener);
         if (added && !instance.isRequestingLocationUpdates) {
-            instance.startRequestingLocationUpdates();
+            startRequestingLocationUpdates();
         }
         return added;
     }
 
     public static boolean unregisterLocationListener(@NonNull LocationListener locationListener) {
-        LocationUtil instance = getInstance();
+        AndroidLocationProvider instance = getInstance();
         boolean removed = instance.locationListeners.remove(locationListener);
         if (removed && instance.isRequestingLocationUpdates && instance.locationListeners.isEmpty()) {
-            instance.stopRequestingLocationUpdates();
+            stopRequestingLocationUpdates();
         }
         return removed;
     }
 
     @SuppressLint("MissingPermission")
     public static void startRequestingLocationUpdates() {
-        LocationUtil instance = getInstance();
+        AndroidLocationProvider instance = getInstance();
         if (instance.isRequestingLocationUpdates) {
             return;
         }
@@ -146,7 +150,7 @@ public final class LocationUtil implements LocationProvider {
     }
 
     public static void stopRequestingLocationUpdates() {
-        LocationUtil instance = getInstance();
+        AndroidLocationProvider instance = getInstance();
         if (!instance.isRequestingLocationUpdates) {
             return;
         }
@@ -160,7 +164,7 @@ public final class LocationUtil implements LocationProvider {
 
     @SuppressLint("MissingPermission")
     public static void requestLastKnownLocation() {
-        final LocationUtil instance = getInstance();
+        final AndroidLocationProvider instance = getInstance();
         if (!instance.hasLocationPermission()) {
             return;
         }
@@ -239,6 +243,28 @@ public final class LocationUtil implements LocationProvider {
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
         }, REQUEST_CODE_LOCATION_PERMISSIONS);
+    }
+
+    public static boolean isLocationEnabled(@NonNull Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            try {
+                int locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+                return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+            } catch (Settings.SettingNotFoundException e) {
+                Log.e(TAG, "Unable to get location mode");
+                e.printStackTrace();
+                return false;
+            }
+        } else {
+            String locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+    }
+
+    public static void requestLocationEnabling(@NonNull Activity activity) {
+        Log.d(TAG, "Requesting location enabling");
+        Intent locationSettings = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        activity.startActivity(locationSettings);
     }
 
     public static Location convertLocation(android.location.Location androidLocation) {
