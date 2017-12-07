@@ -7,8 +7,8 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 public abstract class BeaconUtil {
 
     /**
-     * Estimates a maximum distance at which advertising packages sent using the specified transmission
-     * power can be received.
+     * Estimates a maximum distance at which advertising packages sent using the specified
+     * transmission power can be received.
      *
      * @param transmissionPower the tx power (in dBm) of the beacon
      * @return estimated range in meters

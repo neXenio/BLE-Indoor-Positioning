@@ -59,7 +59,7 @@ public abstract class Beacon {
         }
         List<com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket> removableAdvertisingPackets = new ArrayList<>();
         com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket latestAdvertisingPacket = getLatestAdvertisingPacket();
-        long minimumPacketTimestamp = System.currentTimeMillis() - com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket.MAXIMUM_PACKET_AGE;
+        long minimumPacketTimestamp = System.currentTimeMillis() - com.nexenio.bleindoorpositioning.ble.beacon.Beacon.MAXIMUM_PACKET_AGE;
         for (com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket advertisingPacket : advertisingPackets) {
             if (advertisingPacket == latestAdvertisingPacket) {
                 // don't remove the latest packet

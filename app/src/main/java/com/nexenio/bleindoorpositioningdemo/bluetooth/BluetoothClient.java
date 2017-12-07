@@ -8,9 +8,8 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
-import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
-import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.scan.ScanResult;
 import com.polidea.rxandroidble.scan.ScanSettings;
@@ -118,21 +117,18 @@ public class BluetoothClient {
     }
 
     private void processScanResult(@NonNull ScanResult scanResult) {
-        if (!"E2:38:2E:68:46:E9".equals(scanResult.getBleDevice().getMacAddress())) {
-            return; // TODO: don't ignore all devices
-        }
+        String macAddress = scanResult.getBleDevice().getMacAddress();
 
         byte[] data = scanResult.getScanRecord().getBytes();
+        AdvertisingPacket advertisingPacket = AdvertisingPacket.from(data);
 
-        if (IBeaconAdvertisingPacket.meetsSpecification(data)) {
-            IBeaconAdvertisingPacket advertisingPacket = new IBeaconAdvertisingPacket(data);
-            Log.v(TAG, scanResult.getBleDevice().getMacAddress() + " advertised: " + advertisingPacket);
-        }
-        if (EddystoneAdvertisingPacket.meetsSpecification(data)) {
-            EddystoneAdvertisingPacket advertisingPacket = new EddystoneAdvertisingPacket(data);
-            Log.v(TAG, scanResult.getBleDevice().getMacAddress() + " advertised: " + advertisingPacket);
-        } else {
-            Log.v(TAG, "Unprocessed scan result: " + scanResult + "\n" + AdvertisingPacketUtil.toHexadecimalString(data));
+        if (advertisingPacket != null) {
+            if ("E2:38:2E:68:46:E9".equals(macAddress)) {
+                // TODO: remove
+                Log.v(TAG, scanResult.getBleDevice().getMacAddress() + " advertised: " + advertisingPacket);
+            }
+            advertisingPacket.setRssi(scanResult.getRssi());
+            BeaconManager.getInstance().processAdvertisingPacket(macAddress, advertisingPacket);
         }
 
     }

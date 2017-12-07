@@ -1,6 +1,8 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -8,6 +10,7 @@ import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by steppschuh on 15.11.17.
@@ -15,18 +18,29 @@ import java.util.UUID;
 
 public abstract class Beacon {
 
+    public static final long MAXIMUM_PACKET_AGE = TimeUnit.SECONDS.toMillis(30);
+
     protected UUID uuid;
+    protected String macAddress;
     protected int rssi; // in dBm
     protected int calibratedRssi; // in dBm
     protected int calibratedDistance; // in cm
     protected int transmissionPower; // in dBm
-    protected int major;
-    protected int minor;
-    protected List<AdvertisingPacket> advertisingPackets;
+    protected List<AdvertisingPacket> advertisingPackets = new ArrayList<>();
     protected LocationProvider locationProvider;
 
     public Beacon() {
         this.locationProvider = createLocationProvider();
+    }
+
+    public static Beacon from(AdvertisingPacket advertisingPacket) {
+        Beacon beacon = null;
+        if (advertisingPacket instanceof IBeaconAdvertisingPacket) {
+            beacon = new IBeacon();
+        } else if (advertisingPacket instanceof EddystoneAdvertisingPacket) {
+            beacon = new Eddystone();
+        }
+        return beacon;
     }
 
     public boolean hasLocation() {
@@ -51,9 +65,6 @@ public abstract class Beacon {
     }
 
     public void addAdvertisingPacket(AdvertisingPacket advertisingPacket) {
-        if (advertisingPackets == null) {
-            advertisingPackets = new ArrayList<>();
-        }
         advertisingPackets.add(advertisingPacket);
         trimAdvertisingPackets();
     }
@@ -64,7 +75,7 @@ public abstract class Beacon {
         }
         List<AdvertisingPacket> removableAdvertisingPackets = new ArrayList<>();
         AdvertisingPacket latestAdvertisingPacket = getLatestAdvertisingPacket();
-        long minimumPacketTimestamp = System.currentTimeMillis() - AdvertisingPacket.MAXIMUM_PACKET_AGE;
+        long minimumPacketTimestamp = System.currentTimeMillis() - MAXIMUM_PACKET_AGE;
         for (AdvertisingPacket advertisingPacket : advertisingPackets) {
             if (advertisingPacket == latestAdvertisingPacket) {
                 // don't remove the latest packet
@@ -99,6 +110,14 @@ public abstract class Beacon {
         this.uuid = uuid;
     }
 
+    public String getMacAddress() {
+        return macAddress;
+    }
+
+    public void setMacAddress(String macAddress) {
+        this.macAddress = macAddress;
+    }
+
     public int getRssi() {
         return rssi;
     }
@@ -129,22 +148,6 @@ public abstract class Beacon {
 
     public void setTransmissionPower(int transmissionPower) {
         this.transmissionPower = transmissionPower;
-    }
-
-    public int getMajor() {
-        return major;
-    }
-
-    public void setMajor(int major) {
-        this.major = major;
-    }
-
-    public int getMinor() {
-        return minor;
-    }
-
-    public void setMinor(int minor) {
-        this.minor = minor;
     }
 
     public List<AdvertisingPacket> getAdvertisingPackets() {
