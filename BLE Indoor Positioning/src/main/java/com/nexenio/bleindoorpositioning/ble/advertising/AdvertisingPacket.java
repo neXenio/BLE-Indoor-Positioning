@@ -1,5 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.advertising;
 
+import java.util.Arrays;
+
 /**
  * Created by steppschuh on 15.11.17.
  */
@@ -23,6 +25,13 @@ public abstract class AdvertisingPacket {
             advertisingPacket = new EddystoneAdvertisingPacket(data);
         }
         return advertisingPacket;
+    }
+
+    public boolean dataEquals(AdvertisingPacket advertisingPacket) {
+        if (advertisingPacket == null) {
+            return false;
+        }
+        return Arrays.equals(data, advertisingPacket.data);
     }
 
     public byte[] getData() {

@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.scan.ScanResult;
@@ -31,6 +32,7 @@ public class BluetoothClient {
     private Context context;
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
+    private BeaconManager beaconManager = BeaconManager.getInstance();
 
     private RxBleClient rxBleClient;
     private Subscription scanningSubscription;
@@ -123,12 +125,26 @@ public class BluetoothClient {
         AdvertisingPacket advertisingPacket = AdvertisingPacket.from(data);
 
         if (advertisingPacket != null) {
-            if ("E2:38:2E:68:46:E9".equals(macAddress)) {
-                // TODO: remove
-                Log.v(TAG, scanResult.getBleDevice().getMacAddress() + " advertised: " + advertisingPacket);
-            }
             advertisingPacket.setRssi(scanResult.getRssi());
-            BeaconManager.getInstance().processAdvertisingPacket(macAddress, advertisingPacket);
+
+            Beacon beacon = beaconManager.getBeaconMap().get(macAddress);
+            AdvertisingPacket lastAdvertisingPacket = beacon == null ? null : beacon.getLatestAdvertisingPacket();
+
+            boolean isNewBeacon = beacon == null;
+            boolean isNewAdvertisingData = lastAdvertisingPacket == null || !advertisingPacket.dataEquals(lastAdvertisingPacket);
+
+            if (isNewBeacon) {
+                Log.i(TAG, macAddress + " data received for the first time: " + advertisingPacket);
+            } else if (isNewAdvertisingData) {
+                Log.d(TAG, macAddress + " data changed to: " + advertisingPacket);
+            } else {
+                if ("E2:38:2E:68:46:E9".equals(macAddress)) {
+                    // TODO: remove());
+                }
+                Log.v(TAG, macAddress + " data unchanged: " + advertisingPacket);
+            }
+
+            beaconManager.processAdvertisingPacket(macAddress, advertisingPacket);
         }
 
     }
