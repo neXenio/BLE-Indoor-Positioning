@@ -1,8 +1,10 @@
-package com.nexenio.bleindoorpositioningdemo.ui;
+package com.nexenio.bleindoorpositioningdemo.ui.beaconview;
 
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.CallSuper;
+import android.support.annotation.LayoutRes;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.view.ViewGroup;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
+import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
@@ -23,65 +26,48 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class BeaconMapFragment extends Fragment {
+public abstract class BeaconViewFragment extends Fragment {
 
-    private BeaconManager beaconManager = BeaconManager.getInstance();
-    private BeaconMap beaconMap;
-    private LocationListener deviceLocationListener;
+    protected BeaconManager beaconManager = BeaconManager.getInstance();
+    protected LocationListener deviceLocationListener;
+    protected BeaconUpdateListener beaconUpdateListener;
 
-    private CoordinatorLayout coordinatorLayout;
+    protected CoordinatorLayout coordinatorLayout;
 
-    public BeaconMapFragment() {
-        deviceLocationListener = new LocationListener() {
-            @Override
-            public void onLocationUpdated(LocationProvider locationProvider, Location location) {
-                // TODO: remove artificial noise
-                //location.setLatitude(location.getLatitude() + Math.random() * 0.0002);
-                //location.setLongitude(location.getLongitude() + Math.random() * 0.0002);
-
-                beaconMap.setDeviceLocation(location);
-                beaconMap.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
-                beaconMap.fitToCurrentLocations();
-            }
-        };
+    public BeaconViewFragment() {
+        deviceLocationListener = createDeviceLocationListener();
+        beaconUpdateListener = createBeaconUpdateListener();
     }
 
-    public static BeaconMapFragment newInstance() {
-        BeaconMapFragment fragment = new BeaconMapFragment();
-        Bundle args = new Bundle();
-        //args.putString(ARG_PARAM1, param1);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    protected abstract LocationListener createDeviceLocationListener();
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            //mParam1 = getArguments().getString(ARG_PARAM1);
-        }
-    }
+    protected abstract BeaconUpdateListener createBeaconUpdateListener();
 
+    @LayoutRes
+    protected abstract int getLayoutResourceId();
+
+    @CallSuper
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View inflatedView = inflater.inflate(R.layout.fragment_beacon_map, container, false);
+        View inflatedView = inflater.inflate(getLayoutResourceId(), container, false);
         coordinatorLayout = inflatedView.findViewById(R.id.coordinatorLayout);
-        beaconMap = inflatedView.findViewById(R.id.beaconMap);
-        //beaconMap.setBeacons(createTestBeacons());
-        beaconMap.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
         return inflatedView;
     }
 
+    @CallSuper
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         AndroidLocationProvider.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.requestLastKnownLocation();
+        BeaconManager.registerBeaconUpdateListener(beaconUpdateListener);
     }
 
+    @CallSuper
     @Override
     public void onDetach() {
         AndroidLocationProvider.unregisterLocationListener(deviceLocationListener);
+        BeaconManager.unregisterBeaconUpdateListener(beaconUpdateListener);
         super.onDetach();
     }
 

@@ -15,7 +15,8 @@ import android.view.View;
 
 import com.nexenio.bleindoorpositioningdemo.bluetooth.BluetoothClient;
 import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
-import com.nexenio.bleindoorpositioningdemo.ui.BeaconMapFragment;
+import com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart.BeaconChartFragment;
+import com.nexenio.bleindoorpositioningdemo.ui.beaconview.map.BeaconMapFragment;
 
 public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -33,7 +34,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         coordinatorLayout = findViewById(R.id.coordinatorLayout);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
-        bottomNavigationView.setSelectedItemId(R.id.navigation_map);
+        bottomNavigationView.setSelectedItemId(R.id.navigation_chart);
 
         // setup location
         AndroidLocationProvider.initialize(this);
@@ -47,13 +48,14 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         Fragment selectedFragment = null;
         switch (item.getItemId()) {
             case R.id.navigation_map: {
-                selectedFragment = BeaconMapFragment.newInstance();
+                selectedFragment = new BeaconMapFragment();
                 break;
             }
             case R.id.navigation_radar: {
                 break;
             }
             case R.id.navigation_chart: {
+                selectedFragment = new BeaconChartFragment();
                 break;
             }
         }

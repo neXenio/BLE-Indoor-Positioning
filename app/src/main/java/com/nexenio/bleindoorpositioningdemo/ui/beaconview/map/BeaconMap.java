@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioningdemo.ui;
+package com.nexenio.bleindoorpositioningdemo.ui.beaconview.map;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -19,6 +19,8 @@ import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 import com.nexenio.bleindoorpositioning.location.projection.EquirectangularProjection;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
+import com.nexenio.bleindoorpositioningdemo.ui.LocationAnimator;
+import com.nexenio.bleindoorpositioningdemo.ui.beaconview.BeaconView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
