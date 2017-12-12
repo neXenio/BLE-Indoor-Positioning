@@ -2,8 +2,8 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,7 +15,7 @@ public class BeaconManager {
 
     private static BeaconManager instance;
 
-    private Map<String, Beacon> beaconMap = new HashMap<>();
+    private Map<String, Beacon> beaconMap = new LinkedHashMap<>();
 
     private Set<BeaconUpdateListener> beaconUpdateListeners = new HashSet<>();
 
@@ -31,16 +31,17 @@ public class BeaconManager {
     }
 
     public void processAdvertisingPacket(String macAddress, AdvertisingPacket advertisingPacket) {
+        String key = getBeaconKey(macAddress, advertisingPacket);
         Beacon beacon;
-        if (beaconMap.containsKey(macAddress)) {
-            beacon = beaconMap.get(macAddress);
+        if (beaconMap.containsKey(key)) {
+            beacon = beaconMap.get(key);
         } else {
             beacon = Beacon.from(advertisingPacket);
             if (beacon == null) {
                 return;
             }
             beacon.setMacAddress(macAddress);
-            beaconMap.put(macAddress, beacon);
+            beaconMap.put(key, beacon);
         }
         beacon.addAdvertisingPacket(advertisingPacket);
         notifyBeaconUpdateListeners(beacon);
@@ -58,6 +59,10 @@ public class BeaconManager {
 
     public static boolean unregisterBeaconUpdateListener(BeaconUpdateListener beaconUpdateListener) {
         return getInstance().beaconUpdateListeners.remove(beaconUpdateListener);
+    }
+
+    public static String getBeaconKey(String macAddress, AdvertisingPacket advertisingPacket) {
+        return macAddress + "-" + advertisingPacket.getClass().getSimpleName();
     }
 
     /*

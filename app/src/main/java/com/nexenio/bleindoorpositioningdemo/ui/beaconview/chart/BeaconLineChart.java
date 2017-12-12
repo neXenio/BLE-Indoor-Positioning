@@ -3,8 +3,12 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.Shader;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
@@ -29,11 +33,13 @@ public class BeaconLineChart extends BeaconChart {
     protected ValueAnimator xAxisStepAnimator;
     protected ValueAnimator yAxisStepAnimator;
 
-    protected float axisMargin = pixelsPerDip * 32;
-    protected float axisWidth = pixelsPerDip * 2;
+    protected float axisMargin;
+    protected float axisWidth;
 
     protected long xAxisRange;
     protected float yAxisRange;
+
+    protected Shader fadeOutShader;
 
     public BeaconLineChart(Context context) {
         super(context);
@@ -54,10 +60,18 @@ public class BeaconLineChart extends BeaconChart {
     @Override
     public void initialize() {
         super.initialize();
+
+        ColorUtil.initialize(getContext());
+
         xAxisMaximumAnimator = startValueAnimator(xAxisMaximumAnimator, 0);
         xAxisMinimumAnimator = startValueAnimator(xAxisMinimumAnimator, -TimeUnit.SECONDS.toMillis(30));
         yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 0);
         yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, -100);
+
+        axisMargin = pixelsPerDip * 32;
+        axisWidth = pixelsPerDip * 2;
+
+        fadeOutShader = createLineShader(primaryStrokePaint.getColor());
     }
 
     protected ValueAnimator startValueAnimator(ValueAnimator valueAnimator, float targetValue) {
@@ -86,7 +100,6 @@ public class BeaconLineChart extends BeaconChart {
     }
 
     protected void drawAxis(Canvas canvas) {
-
         Paint axisPaint = new Paint(textPaint);
         axisPaint.setAlpha(50);
 
@@ -94,6 +107,7 @@ public class BeaconLineChart extends BeaconChart {
         xAxisRange = (long) ((float) xAxisMaximumAnimator.getAnimatedValue() - (float) xAxisMinimumAnimator.getAnimatedValue());
         PointF xAxisStartPoint = new PointF(axisMargin, canvasHeight - axisMargin - axisWidth);
         PointF xAxisEndPoint = new PointF(canvasWidth - axisMargin, canvasHeight - axisMargin);
+
 
         canvas.drawRect(
                 xAxisStartPoint.x,
@@ -124,35 +138,53 @@ public class BeaconLineChart extends BeaconChart {
     }
 
     @Override
+    protected void drawBeacons(Canvas canvas) {
+        super.drawBeacons(canvas);
+    }
+
+    @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
-        long minimumTimestamp = System.currentTimeMillis() - xAxisRange;
+        int beaconIndex = beacons.indexOf(beacon);
+        long minimumTimestamp = System.currentTimeMillis() - (long) (xAxisRange * 1.25f);
+
+        @ColorInt
+        int lineColor = ColorUtil.getBeaconColor(beaconIndex);
 
         Paint linePaint = new Paint(primaryFillPaint);
+        linePaint.setShader(createLineShader(lineColor));
         linePaint.setStrokeWidth(pixelsPerDip);
+        linePaint.setAlpha(128);
 
         PointF lastPoint = null;
-
+        AdvertisingPacket lastAdvertisingPacket = null;
         for (AdvertisingPacket advertisingPacket : beacon.getAdvertisingPackets()) {
             if (advertisingPacket.getTimestamp() < minimumTimestamp) {
                 continue;
             }
-            PointF point = getPointFromAdvertisingPacket(advertisingPacket);
 
-            if (lastPoint != null) {
-                canvas.drawLine(
-                        lastPoint.x,
-                        lastPoint.y,
-                        point.x,
-                        point.y,
-                        linePaint
-                );
+            PointF point = getPointFromAdvertisingPacket(advertisingPacket);
+            canvas.drawCircle(point.x, point.y, pixelsPerDip * 2, linePaint);
+
+            if (lastPoint != null && lastAdvertisingPacket != null) {
+                if (advertisingPacket.getTimestamp() < lastAdvertisingPacket.getTimestamp() + 5000) {
+                    canvas.drawLine(
+                            lastPoint.x,
+                            lastPoint.y,
+                            point.x,
+                            point.y,
+                            linePaint
+                    );
+                }
             }
 
             lastPoint = point;
+            lastAdvertisingPacket = advertisingPacket;
+            beaconIndex++;
         }
 
         if (lastPoint != null) {
-            canvas.drawCircle(lastPoint.x, lastPoint.y, pixelsPerDip * 4, primaryFillPaint);
+            linePaint.setAlpha(255);
+            canvas.drawCircle(lastPoint.x, lastPoint.y, pixelsPerDip * 4, linePaint);
         }
     }
 
@@ -178,6 +210,10 @@ public class BeaconLineChart extends BeaconChart {
     @Override
     protected PointF getPointFromLocation(Location location) {
         return null;
+    }
+
+    protected Shader createLineShader(@ColorInt int color) {
+        return new LinearGradient(axisMargin * 1.5f, 0, axisMargin * 4, 0, Color.TRANSPARENT, color, Shader.TileMode.CLAMP);
     }
 
 }

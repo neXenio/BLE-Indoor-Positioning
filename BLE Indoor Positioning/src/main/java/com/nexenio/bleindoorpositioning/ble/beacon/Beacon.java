@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class Beacon {
 
-    public static final long MAXIMUM_PACKET_AGE = TimeUnit.SECONDS.toMillis(30);
+    public static final long MAXIMUM_PACKET_AGE = TimeUnit.SECONDS.toMillis(60);
 
     protected UUID uuid;
     protected String macAddress;
