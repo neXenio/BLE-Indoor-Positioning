@@ -3,12 +3,14 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
+import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -16,6 +18,7 @@ import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.BeaconViewFragment;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class BeaconChartFragment extends BeaconViewFragment {
 
@@ -43,8 +46,14 @@ public class BeaconChartFragment extends BeaconViewFragment {
     protected BeaconUpdateListener createBeaconUpdateListener() {
         return new BeaconUpdateListener() {
             @Override
-            public void onBeaconUpdated(Beacon beacon) {
-                beaconChart.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
+            public void onBeaconUpdated(Beacon updatedBeacon) {
+                List<Beacon> beacons = new ArrayList<>();
+                for (Beacon beacon : beaconManager.getBeaconMap().values()) {
+                    if (shouldRenderBeacon(beacon)) {
+                        beacons.add(beacon);
+                    }
+                }
+                beaconChart.setBeacons(beacons);
             }
         };
     }
@@ -54,9 +63,15 @@ public class BeaconChartFragment extends BeaconViewFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View inflatedView = super.onCreateView(inflater, container, savedInstanceState);
         beaconChart = inflatedView.findViewById(R.id.beaconChart);
-        //beaconChart.setBeacons(createTestBeacons());
         beaconChart.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
         return inflatedView;
+    }
+
+    protected boolean shouldRenderBeacon(@NonNull Beacon beacon) {
+        if (!(beacon instanceof IBeacon)) {
+            return false;
+        }
+        return true;
     }
 
 }

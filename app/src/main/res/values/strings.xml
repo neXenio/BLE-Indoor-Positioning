@@ -5,6 +5,9 @@
     <string name="title_radar">Radar</string>
     <string name="title_chart">Chart</string>
 
+    <string name="axis_label_time">Time in seconds</string>
+    <string name="axis_label_rssi">RSSI in dBm</string>
+
     <string name="error_location_disabled">Location services disabled</string>
     <string name="error_bluetooth_disabled">Bluetooth disabled</string>
     <string name="action_enable">Enable</string>

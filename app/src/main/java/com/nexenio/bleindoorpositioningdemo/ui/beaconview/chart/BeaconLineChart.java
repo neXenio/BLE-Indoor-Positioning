@@ -15,6 +15,7 @@ import android.util.AttributeSet;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioningdemo.R;
 
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +33,9 @@ public class BeaconLineChart extends BeaconChart {
 
     protected ValueAnimator xAxisStepAnimator;
     protected ValueAnimator yAxisStepAnimator;
+
+    protected String xAxisLabel;
+    protected String yAxisLabel;
 
     protected float axisMargin;
     protected float axisWidth;
@@ -63,12 +67,15 @@ public class BeaconLineChart extends BeaconChart {
 
         ColorUtil.initialize(getContext());
 
+        xAxisLabel = getContext().getString(R.string.axis_label_time);
+        yAxisLabel = getContext().getString(R.string.axis_label_rssi);
+
         xAxisMaximumAnimator = startValueAnimator(xAxisMaximumAnimator, 0);
         xAxisMinimumAnimator = startValueAnimator(xAxisMinimumAnimator, -TimeUnit.SECONDS.toMillis(30));
         yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 0);
         yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, -100);
 
-        axisMargin = pixelsPerDip * 32;
+        axisMargin = pixelsPerDip * 40;
         axisWidth = pixelsPerDip * 2;
 
         fadeOutShader = createLineShader(primaryStrokePaint.getColor());
@@ -89,6 +96,8 @@ public class BeaconLineChart extends BeaconChart {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        xAxisRange = (long) ((float) xAxisMaximumAnimator.getAnimatedValue() - (float) xAxisMinimumAnimator.getAnimatedValue());
+        yAxisRange = (float) yAxisMaximumAnimator.getAnimatedValue() - (float) yAxisMinimumAnimator.getAnimatedValue();
         super.onDraw(canvas);
         invalidate();
     }
@@ -102,34 +111,103 @@ public class BeaconLineChart extends BeaconChart {
     protected void drawAxis(Canvas canvas) {
         Paint axisPaint = new Paint(textPaint);
         axisPaint.setAlpha(50);
+        axisPaint.setStrokeWidth(axisWidth);
 
         // x axis
-        xAxisRange = (long) ((float) xAxisMaximumAnimator.getAnimatedValue() - (float) xAxisMinimumAnimator.getAnimatedValue());
-        PointF xAxisStartPoint = new PointF(axisMargin, canvasHeight - axisMargin - axisWidth);
-        PointF xAxisEndPoint = new PointF(canvasWidth - axisMargin, canvasHeight - axisMargin);
-
-
-        canvas.drawRect(
-                xAxisStartPoint.x,
-                xAxisStartPoint.y,
-                xAxisEndPoint.x,
-                xAxisEndPoint.y,
-                axisPaint
-        );
+        PointF xAxisStartPoint = new PointF(axisMargin, canvasHeight - axisMargin);
+        PointF xAxisEndPoint = new PointF(canvasWidth - axisMargin, xAxisStartPoint.y);
+        canvas.drawLine(xAxisStartPoint.x, xAxisStartPoint.y, xAxisEndPoint.x, xAxisEndPoint.y, axisPaint);
 
         // y axis
-        yAxisRange = (float) yAxisMaximumAnimator.getAnimatedValue() - (float) yAxisMinimumAnimator.getAnimatedValue();
         PointF yAxisStartPoint = new PointF(xAxisStartPoint.x, axisMargin);
-        PointF yAxisEndPoint = new PointF(xAxisStartPoint.x + axisWidth, xAxisStartPoint.y);
+        PointF yAxisEndPoint = new PointF(xAxisStartPoint.x, xAxisStartPoint.y);
+        canvas.drawLine(yAxisStartPoint.x, yAxisStartPoint.y, yAxisEndPoint.x, yAxisEndPoint.y, axisPaint);
 
-        canvas.drawRect(
-                yAxisStartPoint.x,
-                yAxisStartPoint.y,
-                yAxisEndPoint.x,
-                yAxisEndPoint.y,
-                axisPaint
+        // labels
+        Paint axisLabelPaint = new Paint(textPaint);
+        axisLabelPaint.setAlpha(50);
+        axisLabelPaint.setTextSize(pixelsPerDip * 12);
+
+        // x axis label
+        PointF xAxisLabelCenter = new PointF(
+                xAxisStartPoint.x + ((xAxisEndPoint.x - xAxisStartPoint.x) / 2) - (axisLabelPaint.measureText(xAxisLabel) / 2),
+                xAxisStartPoint.y - (pixelsPerDip * 8)
         );
+        canvas.drawText(xAxisLabel, xAxisLabelCenter.x, xAxisLabelCenter.y, axisLabelPaint);
 
+        // y axis label
+        PointF yAxisLabelCenter = new PointF(
+                yAxisStartPoint.x + (pixelsPerDip * 16),
+                yAxisStartPoint.y + ((yAxisEndPoint.y - yAxisStartPoint.y) / 2) + (axisLabelPaint.measureText(yAxisLabel) / 2)
+        );
+        canvas.save();
+        canvas.rotate(-90f, yAxisLabelCenter.x, yAxisLabelCenter.y);
+        canvas.drawText(yAxisLabel, yAxisLabelCenter.x, yAxisLabelCenter.y, axisLabelPaint);
+        canvas.restore();
+
+        // reference values
+        int referenceLineCount;
+        float referenceValue;
+        String referenceText;
+        float referenceTextWidth;
+        float axisReferencePixelDelta;
+        float axisReferenceValueDelta;
+        PointF referenceStartPoint = new PointF(xAxisStartPoint.x, xAxisStartPoint.y);
+        PointF referenceEndPoint = new PointF(referenceStartPoint.x, referenceStartPoint.y + (pixelsPerDip * 4));
+
+        // x axis reference values
+        referenceLineCount = 6;
+        axisReferencePixelDelta = (canvasWidth - (2 * axisMargin)) / (float) referenceLineCount;
+        axisReferenceValueDelta = xAxisRange / (float) referenceLineCount;
+        for (int referenceIndex = 0; referenceIndex <= referenceLineCount; referenceIndex++) {
+            referenceStartPoint.x = xAxisStartPoint.x + (referenceIndex * axisReferencePixelDelta);
+            referenceEndPoint.x = referenceStartPoint.x;
+            canvas.drawLine(
+                    referenceStartPoint.x,
+                    referenceStartPoint.y,
+                    referenceEndPoint.x,
+                    referenceEndPoint.y,
+                    axisPaint
+            );
+
+            referenceValue = (float) xAxisMinimumAnimator.getAnimatedValue() + (referenceIndex * axisReferenceValueDelta);
+            referenceText = String.valueOf(TimeUnit.MILLISECONDS.toSeconds((long) referenceValue));
+            referenceTextWidth = axisLabelPaint.measureText(referenceText);
+            canvas.drawText(
+                    referenceText,
+                    referenceStartPoint.x - (referenceTextWidth / 2),
+                    referenceStartPoint.y + (pixelsPerDip * 18),
+                    axisLabelPaint
+            );
+        }
+
+        // y axis reference values
+        referenceLineCount = 5;
+        referenceStartPoint.x = yAxisStartPoint.x;
+        referenceEndPoint.x = referenceStartPoint.x - (pixelsPerDip * 4);
+        axisReferencePixelDelta = (canvasHeight - (2 * axisMargin)) / (float) referenceLineCount;
+        axisReferenceValueDelta = yAxisRange / (float) referenceLineCount;
+        for (int referenceIndex = 0; referenceIndex <= referenceLineCount; referenceIndex++) {
+            referenceStartPoint.y = xAxisStartPoint.y - (referenceIndex * axisReferencePixelDelta);
+            referenceEndPoint.y = referenceStartPoint.y;
+            canvas.drawLine(
+                    referenceStartPoint.x,
+                    referenceStartPoint.y,
+                    referenceEndPoint.x,
+                    referenceEndPoint.y,
+                    axisPaint
+            );
+
+            referenceValue = (float) yAxisMinimumAnimator.getAnimatedValue() + (referenceIndex * axisReferenceValueDelta);
+            referenceText = String.valueOf(Math.round(referenceValue));
+            referenceTextWidth = axisLabelPaint.measureText(referenceText);
+            canvas.drawText(
+                    referenceText,
+                    referenceStartPoint.x - referenceTextWidth - (pixelsPerDip * 10),
+                    referenceStartPoint.y + (pixelsPerDip * 4),
+                    axisLabelPaint
+            );
+        }
     }
 
     @Override
@@ -159,6 +237,9 @@ public class BeaconLineChart extends BeaconChart {
         AdvertisingPacket lastAdvertisingPacket = null;
         for (AdvertisingPacket advertisingPacket : beacon.getAdvertisingPackets()) {
             if (advertisingPacket.getTimestamp() < minimumTimestamp) {
+                continue;
+            }
+            if (advertisingPacket.getRssi() < (float) yAxisMinimumAnimator.getAnimatedValue()) {
                 continue;
             }
 
