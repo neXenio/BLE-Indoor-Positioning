@@ -1,7 +1,6 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
-import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.location.Location;
@@ -9,7 +8,6 @@ import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculat
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;

@@ -3,6 +3,7 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.map;
 
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,7 @@ public class BeaconMapFragment extends BeaconViewFragment {
             @Override
             public void onBeaconUpdated(Beacon beacon) {
                 beaconMap.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
+                Log.d(this.getClass().getSimpleName(), beacon.getLatestAdvertisingPacket().toString() + " distance: " + String.format("%.2f", beacon.getDistance() / 100));
             }
         };
     }

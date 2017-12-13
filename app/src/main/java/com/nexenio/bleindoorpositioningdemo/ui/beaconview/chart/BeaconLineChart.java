@@ -283,10 +283,7 @@ public class BeaconLineChart extends BeaconChart {
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
         currentBeaconIndex = beacons.indexOf(beacon);
 
-        @ColorInt
-        int beaconColor = getBeaconColor(beacon, coloringMode, currentBeaconIndex);
-
-        linePaint.setShader(createLineShader(beaconColor));
+        linePaint.setShader(createLineShader(getBeaconColor(beacon, coloringMode, currentBeaconIndex)));
         linePaint.setAlpha(128);
 
         lastLinePoint = null;

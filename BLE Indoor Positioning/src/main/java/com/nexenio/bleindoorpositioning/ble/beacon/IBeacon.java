@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public class IBeacon extends Beacon {
 
-    public static final int CALIBRATION_DISTANCE_DEFAULT = 100;
+    public static final int CALIBRATION_DISTANCE_DEFAULT = 1;
 
     private UUID proximityUuid;
     private int major;
@@ -38,6 +38,7 @@ public class IBeacon extends Beacon {
             proximityUuid = AdvertisingPacketUtil.toUuid(iBeaconAdvertisingPacket.getProximityUuidBytes());
             major = new BigInteger(iBeaconAdvertisingPacket.getMajorBytes()).intValue();
             minor = new BigInteger(iBeaconAdvertisingPacket.getMinorBytes()).intValue();
+            calibratedRssi = iBeaconAdvertisingPacket.getMeasuredPowerByte();
         }
     }
 
