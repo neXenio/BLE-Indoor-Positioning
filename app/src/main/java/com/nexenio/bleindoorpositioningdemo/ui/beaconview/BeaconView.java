@@ -6,12 +6,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.support.annotation.CallSuper;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -168,6 +170,39 @@ public abstract class BeaconView extends View {
         locationAnimator.setLocationListener(locationListener);
         locationAnimator.start();
         return locationAnimator;
+    }
+
+    @ColorInt
+    public static int getBeaconColor(Beacon beacon, @ColorUtil.ColoringMode int coloringMode, int beaconIndex) {
+        int colorIndex = 0;
+        switch (coloringMode) {
+            case ColorUtil.COLORING_MODE_INSTANCES: {
+                if (beacon instanceof IBeacon) {
+                    colorIndex = ((IBeacon) beacon).getMinor();
+                } else {
+                    colorIndex = beaconIndex;
+                }
+                break;
+            }
+            case ColorUtil.COLORING_MODE_TYPES: {
+                if (beacon instanceof IBeacon) {
+                    colorIndex = 0;
+                } else {
+                    colorIndex = 1;
+                }
+                break;
+            }
+            case ColorUtil.COLORING_MODE_PROPERTIES: {
+                if (beacon instanceof IBeacon) {
+                    colorIndex = ((IBeacon) beacon).getMajor();
+                } else {
+                    // TODO: use Eddystone UID
+                    colorIndex = beaconIndex;
+                }
+                break;
+            }
+        }
+        return ColorUtil.getBeaconColor(colorIndex);
     }
 
     /*

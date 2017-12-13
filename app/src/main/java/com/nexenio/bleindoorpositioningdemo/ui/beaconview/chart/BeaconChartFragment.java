@@ -4,8 +4,8 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -17,6 +17,7 @@ import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.BeaconViewFragment;
+import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +67,12 @@ public class BeaconChartFragment extends BeaconViewFragment {
         beaconChart = inflatedView.findViewById(R.id.beaconChart);
         beaconChart.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
         return inflatedView;
+    }
+
+    @Override
+    protected void onColoringModeSelected(@ColorUtil.ColoringMode int coloringMode, MenuItem menuItem) {
+        super.onColoringModeSelected(coloringMode, menuItem);
+        beaconChart.setColoringMode(coloringMode);
     }
 
     protected boolean shouldRenderBeacon(@NonNull Beacon beacon) {

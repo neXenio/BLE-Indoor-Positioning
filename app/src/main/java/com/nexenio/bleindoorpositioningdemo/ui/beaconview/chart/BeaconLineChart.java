@@ -26,14 +26,24 @@ import java.util.concurrent.TimeUnit;
 
 public class BeaconLineChart extends BeaconChart {
 
+    protected Paint axisPaint;
+    protected Paint axisLabelPaint;
+    protected Paint gridPaint;
+
+    protected PointF xAxisStartPoint;
+    protected PointF xAxisEndPoint;
+
+    protected PointF yAxisStartPoint;
+    protected PointF yAxisEndPoint;
+
+    protected PointF xAxisLabelCenter;
+    protected PointF yAxisLabelCenter;
+
     protected ValueAnimator xAxisMinimumAnimator;
     protected ValueAnimator xAxisMaximumAnimator;
 
     protected ValueAnimator yAxisMinimumAnimator;
     protected ValueAnimator yAxisMaximumAnimator;
-
-    protected ValueAnimator xAxisStepAnimator;
-    protected ValueAnimator yAxisStepAnimator;
 
     protected String xAxisLabel;
     protected String yAxisLabel;
@@ -44,7 +54,24 @@ public class BeaconLineChart extends BeaconChart {
     protected long xAxisRange;
     protected float yAxisRange;
 
+    protected PointF gridLineStartPoint;
+    protected PointF gridLineEndPoint;
+
+    protected int gridLineCount;
+    protected float gridLineValue;
+    protected String gridLineText;
+    protected float gridLineTextWidth;
+    protected float gridLinePixelDelta;
+    protected float gridLineValueDelta;
+
     protected Shader fadeOutShader;
+
+    protected long minimumAdvertisingTimestamp;
+    protected int currentBeaconIndex;
+    protected Paint linePaint;
+    protected PointF currentLinePoint;
+    protected PointF lastLinePoint;
+    protected AdvertisingPacket lastAdvertisingPacket;
 
     public BeaconLineChart(Context context) {
         super(context);
@@ -79,6 +106,21 @@ public class BeaconLineChart extends BeaconChart {
         axisMargin = pixelsPerDip * 40;
         axisWidth = pixelsPerDip * 2;
 
+        axisPaint = new Paint(textPaint);
+        axisPaint.setAlpha(50);
+        axisPaint.setStrokeWidth(axisWidth);
+
+        axisLabelPaint = new Paint(textPaint);
+        axisLabelPaint.setAlpha(50);
+        axisLabelPaint.setTextSize(pixelsPerDip * 12);
+
+        gridPaint = new Paint(axisPaint);
+        gridPaint.setStrokeWidth(pixelsPerDip);
+        gridPaint.setAlpha(15);
+
+        linePaint = new Paint(primaryFillPaint);
+        linePaint.setStrokeWidth(pixelsPerDip);
+
         fadeOutShader = createLineShader(primaryStrokePaint.getColor());
     }
 
@@ -96,6 +138,30 @@ public class BeaconLineChart extends BeaconChart {
     }
 
     @Override
+    protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
+        super.onSizeChanged(width, height, oldWidth, oldHeight);
+
+        xAxisStartPoint = new PointF(axisMargin, canvasHeight - axisMargin);
+        xAxisEndPoint = new PointF(canvasWidth - axisMargin, xAxisStartPoint.y);
+
+        yAxisStartPoint = new PointF(xAxisStartPoint.x, axisMargin);
+        yAxisEndPoint = new PointF(xAxisStartPoint.x, xAxisStartPoint.y);
+
+        xAxisLabelCenter = new PointF(
+                xAxisStartPoint.x + ((xAxisEndPoint.x - xAxisStartPoint.x) / 2) - (axisLabelPaint.measureText(xAxisLabel) / 2),
+                xAxisStartPoint.y - (pixelsPerDip * 8)
+        );
+
+        yAxisLabelCenter = new PointF(
+                yAxisStartPoint.x + (pixelsPerDip * 16),
+                yAxisStartPoint.y + ((yAxisEndPoint.y - yAxisStartPoint.y) / 2) + (axisLabelPaint.measureText(yAxisLabel) / 2)
+        );
+
+        gridLineStartPoint = new PointF(xAxisStartPoint.x, xAxisStartPoint.y);
+        gridLineEndPoint = new PointF(gridLineStartPoint.x, gridLineStartPoint.y + (pixelsPerDip * 4));
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         xAxisRange = (long) ((float) xAxisMaximumAnimator.getAnimatedValue() - (float) xAxisMinimumAnimator.getAnimatedValue());
         yAxisRange = (float) yAxisMaximumAnimator.getAnimatedValue() - (float) yAxisMinimumAnimator.getAnimatedValue();
@@ -110,124 +176,93 @@ public class BeaconLineChart extends BeaconChart {
     }
 
     protected void drawAxis(Canvas canvas) {
-        Paint axisPaint = new Paint(textPaint);
-        axisPaint.setAlpha(50);
-        axisPaint.setStrokeWidth(axisWidth);
-
-        Paint gridPaint = new Paint(axisPaint);
-        gridPaint.setStrokeWidth(pixelsPerDip);
-        gridPaint.setAlpha(15);
-
         // x axis
-        PointF xAxisStartPoint = new PointF(axisMargin, canvasHeight - axisMargin);
-        PointF xAxisEndPoint = new PointF(canvasWidth - axisMargin, xAxisStartPoint.y);
         canvas.drawLine(xAxisStartPoint.x, xAxisStartPoint.y, xAxisEndPoint.x, xAxisEndPoint.y, axisPaint);
 
         // y axis
-        PointF yAxisStartPoint = new PointF(xAxisStartPoint.x, axisMargin);
-        PointF yAxisEndPoint = new PointF(xAxisStartPoint.x, xAxisStartPoint.y);
         canvas.drawLine(yAxisStartPoint.x, yAxisStartPoint.y, yAxisEndPoint.x, yAxisEndPoint.y, axisPaint);
 
-        // labels
-        Paint axisLabelPaint = new Paint(textPaint);
-        axisLabelPaint.setAlpha(50);
-        axisLabelPaint.setTextSize(pixelsPerDip * 12);
-
         // x axis label
-        PointF xAxisLabelCenter = new PointF(
-                xAxisStartPoint.x + ((xAxisEndPoint.x - xAxisStartPoint.x) / 2) - (axisLabelPaint.measureText(xAxisLabel) / 2),
-                xAxisStartPoint.y - (pixelsPerDip * 8)
-        );
         canvas.drawText(xAxisLabel, xAxisLabelCenter.x, xAxisLabelCenter.y, axisLabelPaint);
 
         // y axis label
-        PointF yAxisLabelCenter = new PointF(
-                yAxisStartPoint.x + (pixelsPerDip * 16),
-                yAxisStartPoint.y + ((yAxisEndPoint.y - yAxisStartPoint.y) / 2) + (axisLabelPaint.measureText(yAxisLabel) / 2)
-        );
         canvas.save();
         canvas.rotate(-90f, yAxisLabelCenter.x, yAxisLabelCenter.y);
         canvas.drawText(yAxisLabel, yAxisLabelCenter.x, yAxisLabelCenter.y, axisLabelPaint);
         canvas.restore();
 
-        // reference values
-        int referenceLineCount;
-        float referenceValue;
-        String referenceText;
-        float referenceTextWidth;
-        float axisReferencePixelDelta;
-        float axisReferenceValueDelta;
-        PointF referenceStartPoint = new PointF(xAxisStartPoint.x, xAxisStartPoint.y);
-        PointF referenceEndPoint = new PointF(referenceStartPoint.x, referenceStartPoint.y + (pixelsPerDip * 4));
-
-        // x axis reference values
-        referenceLineCount = 6;
-        axisReferencePixelDelta = (canvasWidth - (2 * axisMargin)) / (float) referenceLineCount;
-        axisReferenceValueDelta = xAxisRange / (float) referenceLineCount;
-        for (int referenceIndex = 0; referenceIndex <= referenceLineCount; referenceIndex++) {
-            referenceStartPoint.x = xAxisStartPoint.x + (referenceIndex * axisReferencePixelDelta);
-            referenceEndPoint.x = referenceStartPoint.x;
+        // x axis grid values
+        gridLineCount = 6;
+        gridLineStartPoint.x = xAxisStartPoint.x;
+        gridLineStartPoint.y = xAxisStartPoint.y;
+        gridLineEndPoint.x = gridLineStartPoint.x;
+        gridLineEndPoint.y = gridLineStartPoint.y + (pixelsPerDip * 4);
+        gridLinePixelDelta = (canvasWidth - (2 * axisMargin)) / (float) gridLineCount;
+        gridLineValueDelta = xAxisRange / (float) gridLineCount;
+        for (int referenceIndex = 0; referenceIndex <= gridLineCount; referenceIndex++) {
+            gridLineStartPoint.x = xAxisStartPoint.x + (referenceIndex * gridLinePixelDelta);
+            gridLineEndPoint.x = gridLineStartPoint.x;
 
             canvas.drawLine(
-                    referenceStartPoint.x,
-                    referenceStartPoint.y,
-                    referenceEndPoint.x,
-                    referenceEndPoint.y,
+                    gridLineStartPoint.x,
+                    gridLineStartPoint.y,
+                    gridLineEndPoint.x,
+                    gridLineEndPoint.y,
                     axisPaint
             );
 
             canvas.drawLine(
-                    referenceStartPoint.x,
+                    gridLineStartPoint.x,
                     yAxisStartPoint.y,
-                    referenceStartPoint.x,
+                    gridLineStartPoint.x,
                     yAxisEndPoint.y,
                     gridPaint
             );
 
-            referenceValue = (float) xAxisMinimumAnimator.getAnimatedValue() + (referenceIndex * axisReferenceValueDelta);
-            referenceText = String.valueOf(TimeUnit.MILLISECONDS.toSeconds((long) referenceValue));
-            referenceTextWidth = axisLabelPaint.measureText(referenceText);
+            gridLineValue = (float) xAxisMinimumAnimator.getAnimatedValue() + (referenceIndex * gridLineValueDelta);
+            gridLineText = String.valueOf(TimeUnit.MILLISECONDS.toSeconds((long) gridLineValue));
+            gridLineTextWidth = axisLabelPaint.measureText(gridLineText);
             canvas.drawText(
-                    referenceText,
-                    referenceStartPoint.x - (referenceTextWidth / 2),
-                    referenceStartPoint.y + (pixelsPerDip * 18),
+                    gridLineText,
+                    gridLineStartPoint.x - (gridLineTextWidth / 2),
+                    gridLineStartPoint.y + (pixelsPerDip * 18),
                     axisLabelPaint
             );
         }
 
-        // y axis reference values
-        referenceLineCount = 5;
-        referenceStartPoint.x = yAxisStartPoint.x;
-        referenceEndPoint.x = referenceStartPoint.x - (pixelsPerDip * 4);
-        axisReferencePixelDelta = (canvasHeight - (2 * axisMargin)) / (float) referenceLineCount;
-        axisReferenceValueDelta = yAxisRange / (float) referenceLineCount;
-        for (int referenceIndex = 0; referenceIndex <= referenceLineCount; referenceIndex++) {
-            referenceStartPoint.y = xAxisStartPoint.y - (referenceIndex * axisReferencePixelDelta);
-            referenceEndPoint.y = referenceStartPoint.y;
+        // y axis grid values
+        gridLineCount = 5;
+        gridLineStartPoint.x = yAxisStartPoint.x;
+        gridLineEndPoint.x = gridLineStartPoint.x - (pixelsPerDip * 4);
+        gridLinePixelDelta = (canvasHeight - (2 * axisMargin)) / (float) gridLineCount;
+        gridLineValueDelta = yAxisRange / (float) gridLineCount;
+        for (int referenceIndex = 0; referenceIndex <= gridLineCount; referenceIndex++) {
+            gridLineStartPoint.y = xAxisStartPoint.y - (referenceIndex * gridLinePixelDelta);
+            gridLineEndPoint.y = gridLineStartPoint.y;
 
             canvas.drawLine(
-                    referenceStartPoint.x,
-                    referenceStartPoint.y,
-                    referenceEndPoint.x,
-                    referenceEndPoint.y,
+                    gridLineStartPoint.x,
+                    gridLineStartPoint.y,
+                    gridLineEndPoint.x,
+                    gridLineEndPoint.y,
                     axisPaint
             );
 
             canvas.drawLine(
                     xAxisStartPoint.x,
-                    referenceStartPoint.y,
+                    gridLineStartPoint.y,
                     xAxisEndPoint.x,
-                    referenceStartPoint.y,
+                    gridLineStartPoint.y,
                     gridPaint
             );
 
-            referenceValue = (float) yAxisMinimumAnimator.getAnimatedValue() + (referenceIndex * axisReferenceValueDelta);
-            referenceText = String.valueOf(Math.round(referenceValue));
-            referenceTextWidth = axisLabelPaint.measureText(referenceText);
+            gridLineValue = (float) yAxisMinimumAnimator.getAnimatedValue() + (referenceIndex * gridLineValueDelta);
+            gridLineText = String.valueOf(Math.round(gridLineValue));
+            gridLineTextWidth = axisLabelPaint.measureText(gridLineText);
             canvas.drawText(
-                    referenceText,
-                    referenceStartPoint.x - referenceTextWidth - (pixelsPerDip * 10),
-                    referenceStartPoint.y + (pixelsPerDip * 4),
+                    gridLineText,
+                    gridLineStartPoint.x - gridLineTextWidth - (pixelsPerDip * 10),
+                    gridLineStartPoint.y + (pixelsPerDip * 4),
                     axisLabelPaint
             );
         }
@@ -240,76 +275,73 @@ public class BeaconLineChart extends BeaconChart {
 
     @Override
     protected void drawBeacons(Canvas canvas) {
+        minimumAdvertisingTimestamp = System.currentTimeMillis() - (long) (xAxisRange * 1.25f);
         super.drawBeacons(canvas);
     }
 
     @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
-        int beaconIndex = beacons.indexOf(beacon);
-        long minimumTimestamp = System.currentTimeMillis() - (long) (xAxisRange * 1.25f);
+        currentBeaconIndex = beacons.indexOf(beacon);
 
         @ColorInt
-        int lineColor = ColorUtil.getBeaconColor(beaconIndex);
+        int beaconColor = getBeaconColor(beacon, coloringMode, currentBeaconIndex);
 
-        Paint linePaint = new Paint(primaryFillPaint);
-        linePaint.setShader(createLineShader(lineColor));
-        linePaint.setStrokeWidth(pixelsPerDip);
+        linePaint.setShader(createLineShader(beaconColor));
         linePaint.setAlpha(128);
 
-        PointF currentPoint;
-        PointF lastPoint = null;
-        AdvertisingPacket lastAdvertisingPacket = null;
+        lastLinePoint = null;
+        lastAdvertisingPacket = null;
         for (AdvertisingPacket advertisingPacket : beacon.getAdvertisingPackets()) {
-            if (advertisingPacket.getTimestamp() < minimumTimestamp) {
+            if (advertisingPacket.getTimestamp() < minimumAdvertisingTimestamp) {
                 continue;
             }
             if (advertisingPacket.getRssi() < (float) yAxisMinimumAnimator.getAnimatedValue()) {
                 continue;
             }
 
-            currentPoint = getPointFromAdvertisingPacket(advertisingPacket);
-            canvas.drawCircle(currentPoint.x, currentPoint.y, pixelsPerDip * 1.5f, linePaint);
+            currentLinePoint = getPointFromAdvertisingPacket(advertisingPacket, currentLinePoint);
+            canvas.drawCircle(currentLinePoint.x, currentLinePoint.y, pixelsPerDip * 1.5f, linePaint);
 
-            if (lastPoint != null && lastAdvertisingPacket != null) {
+            if (lastLinePoint != null && lastAdvertisingPacket != null) {
                 if (advertisingPacket.getTimestamp() < lastAdvertisingPacket.getTimestamp() + 5000) {
                     canvas.drawLine(
-                            lastPoint.x,
-                            lastPoint.y,
-                            currentPoint.x,
-                            currentPoint.y,
+                            lastLinePoint.x,
+                            lastLinePoint.y,
+                            currentLinePoint.x,
+                            currentLinePoint.y,
                             linePaint
                     );
                 }
+            } else {
+                lastLinePoint = new PointF();
             }
 
-            lastPoint = currentPoint;
+            lastLinePoint.x = currentLinePoint.x;
+            lastLinePoint.y = currentLinePoint.y;
             lastAdvertisingPacket = advertisingPacket;
-            beaconIndex++;
+            currentBeaconIndex++;
         }
 
-        if (lastPoint != null) {
+        if (lastLinePoint != null) {
             linePaint.setAlpha(255);
-            canvas.drawCircle(lastPoint.x, lastPoint.y, pixelsPerDip * 4, linePaint);
+            canvas.drawCircle(lastLinePoint.x, lastLinePoint.y, pixelsPerDip * 4, linePaint);
         }
     }
 
-    protected PointF getPointFromAdvertisingPacket(AdvertisingPacket advertisingPacket) {
-        float x;
-        float y;
+    protected PointF getPointFromAdvertisingPacket(AdvertisingPacket advertisingPacket, PointF point) {
+        if (point == null) {
+            point = new PointF();
+        }
 
         // map timestamp to x axis
-        float xAxisWidth = canvasWidth - (2 * axisMargin);
-        long packetAge = System.currentTimeMillis() - advertisingPacket.getTimestamp();
-        x = (xAxisWidth * (xAxisRange - packetAge)) / xAxisRange;
-        x += axisMargin;
+        point.x = ((xAxisEndPoint.x - xAxisStartPoint.x) * (xAxisRange - (System.currentTimeMillis() - advertisingPacket.getTimestamp()))) / xAxisRange;
+        point.x += axisMargin;
 
         // map RSSI to y axis
-        float yAxisHeight = canvasHeight - (2 * axisMargin);
-        float mappedRssi = advertisingPacket.getRssi() - (float) yAxisMinimumAnimator.getAnimatedValue();
-        y = (yAxisHeight * (yAxisRange - mappedRssi)) / yAxisRange;
-        y += axisMargin;
+        point.y = ((yAxisEndPoint.y - yAxisStartPoint.y) * (yAxisRange - (advertisingPacket.getRssi() - (float) yAxisMinimumAnimator.getAnimatedValue()))) / yAxisRange;
+        point.y += axisMargin;
 
-        return new PointF(x, y);
+        return point;
     }
 
     @Override
