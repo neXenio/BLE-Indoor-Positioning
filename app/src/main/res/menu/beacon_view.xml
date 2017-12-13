@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/menu_filter"
+            android:title="@string/title_filter"
+            android:icon="@drawable/filter"/>
+
+    <item
+            android:id="@+id/menu_color"
+            android:title="@string/menu_color">
+
+        <menu>
+
+            <group
+                    android:id="@+id/menu_color_group"
+                    android:checkableBehavior="single">
+
+                <item
+                        android:id="@+id/menu_color_by_instance"
+                        android:title="@string/menu_color_by_instance"
+                        android:checked="true"/>
+
+                <item
+                        android:id="@+id/menu_color_by_type"
+                        android:title="@string/menu_color_by_type"/>
+
+                <item
+                        android:id="@+id/menu_color_by_property"
+                        android:title="@string/menu_color_by_property"/>
+
+            </group>
+
+        </menu>
+
+    </item>
+
+</menu>

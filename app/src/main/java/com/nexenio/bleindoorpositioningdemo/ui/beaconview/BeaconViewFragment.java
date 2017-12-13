@@ -5,9 +5,14 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -34,6 +39,9 @@ public abstract class BeaconViewFragment extends Fragment {
 
     protected CoordinatorLayout coordinatorLayout;
 
+    @ColorUtil.ColoringMode
+    protected int coloringMode = ColorUtil.COLORING_MODE_INSTANCES;
+
     public BeaconViewFragment() {
         deviceLocationListener = createDeviceLocationListener();
         beaconUpdateListener = createBeaconUpdateListener();
@@ -45,6 +53,12 @@ public abstract class BeaconViewFragment extends Fragment {
 
     @LayoutRes
     protected abstract int getLayoutResourceId();
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     @CallSuper
     @Override
@@ -69,6 +83,37 @@ public abstract class BeaconViewFragment extends Fragment {
         AndroidLocationProvider.unregisterLocationListener(deviceLocationListener);
         BeaconManager.unregisterBeaconUpdateListener(beaconUpdateListener);
         super.onDetach();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.beacon_view, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_color_by_instance: {
+                onColoringModeSelected(ColorUtil.COLORING_MODE_INSTANCES, item);
+                return true;
+            }
+            case R.id.menu_color_by_type: {
+                onColoringModeSelected(ColorUtil.COLORING_MODE_TYPES, item);
+                return true;
+            }
+            case R.id.menu_color_by_property: {
+                onColoringModeSelected(ColorUtil.COLORING_MODE_PROPERTIES, item);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected void onColoringModeSelected(@ColorUtil.ColoringMode int coloringMode, MenuItem menuItem) {
+        menuItem.setChecked(true);
+        this.coloringMode = coloringMode;
+        Log.d("Coloring Mode", "" + coloringMode);
     }
 
     private static List<Beacon> createTestBeacons() {

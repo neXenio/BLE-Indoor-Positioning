@@ -73,7 +73,6 @@ public class BeaconChartFragment extends BeaconViewFragment {
             return false;
         }
         String proximityUuid = ((IBeacon) beacon).getProximityUuid().toString();
-        Log.w(this.getClass().getSimpleName(), proximityUuid);
         if (!"acfd065e-c3c0-11e3-9bbe-1a514932ac01".equals(proximityUuid)) {
             // TODO: remove debug filter
             return false;

@@ -1,12 +1,17 @@
-package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
+package com.nexenio.bleindoorpositioningdemo.ui.beaconview;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.support.annotation.ColorInt;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 
 import com.nexenio.bleindoorpositioningdemo.R;
+
+import java.lang.annotation.Retention;
+
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * Created by steppschuh on 12.12.17.
@@ -14,7 +19,15 @@ import com.nexenio.bleindoorpositioningdemo.R;
 
 public class ColorUtil {
 
-    
+    @Retention(SOURCE)
+    @IntDef({COLORING_MODE_INSTANCES, COLORING_MODE_TYPES, COLORING_MODE_PROPERTIES})
+    public @interface ColoringMode {
+    }
+
+    public static final int COLORING_MODE_INSTANCES = 0;
+    public static final int COLORING_MODE_TYPES = 1;
+    public static final int COLORING_MODE_PROPERTIES = 2;
+
     public static int[] MATERIAL_DESIGN_COLOR_RESOURCE_IDS = {
             R.color.md_red_500, R.color.md_pink_500, R.color.md_deep_purple_500, R.color.md_deep_purple_500,
             R.color.md_indigo_500, R.color.md_blue_500, R.color.md_light_blue_500, R.color.md_cyan_500, R.color.md_teal_500,

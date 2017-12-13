@@ -144,9 +144,9 @@ public class BluetoothClient {
                 if (beacon instanceof IBeacon) {
                     beacon.setLocationProvider(createDebuggingLocationProvider((IBeacon) beacon));
                 }
-                Log.i(TAG, macAddress + " data received for the first time: " + advertisingPacket);
+                Log.d(TAG, macAddress + " data received for the first time: " + advertisingPacket);
             } else if (isNewAdvertisingData) {
-                Log.d(TAG, macAddress + " data changed to: " + advertisingPacket);
+                Log.v(TAG, macAddress + " data changed to: " + advertisingPacket);
             } else {
                 Log.v(TAG, macAddress + " data unchanged: " + advertisingPacket);
             }

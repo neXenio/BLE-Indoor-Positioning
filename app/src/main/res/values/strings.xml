@@ -1,13 +1,47 @@
 <resources>
     <string name="app_name">Indoor Positioning</string>
 
-    <string name="title_map">Map</string>
-    <string name="title_radar">Radar</string>
-    <string name="title_chart">Chart</string>
+    <!-- Beacon -->
+    <string name="beacon">Beacon</string>
+    <string name="beacon_ibeacon">iBeacon</string>
+    <string name="beacon_eddystone">Eddystone</string>
+    <string name="beacon_rssi">RSSI</string>
+    <string name="beacon_tx">TX</string>
+    <string name="beacon_uuid">UUID</string>
+    <string name="beacon_major">Major</string>
+    <string name="beacon_minor">Minor</string>
+    <string name="distance">Distance</string>
 
+    <!-- Map -->
+    <string name="title_map">Map</string>
+
+    <!-- Radar-->
+    <string name="title_radar">Radar</string>
+
+    <!-- Chart -->
+    <string name="title_chart">Chart</string>
     <string name="axis_label_time">Time in seconds</string>
     <string name="axis_label_rssi">RSSI in dBm</string>
 
+    <!-- Filter -->
+    <string name="title_filter">Filter</string>
+    <string name="filter_type">Beacon Type</string>
+    <string name="filter_minimum_rssi">@string/beacon_rssi</string>
+    <string name="filter_distance">@string/distance</string>
+    <string name="filter_distance_immediate">Immediate</string>
+    <string name="filter_distance_near">Near</string>
+    <string name="filter_distance_far">Far</string>
+    <string name="filter_uuid">@string/beacon_uuid</string>
+    <string name="filter_major">@string/beacon_major</string>
+
+    <!-- Menu -->
+    <string name="menu_filter">@string/title_filter</string>
+    <string name="menu_color">Coloring</string>
+    <string name="menu_color_by_instance">Instances</string>
+    <string name="menu_color_by_type">Types</string>
+    <string name="menu_color_by_property">Properties</string>
+
+    <!-- Errors -->
     <string name="error_location_disabled">Location services disabled</string>
     <string name="error_bluetooth_disabled">Bluetooth disabled</string>
     <string name="action_enable">Enable</string>
