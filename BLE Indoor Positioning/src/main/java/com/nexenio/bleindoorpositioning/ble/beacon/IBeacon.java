@@ -31,9 +31,9 @@ public class IBeacon extends Beacon {
     }
 
     @Override
-    public void addAdvertisingPacket(AdvertisingPacket advertisingPacket) {
-        super.addAdvertisingPacket(advertisingPacket);
-        if (!equalsLastAdvertisingPackage(advertisingPacket) && advertisingPacket instanceof IBeaconAdvertisingPacket) {
+    public void applyPropertiesFromAdvertisingPacket(AdvertisingPacket advertisingPacket) {
+        super.applyPropertiesFromAdvertisingPacket(advertisingPacket);
+        if (advertisingPacket instanceof IBeaconAdvertisingPacket) {
             IBeaconAdvertisingPacket iBeaconAdvertisingPacket = (IBeaconAdvertisingPacket) advertisingPacket;
             proximityUuid = AdvertisingPacketUtil.toUuid(iBeaconAdvertisingPacket.getProximityUuidBytes());
             major = new BigInteger(iBeaconAdvertisingPacket.getMajorBytes()).intValue();

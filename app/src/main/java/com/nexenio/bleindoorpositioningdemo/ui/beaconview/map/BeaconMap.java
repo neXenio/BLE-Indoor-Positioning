@@ -234,13 +234,13 @@ public class BeaconMap extends BeaconView {
             locations.add(deviceLocationAnimator.getLocation());
 
             Location deviceTopLeftLocation = new Location(deviceLocationAnimator.getLocation());
-            deviceTopLeftLocation.setLatitude(deviceTopLeftLocation.getLatitude() + 0.0002);
-            deviceTopLeftLocation.setLongitude(deviceTopLeftLocation.getLongitude() - 0.0004);
+            deviceTopLeftLocation.setLatitude(deviceTopLeftLocation.getLatitude() + 0.0001);
+            deviceTopLeftLocation.setLongitude(deviceTopLeftLocation.getLongitude() - 0.0002);
             locations.add(deviceTopLeftLocation);
 
             Location deviceBottomRightLocation = new Location(deviceLocationAnimator.getLocation());
-            deviceBottomRightLocation.setLatitude(deviceBottomRightLocation.getLatitude() - 0.0002);
-            deviceBottomRightLocation.setLongitude(deviceBottomRightLocation.getLongitude() + 0.0004);
+            deviceBottomRightLocation.setLatitude(deviceBottomRightLocation.getLatitude() - 0.0001);
+            deviceBottomRightLocation.setLongitude(deviceBottomRightLocation.getLongitude() + 0.0002);
             locations.add(deviceBottomRightLocation);
         }
         if (topLeftLocationAnimator != null) {

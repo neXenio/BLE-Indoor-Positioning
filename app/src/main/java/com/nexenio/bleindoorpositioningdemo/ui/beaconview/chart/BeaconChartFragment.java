@@ -4,6 +4,7 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,6 +70,12 @@ public class BeaconChartFragment extends BeaconViewFragment {
 
     protected boolean shouldRenderBeacon(@NonNull Beacon beacon) {
         if (!(beacon instanceof IBeacon)) {
+            return false;
+        }
+        String proximityUuid = ((IBeacon) beacon).getProximityUuid().toString();
+        Log.w(this.getClass().getSimpleName(), proximityUuid);
+        if (!"acfd065e-c3c0-11e3-9bbe-1a514932ac01".equals(proximityUuid)) {
+            // TODO: remove debug filter
             return false;
         }
         return true;

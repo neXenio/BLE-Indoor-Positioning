@@ -113,6 +113,10 @@ public class BeaconLineChart extends BeaconChart {
         axisPaint.setAlpha(50);
         axisPaint.setStrokeWidth(axisWidth);
 
+        Paint gridPaint = new Paint(axisPaint);
+        gridPaint.setStrokeWidth(pixelsPerDip);
+        gridPaint.setAlpha(15);
+
         // x axis
         PointF xAxisStartPoint = new PointF(axisMargin, canvasHeight - axisMargin);
         PointF xAxisEndPoint = new PointF(canvasWidth - axisMargin, xAxisStartPoint.y);
@@ -162,12 +166,21 @@ public class BeaconLineChart extends BeaconChart {
         for (int referenceIndex = 0; referenceIndex <= referenceLineCount; referenceIndex++) {
             referenceStartPoint.x = xAxisStartPoint.x + (referenceIndex * axisReferencePixelDelta);
             referenceEndPoint.x = referenceStartPoint.x;
+
             canvas.drawLine(
                     referenceStartPoint.x,
                     referenceStartPoint.y,
                     referenceEndPoint.x,
                     referenceEndPoint.y,
                     axisPaint
+            );
+
+            canvas.drawLine(
+                    referenceStartPoint.x,
+                    yAxisStartPoint.y,
+                    referenceStartPoint.x,
+                    yAxisEndPoint.y,
+                    gridPaint
             );
 
             referenceValue = (float) xAxisMinimumAnimator.getAnimatedValue() + (referenceIndex * axisReferenceValueDelta);
@@ -190,12 +203,21 @@ public class BeaconLineChart extends BeaconChart {
         for (int referenceIndex = 0; referenceIndex <= referenceLineCount; referenceIndex++) {
             referenceStartPoint.y = xAxisStartPoint.y - (referenceIndex * axisReferencePixelDelta);
             referenceEndPoint.y = referenceStartPoint.y;
+
             canvas.drawLine(
                     referenceStartPoint.x,
                     referenceStartPoint.y,
                     referenceEndPoint.x,
                     referenceEndPoint.y,
                     axisPaint
+            );
+
+            canvas.drawLine(
+                    xAxisStartPoint.x,
+                    referenceStartPoint.y,
+                    xAxisEndPoint.x,
+                    referenceStartPoint.y,
+                    gridPaint
             );
 
             referenceValue = (float) yAxisMinimumAnimator.getAnimatedValue() + (referenceIndex * axisReferenceValueDelta);
@@ -233,6 +255,7 @@ public class BeaconLineChart extends BeaconChart {
         linePaint.setStrokeWidth(pixelsPerDip);
         linePaint.setAlpha(128);
 
+        PointF currentPoint;
         PointF lastPoint = null;
         AdvertisingPacket lastAdvertisingPacket = null;
         for (AdvertisingPacket advertisingPacket : beacon.getAdvertisingPackets()) {
@@ -243,22 +266,22 @@ public class BeaconLineChart extends BeaconChart {
                 continue;
             }
 
-            PointF point = getPointFromAdvertisingPacket(advertisingPacket);
-            canvas.drawCircle(point.x, point.y, pixelsPerDip * 2, linePaint);
+            currentPoint = getPointFromAdvertisingPacket(advertisingPacket);
+            canvas.drawCircle(currentPoint.x, currentPoint.y, pixelsPerDip * 1.5f, linePaint);
 
             if (lastPoint != null && lastAdvertisingPacket != null) {
                 if (advertisingPacket.getTimestamp() < lastAdvertisingPacket.getTimestamp() + 5000) {
                     canvas.drawLine(
                             lastPoint.x,
                             lastPoint.y,
-                            point.x,
-                            point.y,
+                            currentPoint.x,
+                            currentPoint.y,
                             linePaint
                     );
                 }
             }
 
-            lastPoint = point;
+            lastPoint = currentPoint;
             lastAdvertisingPacket = advertisingPacket;
             beaconIndex++;
         }

@@ -68,6 +68,10 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
         return true;
     }
 
+    /*
+        Getter & Setter
+     */
+
     public static byte[] getFlags(byte[] data) {
         return Arrays.copyOfRange(data, 0, 3);
     }

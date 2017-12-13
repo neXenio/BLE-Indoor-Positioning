@@ -11,6 +11,7 @@ import android.util.Log;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
+import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import com.polidea.rxandroidble.RxBleClient;
@@ -140,12 +141,9 @@ public class BluetoothClient {
 
             if (isNewBeacon) {
                 beacon = beaconManager.getBeaconMap().get(beaconKey);
-                beacon.setLocationProvider(new LocationProvider() {
-                    @Override
-                    public Location getLocation() {
-                        return new Location(52.512382, 13.390936);
-                    }
-                });
+                if (beacon instanceof IBeacon) {
+                    beacon.setLocationProvider(createDebuggingLocationProvider((IBeacon) beacon));
+                }
                 Log.i(TAG, macAddress + " data received for the first time: " + advertisingPacket);
             } else if (isNewAdvertisingData) {
                 Log.d(TAG, macAddress + " data changed to: " + advertisingPacket);
@@ -155,6 +153,34 @@ public class BluetoothClient {
 
         }
 
+    }
+
+    private static LocationProvider createDebuggingLocationProvider(IBeacon iBeacon) {
+        final Location location = new Location();
+        switch (iBeacon.getMinor()) {
+            case 1: {
+                location.setLatitude(52.512441);
+                location.setLongitude(13.391112);
+                break;
+            }
+            case 2: {
+                location.setLatitude(52.512427);
+                location.setLongitude(13.390934);
+                break;
+            }
+            case 3: {
+                location.setLatitude(52.512424);
+                location.setLongitude(13.390829);
+                break;
+            }
+        }
+
+        return new LocationProvider() {
+            @Override
+            public Location getLocation() {
+                return location;
+            }
+        };
     }
 
 }
