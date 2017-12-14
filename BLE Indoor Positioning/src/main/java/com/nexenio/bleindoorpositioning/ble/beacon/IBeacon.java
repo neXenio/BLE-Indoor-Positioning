@@ -1,12 +1,10 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
-import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.location.provider.IBeaconLocationProvider;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
-import java.math.BigInteger;
 import java.util.UUID;
 
 /**
@@ -35,9 +33,9 @@ public class IBeacon extends Beacon {
         super.applyPropertiesFromAdvertisingPacket(advertisingPacket);
         if (advertisingPacket instanceof IBeaconAdvertisingPacket) {
             IBeaconAdvertisingPacket iBeaconAdvertisingPacket = (IBeaconAdvertisingPacket) advertisingPacket;
-            proximityUuid = AdvertisingPacketUtil.toUuid(iBeaconAdvertisingPacket.getProximityUuidBytes());
-            major = new BigInteger(iBeaconAdvertisingPacket.getMajorBytes()).intValue();
-            minor = new BigInteger(iBeaconAdvertisingPacket.getMinorBytes()).intValue();
+            proximityUuid = iBeaconAdvertisingPacket.getProximityUuid();
+            major = iBeaconAdvertisingPacket.getMajor();
+            minor = iBeaconAdvertisingPacket.getMinor();
             calibratedRssi = iBeaconAdvertisingPacket.getMeasuredPowerByte();
         }
     }

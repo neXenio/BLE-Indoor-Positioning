@@ -48,7 +48,7 @@ public class BeaconMapFragment extends BeaconViewFragment {
             @Override
             public void onBeaconUpdated(Beacon beacon) {
                 beaconMap.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
-                Log.d(this.getClass().getSimpleName(), beacon.getLatestAdvertisingPacket().toString() + " distance: " + String.format("%.2f", beacon.getDistance() / 100));
+                //Log.d(this.getClass().getSimpleName(), beacon.getLatestAdvertisingPacket().toString() + " distance: " + String.format("%.2f", beacon.getDistance() / 100));
             }
         };
     }

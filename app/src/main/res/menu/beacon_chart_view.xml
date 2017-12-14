@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/menu_value"
+            android:title="@string/menu_value">
+
+        <menu>
+
+            <group
+                    android:id="@+id/menu_value_group"
+                    android:checkableBehavior="single">
+
+                <item
+                        android:id="@+id/menu_value_rssi"
+                        android:title="@string/menu_value_rssi"
+                        android:checked="true"/>
+
+                <item
+                        android:id="@+id/menu_value_distance"
+                        android:title="@string/menu_value_distance"/>
+
+                <item
+                        android:id="@+id/menu_value_frequency"
+                        android:title="@string/menu_value_frequency"/>
+
+            </group>
+
+        </menu>
+
+    </item>
+
+</menu>

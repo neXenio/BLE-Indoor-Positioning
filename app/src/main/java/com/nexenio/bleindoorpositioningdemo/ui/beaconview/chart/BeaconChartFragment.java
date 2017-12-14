@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,6 +69,36 @@ public class BeaconChartFragment extends BeaconViewFragment {
         beaconChart = inflatedView.findViewById(R.id.beaconChart);
         beaconChart.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
         return inflatedView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.beacon_chart_view, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_value_rssi: {
+                onValueTypeSelected(BeaconChart.VALUE_TYPE_RSSI, item);
+                return true;
+            }
+            case R.id.menu_value_distance: {
+                onValueTypeSelected(BeaconChart.VALUE_TYPE_DISTANCE, item);
+                return true;
+            }
+            case R.id.menu_value_frequency: {
+                onValueTypeSelected(BeaconChart.VALUE_TYPE_FREQUENCY, item);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected void onValueTypeSelected(@BeaconChart.ValueType int valueType, MenuItem menuItem) {
+        menuItem.setChecked(true);
+        beaconChart.setValueType(valueType);
     }
 
     @Override

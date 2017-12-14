@@ -1,6 +1,8 @@
 package com.nexenio.bleindoorpositioning.ble.advertising;
 
+import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.UUID;
 
 /**
  * For advertising packets as specified in Apples <a href="http://www.blueupbeacons.com/docs/dev/Proximity%20Beacon%20Specification%20R1.pdf">Proximity
@@ -25,28 +27,32 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
     private byte[] minorBytes;
     private byte measuredPowerByte;
 
+    private UUID proximityUuid;
+    private int major;
+    private int minor;
+
     public IBeaconAdvertisingPacket(byte[] data) {
         super(data);
     }
 
     private void parseData() {
-        flagsBytes = getFlags(data);
-        lengthByte = getLength(data);
-        typeByte = getType(data);
-        companyIdBytes = getCompanyId(data);
-        beaconTypeBytes = getBeaconType(data);
-        proximityUuidBytes = getProximityUuid(data);
-        majorBytes = getMajor(data);
-        minorBytes = getMinor(data);
-        measuredPowerByte = getMeasuredPower(data);
+        flagsBytes = getFlagsBytes(data);
+        lengthByte = getLengthBytes(data);
+        typeByte = getTypeBytes(data);
+        companyIdBytes = getCompanyIdBytes(data);
+        beaconTypeBytes = getBeaconTypeBytes(data);
+        proximityUuidBytes = getProximityUuidBytes(data);
+        majorBytes = getMajorBytes(data);
+        minorBytes = getMinorBytes(data);
+        measuredPowerByte = getMeasuredPowerBytes(data);
     }
 
     @Override
     public String toString() {
         return new StringBuilder("iBeacon Advertising Packet (")
-                .append("Proximity UUID: ").append(AdvertisingPacketUtil.toUuid(getProximityUuidBytes())).append(" ")
-                .append("Major: ").append(AdvertisingPacketUtil.toHexadecimalString(getMajorBytes())).append(" ")
-                .append("Minor: ").append(AdvertisingPacketUtil.toHexadecimalString(getMinorBytes())).append(" ")
+                .append("Proximity UUID: ").append(getProximityUuid(getProximityUuidBytes())).append(" ")
+                .append("Major: ").append(getMajor(getMajorBytes())).append(" ")
+                .append("Minor: ").append(getMinor(getMinorBytes())).append(" ")
                 .append("RSSI at 1m: ").append(getMeasuredPowerByte())
                 .append(")")
                 .toString();
@@ -56,56 +62,64 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
         if (data == null || data.length < 29) {
             return false;
         }
-        if (getType(data) != EXPECTED_TYPE) {
+        if (getTypeBytes(data) != EXPECTED_TYPE) {
             return false;
         }
-        if (!Arrays.equals(getFlags(data), EXPECTED_FLAGS)) {
+        if (!Arrays.equals(getFlagsBytes(data), EXPECTED_FLAGS)) {
             return false;
         }
-        if (!Arrays.equals(getBeaconType(data), EXPECTED_BEACON_TYPE)) {
+        if (!Arrays.equals(getBeaconTypeBytes(data), EXPECTED_BEACON_TYPE)) {
             return false;
         }
         return true;
     }
 
-    /*
-        Getter & Setter
-     */
-
-    public static byte[] getFlags(byte[] data) {
+    public static byte[] getFlagsBytes(byte[] data) {
         return Arrays.copyOfRange(data, 0, 3);
     }
 
-    public static byte getLength(byte[] data) {
+    public static byte getLengthBytes(byte[] data) {
         return data[3];
     }
 
-    public static byte getType(byte[] data) {
+    public static byte getTypeBytes(byte[] data) {
         return data[4];
     }
 
-    public static byte[] getCompanyId(byte[] data) {
+    public static byte[] getCompanyIdBytes(byte[] data) {
         return Arrays.copyOfRange(data, 5, 5 + 2);
     }
 
-    public static byte[] getBeaconType(byte[] data) {
+    public static byte[] getBeaconTypeBytes(byte[] data) {
         return Arrays.copyOfRange(data, 7, 7 + 2);
     }
 
-    public static byte[] getProximityUuid(byte[] data) {
+    public static byte[] getProximityUuidBytes(byte[] data) {
         return Arrays.copyOfRange(data, 9, 9 + 24);
     }
 
-    public static byte[] getMajor(byte[] data) {
+    public static byte[] getMajorBytes(byte[] data) {
         return Arrays.copyOfRange(data, 25, 25 + 2);
     }
 
-    public static byte[] getMinor(byte[] data) {
+    public static byte[] getMinorBytes(byte[] data) {
         return Arrays.copyOfRange(data, 27, 27 + 2);
     }
 
-    public static byte getMeasuredPower(byte[] data) {
+    public static byte getMeasuredPowerBytes(byte[] data) {
         return data[29];
+    }
+
+    public static UUID getProximityUuid(byte[] proximityUuidBytes) {
+        return AdvertisingPacketUtil.toUuid(proximityUuidBytes);
+    }
+
+    public static int getMajor(byte[] majorBytes) {
+        return new BigInteger(majorBytes).intValue();
+    }
+
+    public static int getMinor(byte[] minorBytes) {
+        return new BigInteger(minorBytes).intValue();
     }
 
     /*
@@ -114,7 +128,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     public byte[] getFlagsBytes() {
         if (flagsBytes == null) {
-            flagsBytes = getFlags(data);
+            flagsBytes = getFlagsBytes(data);
         }
         return flagsBytes;
     }
@@ -125,7 +139,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     public byte getLengthByte() {
         if (lengthByte == 0) {
-            lengthByte = getLength(data);
+            lengthByte = getLengthBytes(data);
         }
         return lengthByte;
     }
@@ -136,7 +150,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     public byte getTypeByte() {
         if (typeByte == 0) {
-            typeByte = getType(data);
+            typeByte = getTypeBytes(data);
         }
         return typeByte;
     }
@@ -147,7 +161,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     public byte[] getCompanyIdBytes() {
         if (companyIdBytes == null) {
-            companyIdBytes = getCompanyId(data);
+            companyIdBytes = getCompanyIdBytes(data);
         }
         return companyIdBytes;
     }
@@ -158,7 +172,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     public byte[] getBeaconTypeBytes() {
         if (beaconTypeBytes == null) {
-            beaconTypeBytes = getBeaconType(data);
+            beaconTypeBytes = getBeaconTypeBytes(data);
         }
         return beaconTypeBytes;
     }
@@ -169,7 +183,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     public byte[] getProximityUuidBytes() {
         if (proximityUuidBytes == null) {
-            proximityUuidBytes = getProximityUuid(data);
+            proximityUuidBytes = getProximityUuidBytes(data);
         }
         return proximityUuidBytes;
     }
@@ -180,7 +194,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     public byte[] getMajorBytes() {
         if (majorBytes == null) {
-            majorBytes = getMajor(data);
+            majorBytes = getMajorBytes(data);
         }
         return majorBytes;
     }
@@ -191,7 +205,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     public byte[] getMinorBytes() {
         if (minorBytes == null) {
-            minorBytes = getMinor(data);
+            minorBytes = getMinorBytes(data);
         }
         return minorBytes;
     }
@@ -202,7 +216,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     public byte getMeasuredPowerByte() {
         if (measuredPowerByte == 0) {
-            measuredPowerByte = getMeasuredPower(data);
+            measuredPowerByte = getMeasuredPowerBytes(data);
         }
         return measuredPowerByte;
     }
@@ -210,4 +224,38 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
     public void setMeasuredPowerByte(byte measuredPowerByte) {
         this.measuredPowerByte = measuredPowerByte;
     }
+
+    public UUID getProximityUuid() {
+        if (proximityUuid == null) {
+            proximityUuid = getProximityUuid(getProximityUuidBytes());
+        }
+        return proximityUuid;
+    }
+
+    public void setProximityUuid(UUID proximityUuid) {
+        this.proximityUuid = proximityUuid;
+    }
+
+    public int getMajor() {
+        if (major == 0) {
+            major = getMajor(getMajorBytes());
+        }
+        return major;
+    }
+
+    public void setMajor(int major) {
+        this.major = major;
+    }
+
+    public int getMinor() {
+        if (minor == 0) {
+            minor = getMajor(getMinorBytes());
+        }
+        return minor;
+    }
+
+    public void setMinor(int minor) {
+        this.minor = minor;
+    }
+
 }

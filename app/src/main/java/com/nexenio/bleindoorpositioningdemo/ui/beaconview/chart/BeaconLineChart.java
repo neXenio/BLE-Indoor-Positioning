@@ -15,6 +15,7 @@ import android.util.AttributeSet;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
@@ -96,7 +97,6 @@ public class BeaconLineChart extends BeaconChart {
         ColorUtil.initialize(getContext());
 
         xAxisLabel = getContext().getString(R.string.axis_label_time);
-        yAxisLabel = getContext().getString(R.string.axis_label_rssi);
 
         xAxisMaximumAnimator = startValueAnimator(xAxisMaximumAnimator, 0);
         xAxisMinimumAnimator = startValueAnimator(xAxisMinimumAnimator, -TimeUnit.SECONDS.toMillis(30));
@@ -144,8 +144,8 @@ public class BeaconLineChart extends BeaconChart {
         xAxisStartPoint = new PointF(axisMargin, canvasHeight - axisMargin);
         xAxisEndPoint = new PointF(canvasWidth - axisMargin, xAxisStartPoint.y);
 
-        yAxisStartPoint = new PointF(xAxisStartPoint.x, axisMargin);
-        yAxisEndPoint = new PointF(xAxisStartPoint.x, xAxisStartPoint.y);
+        yAxisStartPoint = new PointF(xAxisStartPoint.x, xAxisStartPoint.y);
+        yAxisEndPoint = new PointF(xAxisStartPoint.x, axisMargin);
 
         xAxisLabelCenter = new PointF(
                 xAxisStartPoint.x + ((xAxisEndPoint.x - xAxisStartPoint.x) / 2) - (axisLabelPaint.measureText(xAxisLabel) / 2),
@@ -159,6 +159,40 @@ public class BeaconLineChart extends BeaconChart {
 
         gridLineStartPoint = new PointF(xAxisStartPoint.x, xAxisStartPoint.y);
         gridLineEndPoint = new PointF(gridLineStartPoint.x, gridLineStartPoint.y + (pixelsPerDip * 4));
+    }
+
+    @Override
+    protected void onValueTypeChanged() {
+        super.onValueTypeChanged();
+        switch (valueType) {
+            case VALUE_TYPE_RSSI: {
+                yAxisLabel = getContext().getString(R.string.axis_label_rssi);
+                yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 0);
+                yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, -100);
+                break;
+            }
+            case VALUE_TYPE_DISTANCE: {
+                yAxisLabel = getContext().getString(R.string.axis_label_distance);
+                yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 25);
+                yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, 0);
+                break;
+            }
+            case VALUE_TYPE_FREQUENCY: {
+                yAxisLabel = getContext().getString(R.string.axis_label_frequency);
+                yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 10);
+                yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, 0);
+                break;
+            }
+        }
+        if (yAxisLabelCenter != null) {
+            yAxisLabelCenter.y = yAxisStartPoint.y + ((yAxisEndPoint.y - yAxisStartPoint.y) / 2) + (axisLabelPaint.measureText(yAxisLabel) / 2);
+        }
+    }
+
+    @Override
+    protected void onColoringModeChanged() {
+        super.onColoringModeChanged();
+
     }
 
     @Override
@@ -292,11 +326,7 @@ public class BeaconLineChart extends BeaconChart {
             if (advertisingPacket.getTimestamp() < minimumAdvertisingTimestamp) {
                 continue;
             }
-            if (advertisingPacket.getRssi() < (float) yAxisMinimumAnimator.getAnimatedValue()) {
-                continue;
-            }
-
-            currentLinePoint = getPointFromAdvertisingPacket(advertisingPacket, currentLinePoint);
+            currentLinePoint = getPointFromAdvertisingPacket(beacon, advertisingPacket, currentLinePoint);
             canvas.drawCircle(currentLinePoint.x, currentLinePoint.y, pixelsPerDip * 1.5f, linePaint);
 
             if (lastLinePoint != null && lastAdvertisingPacket != null) {
@@ -325,19 +355,27 @@ public class BeaconLineChart extends BeaconChart {
         }
     }
 
-    protected PointF getPointFromAdvertisingPacket(AdvertisingPacket advertisingPacket, PointF point) {
+    protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket) {
+        switch (valueType) {
+            case VALUE_TYPE_RSSI: {
+                return advertisingPacket.getRssi();
+            }
+            case VALUE_TYPE_DISTANCE: {
+                return BeaconDistanceCalculator.calculateDistanceTo(beacon, advertisingPacket);
+            }
+            case VALUE_TYPE_FREQUENCY: {
+                return 5; // TODO: get real value
+            }
+        }
+        return 0;
+    }
+
+    protected PointF getPointFromAdvertisingPacket(Beacon beacon, AdvertisingPacket advertisingPacket, PointF point) {
         if (point == null) {
             point = new PointF();
         }
-
-        // map timestamp to x axis
-        point.x = ((xAxisEndPoint.x - xAxisStartPoint.x) * (xAxisRange - (System.currentTimeMillis() - advertisingPacket.getTimestamp()))) / xAxisRange;
-        point.x += axisMargin;
-
-        // map RSSI to y axis
-        point.y = ((yAxisEndPoint.y - yAxisStartPoint.y) * (yAxisRange - (advertisingPacket.getRssi() - (float) yAxisMinimumAnimator.getAnimatedValue()))) / yAxisRange;
-        point.y += axisMargin;
-
+        point.x = xAxisStartPoint.x + ((xAxisEndPoint.x - xAxisStartPoint.x) * (xAxisRange - (System.currentTimeMillis() - advertisingPacket.getTimestamp()))) / xAxisRange;
+        point.y = yAxisStartPoint.y - ((yAxisStartPoint.y - yAxisEndPoint.y) * (getValue(beacon, advertisingPacket) - (float) yAxisMinimumAnimator.getAnimatedValue())) / yAxisRange;
         return point;
     }
 
