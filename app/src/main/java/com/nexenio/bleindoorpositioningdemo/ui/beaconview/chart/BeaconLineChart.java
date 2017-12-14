@@ -13,12 +13,14 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -322,7 +324,8 @@ public class BeaconLineChart extends BeaconChart {
 
         lastLinePoint = null;
         lastAdvertisingPacket = null;
-        for (AdvertisingPacket advertisingPacket : beacon.getAdvertisingPackets()) {
+
+        for (AdvertisingPacket advertisingPacket : (List<AdvertisingPacket>) beacon.getAdvertisingPackets()) {
             if (advertisingPacket.getTimestamp() < minimumAdvertisingTimestamp) {
                 continue;
             }
@@ -355,16 +358,34 @@ public class BeaconLineChart extends BeaconChart {
         }
     }
 
-    protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket) {
+    protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket, long windowLength) {
+        List<AdvertisingPacket> recentAdvertisingPackets = null;
+        int[] recentRssis;
+        float meanRssi;
+
+        // make sure that the window size is at least 10 seconds when we're looking for the frequency
+        windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? windowLength : Math.max(windowLength, 10000);
+
+        if (windowLength == 0) {
+            meanRssi = advertisingPacket.getRssi();
+        } else {
+            recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
+                    advertisingPacket.getTimestamp() - windowLength,
+                    advertisingPacket.getTimestamp()
+            );
+            recentRssis = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(recentAdvertisingPackets);
+            meanRssi = AdvertisingPacketUtil.getMeanRssi(recentRssis);
+        }
+
         switch (valueType) {
             case VALUE_TYPE_RSSI: {
-                return advertisingPacket.getRssi();
+                return meanRssi;
             }
             case VALUE_TYPE_DISTANCE: {
-                return BeaconDistanceCalculator.calculateDistanceTo(beacon, advertisingPacket);
+                return BeaconDistanceCalculator.calculateDistanceTo(beacon, meanRssi);
             }
             case VALUE_TYPE_FREQUENCY: {
-                return 5; // TODO: get real value
+                return 1000 * (recentAdvertisingPackets.size() / (float) windowLength);
             }
         }
         return 0;
@@ -375,7 +396,7 @@ public class BeaconLineChart extends BeaconChart {
             point = new PointF();
         }
         point.x = xAxisStartPoint.x + ((xAxisEndPoint.x - xAxisStartPoint.x) * (xAxisRange - (System.currentTimeMillis() - advertisingPacket.getTimestamp()))) / xAxisRange;
-        point.y = yAxisStartPoint.y - ((yAxisStartPoint.y - yAxisEndPoint.y) * (getValue(beacon, advertisingPacket) - (float) yAxisMinimumAnimator.getAnimatedValue())) / yAxisRange;
+        point.y = yAxisStartPoint.y - ((yAxisStartPoint.y - yAxisEndPoint.y) * (getValue(beacon, advertisingPacket, 2000) - (float) yAxisMinimumAnimator.getAnimatedValue())) / yAxisRange;
         return point;
     }
 

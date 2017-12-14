@@ -1,5 +1,6 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
+import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.location.provider.EddystoneLocationProvider;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
@@ -7,7 +8,7 @@ import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
  * Created by steppschuh on 15.11.17.
  */
 
-public class Eddystone extends Beacon {
+public class Eddystone extends Beacon<EddystoneAdvertisingPacket> {
 
     public static final int CALIBRATION_DISTANCE_DEFAULT = 0;
 

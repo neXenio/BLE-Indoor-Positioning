@@ -21,15 +21,15 @@ public abstract class BeaconDistanceCalculator {
      * path loss model</a>.
      */
     public static float calculateDistanceTo(Beacon beacon) {
-        return calculateDistance(beacon.getRssi(), beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), PATH_LOSS_PARAMETER_INDOOR);
+        return calculateDistanceTo(beacon, beacon.getRssi());
     }
 
     /**
      * Calculates the distance to the specified beacon using the <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
      * path loss model</a>.
      */
-    public static float calculateDistanceTo(Beacon beacon, AdvertisingPacket advertisingPacket) {
-        return calculateDistance(advertisingPacket.getRssi(), beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), PATH_LOSS_PARAMETER_INDOOR);
+    public static float calculateDistanceTo(Beacon beacon, float rssi) {
+        return calculateDistance(rssi, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), PATH_LOSS_PARAMETER_INDOOR);
     }
 
     /**
@@ -41,8 +41,8 @@ public abstract class BeaconDistanceCalculator {
      * @param calibratedDistance the distance in meters at which the calibrated RSSI was measured
      * @param pathLossParameter  the path-loss adjustment parameter
      */
-    public static float calculateDistance(int rssi, int calibratedRssi, int calibratedDistance, float pathLossParameter) {
-        int calibratedRssiAtOneMeter;
+    public static float calculateDistance(float rssi, float calibratedRssi, int calibratedDistance, float pathLossParameter) {
+        float calibratedRssiAtOneMeter;
         if (calibratedDistance == IBeacon.CALIBRATION_DISTANCE_DEFAULT) {
             calibratedRssiAtOneMeter = calibratedRssi;
         } else if (calibratedDistance == Eddystone.CALIBRATION_DISTANCE_DEFAULT) {
@@ -61,7 +61,7 @@ public abstract class BeaconDistanceCalculator {
      * @param calibratedRssi    the RSSI measured at 1m distance
      * @param pathLossParameter the path-loss adjustment parameter
      */
-    public static float calculateDistance(int rssi, int calibratedRssi, float pathLossParameter) {
+    public static float calculateDistance(float rssi, float calibratedRssi, float pathLossParameter) {
         return (float) Math.pow(10, (calibratedRssi - rssi) / (10 * pathLossParameter));
     }
 

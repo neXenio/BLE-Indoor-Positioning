@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * Created by steppschuh on 15.11.17.
  */
 
-public abstract class Beacon {
+public abstract class Beacon<P extends AdvertisingPacket> {
 
     public static final long MAXIMUM_PACKET_AGE = TimeUnit.SECONDS.toMillis(60);
 
@@ -26,7 +26,7 @@ public abstract class Beacon {
     protected int calibratedRssi; // in dBm
     protected int calibratedDistance; // in cm
     protected int transmissionPower; // in dBm
-    protected List<AdvertisingPacket> advertisingPackets = new ArrayList<>();
+    protected List<P> advertisingPackets = new ArrayList<>();
     protected LocationProvider locationProvider;
 
     public Beacon() {
@@ -57,14 +57,40 @@ public abstract class Beacon {
         return advertisingPackets != null && !advertisingPackets.isEmpty();
     }
 
-    public AdvertisingPacket getLatestAdvertisingPacket() {
+    public P getLatestAdvertisingPacket() {
         if (!hasAnyAdvertisingPacket()) {
             return null;
         }
         return advertisingPackets.get(advertisingPackets.size() - 1);
     }
 
-    public void addAdvertisingPacket(AdvertisingPacket advertisingPacket) {
+    public List<P> getAdvertisingPacketsBetween(long startTimestamp, long endTimestamp) {
+        List<P> matchingAdvertisingPackets = new ArrayList<>();
+        for (P advertisingPacket : advertisingPackets) {
+            if (advertisingPacket.getTimestamp() <= startTimestamp) {
+                continue;
+            }
+            if (advertisingPacket.getTimestamp() > endTimestamp) {
+                continue;
+            }
+            matchingAdvertisingPackets.add(advertisingPacket);
+        }
+        return matchingAdvertisingPackets;
+    }
+
+    public List<P> getAdvertisingPacketsFromLast(long amount, TimeUnit timeUnit) {
+        return getAdvertisingPacketsBetween(System.currentTimeMillis() - timeUnit.toMillis(amount), System.currentTimeMillis());
+    }
+
+    public List<P> getAdvertisingPacketsSince(long timestamp) {
+        return getAdvertisingPacketsBetween(timestamp, System.currentTimeMillis());
+    }
+
+    public List<P> getAdvertisingPacketsBefore(long timestamp) {
+        return getAdvertisingPacketsBetween(0, timestamp);
+    }
+
+    public void addAdvertisingPacket(P advertisingPacket) {
         rssi = advertisingPacket.getRssi();
         if (!hasAnyAdvertisingPacket() || !advertisingPacket.dataEquals(getLatestAdvertisingPacket())) {
             applyPropertiesFromAdvertisingPacket(advertisingPacket);
@@ -73,7 +99,7 @@ public abstract class Beacon {
         trimAdvertisingPackets();
     }
 
-    public void applyPropertiesFromAdvertisingPacket(AdvertisingPacket advertisingPacket) {
+    public void applyPropertiesFromAdvertisingPacket(P advertisingPacket) {
         //setTransmissionPower(lastAdvertisingPacket.get);
     }
 
@@ -81,10 +107,10 @@ public abstract class Beacon {
         if (!hasAnyAdvertisingPacket()) {
             return;
         }
-        List<AdvertisingPacket> removableAdvertisingPackets = new ArrayList<>();
+        List<P> removableAdvertisingPackets = new ArrayList<>();
         AdvertisingPacket latestAdvertisingPacket = getLatestAdvertisingPacket();
         long minimumPacketTimestamp = System.currentTimeMillis() - MAXIMUM_PACKET_AGE;
-        for (AdvertisingPacket advertisingPacket : advertisingPackets) {
+        for (P advertisingPacket : advertisingPackets) {
             if (advertisingPacket == latestAdvertisingPacket) {
                 // don't remove the latest packet
                 continue;
@@ -98,7 +124,7 @@ public abstract class Beacon {
         advertisingPackets.removeAll(removableAdvertisingPackets);
     }
 
-    public boolean equalsLastAdvertisingPackage(AdvertisingPacket advertisingPacket) {
+    public boolean equalsLastAdvertisingPackage(P advertisingPacket) {
         return hasAnyAdvertisingPacket() && getLatestAdvertisingPacket().equals(advertisingPacket);
     }
 
@@ -162,11 +188,11 @@ public abstract class Beacon {
         this.transmissionPower = transmissionPower;
     }
 
-    public List<AdvertisingPacket> getAdvertisingPackets() {
+    public List<P> getAdvertisingPackets() {
         return advertisingPackets;
     }
 
-    public void setAdvertisingPackets(List<AdvertisingPacket> advertisingPackets) {
+    public void setAdvertisingPackets(List<P> advertisingPackets) {
         this.advertisingPackets = advertisingPackets;
     }
 
