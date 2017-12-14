@@ -107,7 +107,7 @@ public abstract class BeaconViewFragment extends Fragment {
                 return true;
             }
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
     protected void onColoringModeSelected(@ColorUtil.ColoringMode int coloringMode, MenuItem menuItem) {

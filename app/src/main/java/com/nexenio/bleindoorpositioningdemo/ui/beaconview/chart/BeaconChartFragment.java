@@ -4,6 +4,7 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,10 +24,12 @@ import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class BeaconChartFragment extends BeaconViewFragment {
 
     private BeaconChart beaconChart;
+    private static final UUID expectedUuid = UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01"); // TODO: remove debug filter
 
     @Override
     protected int getLayoutResourceId() {
@@ -93,7 +96,7 @@ public class BeaconChartFragment extends BeaconViewFragment {
                 return true;
             }
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
     protected void onValueTypeSelected(@BeaconChart.ValueType int valueType, MenuItem menuItem) {
@@ -111,9 +114,8 @@ public class BeaconChartFragment extends BeaconViewFragment {
         if (!(beacon instanceof IBeacon)) {
             return false;
         }
-        String proximityUuid = ((IBeacon) beacon).getProximityUuid().toString();
-        if (!"acfd065e-c3c0-11e3-9bbe-1a514932ac01".equals(proximityUuid)) {
-            // TODO: remove debug filter
+        UUID proximityUuid = ((IBeacon) beacon).getProximityUuid();
+        if (!expectedUuid.equals(proximityUuid)) {
             return false;
         }
         return true;
