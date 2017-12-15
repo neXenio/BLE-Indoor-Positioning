@@ -11,10 +11,10 @@ public class LocationTest {
         Olympiastadion Berlin
         https://goo.gl/maps/xSx4gBEpHB42
      */
-    public static final Location SOCCER_FIELD_TOP_LEFT = new Location(52.514890, 13.238694);
-    public static final Location SOCCER_FIELD_TOP_RIGHT = new Location(52.515024, 13.240219);
-    public static final Location SOCCER_FIELD_BOTTOM_LEFT = new Location(52.514285, 13.238834);
-    public static final Location SOCCER_FIELD_BOTTOM_RIGHT = new Location(52.514421, 13.240373);
+    public static final Location SOCCER_FIELD_TOP_LEFT = new Location(52.514889, 13.238694);
+    public static final Location SOCCER_FIELD_TOP_RIGHT = new Location(52.515029, 13.240220);
+    public static final Location SOCCER_FIELD_BOTTOM_LEFT = new Location(52.514288, 13.238832);
+    public static final Location SOCCER_FIELD_BOTTOM_RIGHT = new Location(52.514430, 13.240369);
     public static final Location SOCCER_FIELD_CENTER = new Location(52.514658, 13.239525);
     public static final int SOCKER_FIELD_WIDTH = 105;
     public static final int SOCKER_FIELD_HEIGHT = 68;

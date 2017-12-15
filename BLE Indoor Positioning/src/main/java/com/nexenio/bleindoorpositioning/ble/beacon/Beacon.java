@@ -24,7 +24,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     protected String macAddress;
     protected int rssi; // in dBm
     protected int calibratedRssi; // in dBm
-    protected int calibratedDistance; // in cm
+    protected int calibratedDistance; // in m
     protected int transmissionPower; // in dBm
     protected List<P> advertisingPackets = new ArrayList<>();
     protected LocationProvider locationProvider;

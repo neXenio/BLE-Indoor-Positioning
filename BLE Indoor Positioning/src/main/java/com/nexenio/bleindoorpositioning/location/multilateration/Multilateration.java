@@ -4,6 +4,7 @@ import com.lemmingapex.trilateration.NonLinearLeastSquaresSolver;
 import com.lemmingapex.trilateration.TrilaterationFunction;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.projection.SphericalMercatorProjection;
 
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
@@ -31,9 +32,31 @@ public class Multilateration {
         this.beacons = beacons;
     }
 
+    public static double[][] getPositions(List<Beacon> beacons) {
+        double[][] positions = new double[beacons.size()][];
+        Location location;
+        for (int beaconIndex = 0; beaconIndex < beacons.size(); beaconIndex++) {
+            location = beacons.get(beaconIndex).getLocation();
+            positions[beaconIndex] = new double[]{
+                    SphericalMercatorProjection.latitudeToY(location.getLatitude()),
+                    SphericalMercatorProjection.longitudeToX(location.getLongitude())
+                    // TODO: add altitude
+            };
+        }
+        return positions;
+    }
+
+    public static double[] getDistances(List<Beacon> beacons) {
+        double[] distances = new double[beacons.size()];
+        for (int beaconIndex = 0; beaconIndex < beacons.size(); beaconIndex++) {
+            distances[beaconIndex] = beacons.get(beaconIndex).getDistance();
+        }
+        return distances;
+    }
+
     public LeastSquaresOptimizer.Optimum findOptimum() {
-        double[][] positions = new double[][]{{5.0, -6.0}, {13.0, -15.0}, {21.0, -3.0}, {12.4, -21.2}};
-        double[] distances = new double[]{8.06, 13.97, 23.32, 15.31};
+        double[][] positions = getPositions(beacons);
+        double[] distances = getDistances(beacons);
         return findOptimum(positions, distances);
     }
 
@@ -46,8 +69,10 @@ public class Multilateration {
 
     public static Location getLocation(LeastSquaresOptimizer.Optimum optimum) {
         double[] centroid = optimum.getPoint().toArray();
-        // TODO: convert to geo coordinates
-        return new Location();
+        double latitude = SphericalMercatorProjection.yToLatitude(centroid[0]);
+        double longitude = SphericalMercatorProjection.xToLongitude(centroid[1]);
+        // TODO: add altitude
+        return new Location(latitude, longitude);
     }
 
     public static float getAccuracy(LeastSquaresOptimizer.Optimum optimum) {
