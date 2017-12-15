@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.nexenio.bleindoorpositioning.IndoorPositioning;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
@@ -72,6 +73,7 @@ public abstract class BeaconViewFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        IndoorPositioning.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.requestLastKnownLocation();
         BeaconManager.registerBeaconUpdateListener(beaconUpdateListener);
@@ -80,6 +82,7 @@ public abstract class BeaconViewFragment extends Fragment {
     @CallSuper
     @Override
     public void onDetach() {
+        IndoorPositioning.unregisterLocationListener(deviceLocationListener);
         AndroidLocationProvider.unregisterLocationListener(deviceLocationListener);
         BeaconManager.unregisterBeaconUpdateListener(beaconUpdateListener);
         super.onDetach();

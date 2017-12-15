@@ -42,13 +42,12 @@ public class MultilaterationTest {
 
     @Test
     public void findOptimum_realLocations_matchingOptimum() throws Exception {
-        double[] expectedCenter = new double[]{
-                6893722.565857311, 1473817.181344815}; // SOCCER_FIELD_CENTER
+        double[] expectedCenter = new double[]{6893722.565857311, 1473817.181344815}; // SOCCER_FIELD_CENTER
         double[][] positions = new double[][]{
                 {6893765.004164174, 1473724.674847966}, // SOCCER_FIELD_TOP_LEFT
                 {6893789.51604695, 1473894.4370714256}, // SOCCER_FIELD_TOP_RIGHT
                 {6893679.213163125, 1473911.580273008}, // SOCCER_FIELD_BOTTOM_RIGHT
-                {6893654.335773319, 1473740.259576677}, // SOCCER_FIELD_BOTTOM_LEFT
+                {6893654.335773319, 1473740.259576677} // SOCCER_FIELD_BOTTOM_LEFT
         };
         double distance = 125.095963; // distance from soccer field center to any edge
         double[] distances = new double[]{distance, distance, distance, distance};

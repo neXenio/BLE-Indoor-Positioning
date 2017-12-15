@@ -25,7 +25,6 @@ public class Multilateration {
 
     private Location location;
     private float accuracy;
-    private long slidingWindowDuration;
     private LeastSquaresOptimizer.Optimum optimum;
 
     public Multilateration(List<Beacon> beacons) {
@@ -104,10 +103,6 @@ public class Multilateration {
             accuracy = getAccuracy(getOptimum());
         }
         return accuracy;
-    }
-
-    public long getSlidingWindowDuration() {
-        return slidingWindowDuration;
     }
 
     public LeastSquaresOptimizer.Optimum getOptimum() {

@@ -159,8 +159,8 @@ public class BluetoothClient {
         final Location location = new Location();
         switch (iBeacon.getMinor()) {
             case 1: {
-                location.setLatitude(52.512441);
-                location.setLongitude(13.391112);
+                location.setLatitude(52.512437);
+                location.setLongitude(13.391124);
                 break;
             }
             case 2: {
@@ -171,6 +171,11 @@ public class BluetoothClient {
             case 3: {
                 location.setLatitude(52.512424);
                 location.setLongitude(13.390829);
+                break;
+            }
+            case 4: {
+                location.setLatitude(52.512426);
+                location.setLongitude(13.390887);
                 break;
             }
         }

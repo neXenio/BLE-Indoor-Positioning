@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.location.Location;
@@ -8,6 +9,7 @@ import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculat
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -44,7 +46,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public boolean hasLocation() {
-        return locationProvider.getLocation() != null;
+        return locationProvider.getLocation() != null && locationProvider.getLocation().hasLatitudeAndLongitude();
     }
 
     public Location getLocation() {
@@ -128,13 +130,31 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return hasAnyAdvertisingPacket() && getLatestAdvertisingPacket().equals(advertisingPacket);
     }
 
+    public boolean hasBeenSeenSince(long timestamp) {
+        if (!hasAnyAdvertisingPacket()) {
+            return false;
+        }
+        return getLatestAdvertisingPacket().getTimestamp() > timestamp;
+    }
+
     public float getDistance() {
-        return BeaconDistanceCalculator.calculateDistanceTo(this);
+        List<AdvertisingPacket> recentAdvertisingPackets = (List<AdvertisingPacket>) getAdvertisingPacketsFromLast(3, TimeUnit.SECONDS);
+        int[] recentRssis = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(recentAdvertisingPackets);
+        float meanRssi = AdvertisingPacketUtil.getMeanRssi(recentRssis);
+        return BeaconDistanceCalculator.calculateDistanceTo(this, meanRssi);
     }
 
     public float getEstimatedAdvertisingRange() {
         return BeaconUtil.getAdvertisingRange(transmissionPower);
     }
+
+    public static Comparator<Beacon> RssiComparator = new Comparator<Beacon>() {
+
+        public int compare(Beacon firstBeacon, Beacon secondBeacon) {
+            return firstBeacon.rssi - secondBeacon.rssi;
+        }
+
+    };
 
     /*
         Getter & Setter
