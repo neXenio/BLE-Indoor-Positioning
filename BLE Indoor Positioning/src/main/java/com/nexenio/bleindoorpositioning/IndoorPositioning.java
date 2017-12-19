@@ -26,7 +26,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
     private Location lastKnownLocation;
     private long lastLocationUpdateTimestamp;
-    private long maximumLocationUpdateInterval = UPDATE_INTERVAL_FAST;
+    private long maximumLocationUpdateInterval = UPDATE_INTERVAL_MEDIUM;
     private Set<LocationListener> locationListeners = new HashSet<>();
 
     private IndoorPositioning() {

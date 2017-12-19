@@ -138,7 +138,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public float getDistance() {
-        List<AdvertisingPacket> recentAdvertisingPackets = (List<AdvertisingPacket>) getAdvertisingPacketsFromLast(3, TimeUnit.SECONDS);
+        List<AdvertisingPacket> recentAdvertisingPackets = (List<AdvertisingPacket>) getAdvertisingPacketsFromLast(5, TimeUnit.SECONDS);
         int[] recentRssis = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(recentAdvertisingPackets);
         float meanRssi = AdvertisingPacketUtil.getMeanRssi(recentRssis);
         return BeaconDistanceCalculator.calculateDistanceTo(this, meanRssi);

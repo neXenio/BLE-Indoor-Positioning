@@ -2,6 +2,7 @@ package com.nexenio.bleindoorpositioning.location.multilateration;
 
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationTest;
+import com.nexenio.bleindoorpositioning.location.projection.SphericalMercatorProjection;
 
 import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
 import org.junit.Test;
@@ -63,6 +64,25 @@ public class MultilaterationTest {
         System.out.println("Found center location: " + actualCenterLocation.generateGoogleMapsUri());
         System.out.println("Error to expected location: " + String.format("%.2f", error) + "m");
         assertEquals(0, error, 5);
+    }
+
+    @Test
+    public void location_accuracy() throws Exception {
+        double[] point = new double[]{6893722.565857311, 1473817.181344815}; // SOCCER_FIELD_CENTER
+        double latitude = SphericalMercatorProjection.yToLatitude(point[0]);
+        double longitude = SphericalMercatorProjection.xToLongitude(point[1]);
+        Location location = new Location(latitude, longitude);
+
+        double[] adjustedPoint = new double[]{6893722.56, 1473817.18}; // SOCCER_FIELD_CENTER
+        latitude = SphericalMercatorProjection.yToLatitude(adjustedPoint[0]);
+        longitude = SphericalMercatorProjection.xToLongitude(adjustedPoint[1]);
+        Location adjustedLocation = new Location(latitude, longitude);
+
+        System.out.println("Location: " + location.generateGoogleMapsUri());
+        System.out.println("Adjusted location: " + adjustedLocation.generateGoogleMapsUri());
+
+        double error = adjustedLocation.getDistanceTo(location);
+        System.out.println("Error to expected location: " + String.format("%.2f", error) + "m");
     }
 
 }
