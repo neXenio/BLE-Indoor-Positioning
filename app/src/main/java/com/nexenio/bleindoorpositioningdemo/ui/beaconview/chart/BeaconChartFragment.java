@@ -3,8 +3,6 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
-import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,6 +13,7 @@ import android.view.ViewGroup;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -23,13 +22,37 @@ import com.nexenio.bleindoorpositioningdemo.ui.beaconview.BeaconViewFragment;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class BeaconChartFragment extends BeaconViewFragment {
 
     private BeaconChart beaconChart;
-    private static final UUID expectedUuid = UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01"); // TODO: remove debug filter
+
+    public BeaconChartFragment() {
+        super();
+
+        IBeaconFilter uuidFilter = new IBeaconFilter() {
+
+            private UUID legacyUuid = UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01");
+            private UUID gateDetectionUuid = UUID.fromString("f175c9a8-d51c-4d25-8449-4d3d340d1067");
+            private UUID indoorPositioningUuid = UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291");
+
+            @Override
+            public boolean matches(IBeacon beacon) {
+                if (legacyUuid.equals(beacon.getProximityUuid())) {
+                    return true;
+                }
+                if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
+                    return true;
+                }
+                if (gateDetectionUuid.equals(beacon.getProximityUuid())) {
+                    return true;
+                }
+                return false;
+            }
+        };
+        beaconFilters.add(uuidFilter);
+    }
 
     @Override
     protected int getLayoutResourceId() {
@@ -54,13 +77,7 @@ public class BeaconChartFragment extends BeaconViewFragment {
         return new BeaconUpdateListener() {
             @Override
             public void onBeaconUpdated(Beacon updatedBeacon) {
-                List<Beacon> beacons = new ArrayList<>();
-                for (Beacon beacon : beaconManager.getBeaconMap().values()) {
-                    if (shouldRenderBeacon(beacon)) {
-                        beacons.add(beacon);
-                    }
-                }
-                beaconChart.setBeacons(beacons);
+                beaconChart.setBeacons(getBeacons());
             }
         };
     }
@@ -108,17 +125,6 @@ public class BeaconChartFragment extends BeaconViewFragment {
     protected void onColoringModeSelected(@ColorUtil.ColoringMode int coloringMode, MenuItem menuItem) {
         super.onColoringModeSelected(coloringMode, menuItem);
         beaconChart.setColoringMode(coloringMode);
-    }
-
-    protected boolean shouldRenderBeacon(@NonNull Beacon beacon) {
-        if (!(beacon instanceof IBeacon)) {
-            return false;
-        }
-        UUID proximityUuid = ((IBeacon) beacon).getProximityUuid();
-        if (!expectedUuid.equals(proximityUuid)) {
-            return false;
-        }
-        return true;
     }
 
 }

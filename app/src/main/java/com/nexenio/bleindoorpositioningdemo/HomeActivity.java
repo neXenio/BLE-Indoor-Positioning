@@ -56,7 +56,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_filter:
-                Log.w(TAG, "Filter");
+                Log.w(TAG, "BeaconFilter");
                 return true;
             default:
                 break;

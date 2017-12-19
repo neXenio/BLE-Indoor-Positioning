@@ -12,11 +12,15 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.scan.ScanResult;
 import com.polidea.rxandroidble.scan.ScanSettings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import rx.Observer;
 import rx.Subscription;
@@ -179,7 +183,6 @@ public class BluetoothClient {
                 break;
             }
         }
-
         return new LocationProvider() {
             @Override
             public Location getLocation() {

@@ -1,6 +1,5 @@
 package com.nexenio.bleindoorpositioningdemo.ui.beaconview;
 
-
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
@@ -21,6 +20,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -37,6 +37,7 @@ public abstract class BeaconViewFragment extends Fragment {
     protected BeaconManager beaconManager = BeaconManager.getInstance();
     protected LocationListener deviceLocationListener;
     protected BeaconUpdateListener beaconUpdateListener;
+    protected List<BeaconFilter> beaconFilters = new ArrayList<>();
 
     protected CoordinatorLayout coordinatorLayout;
 
@@ -116,7 +117,22 @@ public abstract class BeaconViewFragment extends Fragment {
     protected void onColoringModeSelected(@ColorUtil.ColoringMode int coloringMode, MenuItem menuItem) {
         menuItem.setChecked(true);
         this.coloringMode = coloringMode;
-        Log.d("Coloring Mode", "" + coloringMode);
+    }
+
+    protected List<Beacon> getBeacons() {
+        if (beaconFilters.isEmpty()) {
+            return new ArrayList<>(beaconManager.getBeaconMap().values());
+        }
+        List<Beacon> beacons = new ArrayList<>();
+        for (Beacon beacon : beaconManager.getBeaconMap().values()) {
+            for (BeaconFilter beaconFilter : beaconFilters) {
+                if (beaconFilter.matches(beacon)) {
+                    beacons.add(beacon);
+                    break;
+                }
+            }
+        }
+        return beacons;
     }
 
     private static List<Beacon> createTestBeacons() {
