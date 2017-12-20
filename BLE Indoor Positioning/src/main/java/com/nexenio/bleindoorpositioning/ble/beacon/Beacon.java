@@ -4,6 +4,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.RssiArmaFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -140,8 +141,15 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     public float getDistance() {
         List<AdvertisingPacket> recentAdvertisingPackets = (List<AdvertisingPacket>) getAdvertisingPacketsFromLast(5, TimeUnit.SECONDS);
         int[] recentRssis = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(recentAdvertisingPackets);
-        float meanRssi = AdvertisingPacketUtil.getMeanRssi(recentRssis);
-        return BeaconDistanceCalculator.calculateDistanceTo(this, meanRssi);
+        //float meanRssi = AdvertisingPacketUtil.getMeanRssi(recentRssis);
+        RssiArmaFilter filter = new RssiArmaFilter();
+        filter.addMeasurement((int) AdvertisingPacketUtil.getMeanRssi(recentRssis),recentRssis.length);
+        float filteredRssi = (float) filter.getFilteredRssi();
+        float distance = BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
+        System.out.println("mac: " + macAddress + " | packets: " + recentRssis.length + " | distance: " + distance + " | filteredRssi: " + filteredRssi);
+        // E2:38:2E:68:46:E9 - No. 5
+        //
+        return distance;
     }
 
     public float getEstimatedAdvertisingRange() {
