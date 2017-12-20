@@ -2,6 +2,7 @@ package com.nexenio.bleindoorpositioning.ble.advertising;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +36,21 @@ public abstract class AdvertisingPacketUtil {
             rssiSum += rssis[i];
         }
         return rssiSum / (float) rssis.length;
+    }
+
+    public static float getMedianRssi(int[] values) {
+        // sort values
+        Arrays.sort(values);
+
+        // get centered value
+        float medianValue;
+        int middleIndex = values.length / 2;
+        if (values.length % 2 == 1) {
+            medianValue = values[middleIndex];
+        } else {
+            medianValue = (values[middleIndex - 1] + values[middleIndex]) / 2f;
+        }
+        return medianValue;
     }
 
 }
