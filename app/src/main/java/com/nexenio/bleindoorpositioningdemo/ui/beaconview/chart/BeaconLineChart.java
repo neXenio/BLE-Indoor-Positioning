@@ -362,7 +362,6 @@ public class BeaconLineChart extends BeaconChart {
         List<AdvertisingPacket> recentAdvertisingPackets = null;
         int[] recentRssis;
         float meanRssi;
-        float medianRssi = 0;
 
         // make sure that the window size is at least 10 seconds when we're looking for the frequency
         windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? windowLength : Math.max(windowLength, 10000);
@@ -376,7 +375,6 @@ public class BeaconLineChart extends BeaconChart {
             );
             recentRssis = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(recentAdvertisingPackets);
             meanRssi = AdvertisingPacketUtil.getMeanRssi(recentRssis);
-            medianRssi = AdvertisingPacketUtil.getMedianRssi(recentRssis);
         }
 
         switch (valueType) {
@@ -384,7 +382,7 @@ public class BeaconLineChart extends BeaconChart {
                 return meanRssi;
             }
             case VALUE_TYPE_DISTANCE: {
-                return BeaconDistanceCalculator.calculateDistanceTo(beacon, medianRssi);
+                return BeaconDistanceCalculator.calculateDistanceTo(beacon, meanRssi);
             }
             case VALUE_TYPE_FREQUENCY: {
                 return 1000 * (recentAdvertisingPackets.size() / (float) windowLength);
