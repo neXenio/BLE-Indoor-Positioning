@@ -145,8 +145,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         filter.addMeasurement((int) AdvertisingPacketUtil.getMeanRssi(recentRssis),recentRssis.length);
         float filteredRssi = (float) filter.getFilteredRssi();
         float distance = BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
-        System.out.println("mac: " + macAddress + " | packets: " + recentRssis.length + " | distance: " + distance + " | filteredRssi: " + filteredRssi);
-        // E2:38:2E:68:46:E9 - No. 5
+        //System.out.println("mac: " + macAddress + " | packets: " + recentRssis.length + " | distance: " + distance + " | filteredRssi: " + filteredRssi);
         return distance;
     }
 

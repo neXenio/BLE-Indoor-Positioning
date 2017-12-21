@@ -38,19 +38,4 @@ public abstract class AdvertisingPacketUtil {
         return rssiSum / (float) rssis.length;
     }
 
-    public static float getMedianRssi(int[] values) {
-        // sort values
-        Arrays.sort(values);
-
-        // get centered value
-        float medianValue;
-        int middleIndex = values.length / 2;
-        if (values.length % 2 == 1) {
-            medianValue = values[middleIndex];
-        } else {
-            medianValue = (values[middleIndex - 1] + values[middleIndex]) / 2f;
-        }
-        return medianValue;
-    }
-
 }

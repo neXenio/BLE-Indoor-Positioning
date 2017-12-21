@@ -175,7 +175,7 @@ public class BeaconLineChart extends BeaconChart {
             }
             case VALUE_TYPE_DISTANCE: {
                 yAxisLabel = getContext().getString(R.string.axis_label_distance);
-                yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 10);
+                yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 25);
                 yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, 0);
                 break;
             }
