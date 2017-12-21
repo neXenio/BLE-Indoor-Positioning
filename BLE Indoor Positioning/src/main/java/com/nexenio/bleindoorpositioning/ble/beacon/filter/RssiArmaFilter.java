@@ -19,7 +19,6 @@ public class RssiArmaFilter {
     // Note: the more unlikely, the higher can that value be also, the lower the (expected) sending frequency,
     // the higher should that value be
     private static double DEFAULT_ARMA_FACTOR = 0.95;
-
     private double rssiPrediction;
     private double armaFactor;
     private boolean isInitialized = false;
