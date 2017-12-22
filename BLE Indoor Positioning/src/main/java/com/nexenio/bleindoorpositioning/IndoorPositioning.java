@@ -68,7 +68,6 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
             Collections.reverse(usableBeacons);
             for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
                 if (usableBeacons.get(beaconIndex).getRssi() < 90) {
-                    System.out.println("Ignoring beacon: " + usableBeacons.get(beaconIndex).getLatestAdvertisingPacket());
                     usableBeacons.remove(beaconIndex);
                 }
             }

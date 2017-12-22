@@ -294,6 +294,9 @@ public class BeaconMap extends BeaconView {
     }
 
     protected void startDeviceRadiusAnimation() {
+        if (deviceAccuracyAnimator != null && deviceAccuracyAnimator.isRunning()) {
+            return;
+        }
         deviceAccuracyAnimator = ValueAnimator.ofFloat(0, 1);
         deviceAccuracyAnimator.setDuration(LocationAnimator.ANIMATION_DURATION_LONG);
         deviceAccuracyAnimator.setRepeatCount(1);

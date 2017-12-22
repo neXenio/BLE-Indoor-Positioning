@@ -15,11 +15,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.nexenio.bleindoorpositioning.gate.GateDetection;
 import com.nexenio.bleindoorpositioningdemo.bluetooth.BluetoothClient;
 import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart.BeaconChartFragment;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.map.BeaconMapFragment;
+import com.nexenio.bleindoorpositioningdemo.ui.beaconview.radar.BeaconRadarFragment;
 
 public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -37,7 +37,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
         coordinatorLayout = findViewById(R.id.coordinatorLayout);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
-        bottomNavigationView.setSelectedItemId(R.id.navigation_chart);
+        bottomNavigationView.setSelectedItemId(R.id.navigation_radar);
 
         // setup location
         AndroidLocationProvider.initialize(this);
@@ -74,6 +74,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
                 break;
             }
             case R.id.navigation_radar: {
+                selectedFragment = new BeaconRadarFragment();
                 break;
             }
             case R.id.navigation_chart: {
