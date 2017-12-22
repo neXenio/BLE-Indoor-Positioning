@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.nexenio.bleindoorpositioning.gate.GateDetection;
 import com.nexenio.bleindoorpositioningdemo.bluetooth.BluetoothClient;
 import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart.BeaconChartFragment;

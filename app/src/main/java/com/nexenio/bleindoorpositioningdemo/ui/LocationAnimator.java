@@ -5,7 +5,7 @@ import android.animation.ValueAnimator;
 import android.support.annotation.NonNull;
 
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
+import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 /**

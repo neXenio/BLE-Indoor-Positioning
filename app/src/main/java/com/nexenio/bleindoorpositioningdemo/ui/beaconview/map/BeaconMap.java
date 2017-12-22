@@ -15,7 +15,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
-import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
+import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 import com.nexenio.bleindoorpositioning.location.projection.EquirectangularProjection;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;

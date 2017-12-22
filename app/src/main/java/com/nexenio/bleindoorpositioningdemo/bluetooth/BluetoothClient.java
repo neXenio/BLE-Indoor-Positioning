@@ -150,9 +150,9 @@ public class BluetoothClient {
                 }
                 Log.d(TAG, macAddress + " data received for the first time: " + advertisingPacket);
             } else if (isNewAdvertisingData) {
-                Log.v(TAG, macAddress + " data changed to: " + advertisingPacket);
+                //Log.v(TAG, macAddress + " data changed to: " + advertisingPacket);
             } else {
-                Log.v(TAG, macAddress + " data unchanged: " + advertisingPacket);
+                //Log.v(TAG, macAddress + " data unchanged: " + advertisingPacket);
             }
 
         }

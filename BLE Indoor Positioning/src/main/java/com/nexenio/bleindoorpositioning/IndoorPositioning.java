@@ -4,7 +4,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
+import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
@@ -73,7 +73,8 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         lastLocationUpdateTimestamp = System.currentTimeMillis();
     }
 
-    private static List<Beacon> getUsableBeacons(Collection<Beacon> availableBeacons) {
+    public static List<Beacon> getUsableBeacons(Collection<Beacon> availableBeacons) {
+        // TODO: implement as beacon filter
         List<Beacon> usableBeacons = new ArrayList<>();
         long minimumTimestamp = System.currentTimeMillis() - 1000;
         for (Beacon beacon : availableBeacons) {
