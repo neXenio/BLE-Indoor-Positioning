@@ -3,6 +3,9 @@ package com.nexenio.bleindoorpositioning;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
+import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
@@ -14,6 +17,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class IndoorPositioning implements LocationProvider, BeaconUpdateListener {
 
@@ -28,6 +32,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private long lastLocationUpdateTimestamp;
     private long maximumLocationUpdateInterval = UPDATE_INTERVAL_MEDIUM;
     private Set<LocationListener> locationListeners = new HashSet<>();
+    private BeaconFilter indoorPositioningBeaconFilter = createIndoorPositioningBeaconFilter();
 
     private IndoorPositioning() {
 
@@ -62,7 +67,8 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
             usableBeacons.sort(Beacon.RssiComparator);
             Collections.reverse(usableBeacons);
             for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
-                if (usableBeacons.get(beaconIndex).getRssi() < 80) {
+                if (usableBeacons.get(beaconIndex).getRssi() < 90) {
+                    System.out.println("Ignoring beacon: " + usableBeacons.get(beaconIndex).getLatestAdvertisingPacket());
                     usableBeacons.remove(beaconIndex);
                 }
             }
@@ -77,7 +83,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         // TODO: implement as beacon filter
         List<Beacon> usableBeacons = new ArrayList<>();
         long minimumTimestamp = System.currentTimeMillis() - 1000;
-        for (Beacon beacon : availableBeacons) {
+        for (Beacon beacon : (List<Beacon>) getInstance().indoorPositioningBeaconFilter.getMatches(availableBeacons)) {
             if (!beacon.hasLocation()) {
                 continue; // beacon has no location assigned, can't use it for multilateration
             }
@@ -106,6 +112,25 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
     public static boolean unregisterLocationListener(LocationListener locationListener) {
         return getInstance().locationListeners.remove(locationListener);
+    }
+
+    public static IBeaconFilter createIndoorPositioningBeaconFilter() {
+        return new IBeaconFilter() {
+
+            private UUID legacyUuid = UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01");
+            private UUID indoorPositioningUuid = UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291");
+
+            @Override
+            public boolean matches(IBeacon beacon) {
+                if (legacyUuid.equals(beacon.getProximityUuid())) {
+                    return true;
+                }
+                if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
+                    return true;
+                }
+                return false;
+            }
+        };
     }
 
 }

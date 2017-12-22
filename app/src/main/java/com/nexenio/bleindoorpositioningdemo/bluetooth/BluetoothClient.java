@@ -182,6 +182,11 @@ public class BluetoothClient {
                 location.setLongitude(13.390887);
                 break;
             }
+            case 5: {
+                location.setLatitude(52.512369);
+                location.setLongitude(13.390838);
+                break;
+            }
         }
         return new LocationProvider() {
             @Override

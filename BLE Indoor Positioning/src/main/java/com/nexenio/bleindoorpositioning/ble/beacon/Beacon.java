@@ -152,7 +152,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public float getDistance(long amount, TimeUnit timeUnit) {
-        float meanRssi = getMeanRssi(3, TimeUnit.SECONDS);
+        float meanRssi = getMeanRssi(amount, timeUnit);
         return BeaconDistanceCalculator.calculateDistanceTo(this, meanRssi);
     }
 
