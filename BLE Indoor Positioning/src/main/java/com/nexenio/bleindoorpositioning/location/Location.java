@@ -58,6 +58,10 @@ public class Location {
         return LocationDistanceCalculator.calculateDistanceBetween(this, location, false);
     }
 
+    public double getAngleTo(Location location) {
+        return getRotationAngleInDegrees(this, location);
+    }
+
     public boolean latitudeAndLongitudeEquals(Location location) {
         return latitude == location.latitude && longitude == location.longitude;
     }
@@ -91,6 +95,24 @@ public class Location {
             sb.append("Altitude: ").append(altitude).append(" ");
         }
         return sb.toString();
+    }
+
+    /**
+     * Calculates the angle from centerPt to targetPt in degrees.
+     * The return should range from [0,360), rotating CLOCKWISE,
+     * 0 and 360 degrees represents NORTH, 90 degrees represents EAST.
+     *
+     * @param centerLocation Location we are rotating around.
+     * @param targetLocation Location we want to calculate the angle to.
+     * @return angle in degrees. This is the angle from centerLocation to targetLocation.
+     */
+    public static double getRotationAngleInDegrees(Location centerLocation, Location targetLocation) {
+        double longitudeDelta = targetLocation.longitude - centerLocation.longitude;
+        double x = (Math.cos(centerLocation.latitude) * Math.sin(targetLocation.latitude))
+                - (Math.sin(centerLocation.latitude) * Math.cos(targetLocation.latitude) * Math.cos(longitudeDelta));
+        double y = Math.sin(longitudeDelta) * Math.cos(targetLocation.latitude);
+        double angle = Math.toDegrees(Math.atan2(y, x));
+        return 360 - ((angle + 360) % 360);
     }
 
     /*
