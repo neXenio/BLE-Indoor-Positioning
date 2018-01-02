@@ -51,6 +51,7 @@ public class BeaconRadar extends BeaconView {
     public void initialize() {
         super.initialize();
         startMaximumDistanceAnimation(100);
+        setDeviceAngle(0);
         legendPaint = new Paint(textPaint);
         legendPaint.setTextSize(pixelsPerDip * 12);
         legendPaint.setStyle(Paint.Style.STROKE);
@@ -128,17 +129,16 @@ public class BeaconRadar extends BeaconView {
     }
 
     protected void drawLegend(Canvas canvas) {
+        float referenceDistance = DistanceUtil.getReasonableSmallerEvenDistance((float) maximumDistanceAnimator.getAnimatedValue());
+        int referenceLineCount = 5;
+        float referenceDistanceStep = Math.round(referenceDistance / (float) referenceLineCount);
         float distance;
         float canvasUnits;
-        int lineCount = 5;
-        float referenceDistance = DistanceUtil.getReasonableSmallerEvenDistance((float) maximumDistanceAnimator.getAnimatedValue());
-        float distanceStep = Math.round(referenceDistance / (float) lineCount);
-
         String referenceText;
         float referenceTextWidth;
 
-        for (int i = lineCount; i > 0; i--) {
-            distance = i * distanceStep;
+        for (int i = referenceLineCount; i > 0; i--) {
+            distance = Math.round(i * referenceDistanceStep);
             canvasUnits = getCanvasUnitsFromMeters(distance);
 
             canvas.drawCircle(
@@ -148,12 +148,12 @@ public class BeaconRadar extends BeaconView {
                     legendPaint
             );
 
-            referenceText = String.valueOf(Math.round(distance)) + "m";
+            referenceText = String.valueOf(distance) + "m";
             referenceTextWidth = legendPaint.measureText(referenceText);
             canvas.drawText(
                     referenceText,
-                    (canvasWidth / 2) - (referenceTextWidth / 2),
-                    canvasCenter.y + canvasUnits + (pixelsPerDip * 12),
+                    canvasCenter.x - (referenceTextWidth / 2),
+                    canvasCenter.y + canvasUnits + legendPaint.getTextSize(),
                     legendPaint
             );
         }
@@ -183,7 +183,7 @@ public class BeaconRadar extends BeaconView {
     }
 
     public void fitToCurrentLocations() {
-        float maximumDistance = 20;
+        float maximumDistance = 15;
         // TODO: get actual maximum distance
         startMaximumDistanceAnimation(maximumDistance);
     }

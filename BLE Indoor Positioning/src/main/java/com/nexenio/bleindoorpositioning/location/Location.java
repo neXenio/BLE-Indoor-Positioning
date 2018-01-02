@@ -98,13 +98,13 @@ public class Location {
     }
 
     /**
-     * Calculates the angle from centerPt to targetPt in degrees.
-     * The return should range from [0,360), rotating CLOCKWISE,
+     * Calculates the angle between two locations in degrees.
+     * The result ranges from [0,360), rotating CLOCKWISE,
      * 0 and 360 degrees represents NORTH, 90 degrees represents EAST.
      *
      * @param centerLocation Location we are rotating around.
      * @param targetLocation Location we want to calculate the angle to.
-     * @return angle in degrees. This is the angle from centerLocation to targetLocation.
+     * @return angle in degrees
      */
     public static double getRotationAngleInDegrees(Location centerLocation, Location targetLocation) {
         double longitudeDelta = targetLocation.longitude - centerLocation.longitude;

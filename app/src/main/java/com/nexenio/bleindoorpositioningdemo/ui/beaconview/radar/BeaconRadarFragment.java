@@ -28,12 +28,12 @@ import java.util.UUID;
 public class BeaconRadarFragment extends BeaconViewFragment {
 
     private BeaconRadar beaconRadar;
+
     private SensorManager sensorManager;
     private SensorEventListener sensorEventListener;
 
     private final float[] accelerometerReading = new float[3];
     private final float[] magnetometerReading = new float[3];
-
     private final float[] rotationMatrix = new float[9];
     private final float[] orientationAngles = new float[3];
 
@@ -128,7 +128,6 @@ public class BeaconRadarFragment extends BeaconViewFragment {
         View inflatedView = super.onCreateView(inflater, container, savedInstanceState);
         beaconRadar = inflatedView.findViewById(R.id.beaconRadar);
         beaconRadar.setBeacons(getBeacons());
-        beaconRadar.setDeviceAngle(90);
         return inflatedView;
     }
 
