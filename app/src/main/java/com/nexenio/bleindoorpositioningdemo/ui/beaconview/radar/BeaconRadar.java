@@ -28,6 +28,7 @@ public class BeaconRadar extends BeaconView {
 
     protected ValueAnimator deviceAccuracyAnimator;
     protected ValueAnimator maximumDistanceAnimator;
+    protected ValueAnimator deviceAngleAnimator;
 
     public BeaconRadar(Context context) {
         super(context);
@@ -138,9 +139,16 @@ public class BeaconRadar extends BeaconView {
     }
 
     protected PointF getPointFromLocation(Location location) {
-        double distance = deviceLocationAnimator != null ? location.getDistanceTo(deviceLocationAnimator.getLocation()) : 0;
-        float x = canvasCenter.x;
-        float y = canvasCenter.y - getCanvasUnitsFromMeters(distance);
+        if (deviceLocationAnimator == null) {
+            return new PointF(canvasCenter.x, canvasCenter.y);
+        }
+        double distance = location.getDistanceTo(deviceLocationAnimator.getLocation());
+        double radius = getCanvasUnitsFromMeters(distance);
+        double angle = deviceLocationAnimator.getLocation().getAngleTo(location);
+        angle = (angle - (float) deviceAngleAnimator.getAnimatedValue()) % 360;
+        angle = Math.toRadians(angle) - (Math.PI / 2);
+        float x = (float) (canvasCenter.x + (radius * Math.cos(angle)));
+        float y = (float) (canvasCenter.y + (radius * Math.sin(angle)));
         return new PointF(x, y);
     }
 
@@ -168,11 +176,10 @@ public class BeaconRadar extends BeaconView {
         float originValue = distance;
         if (maximumDistanceAnimator != null) {
             originValue = (float) maximumDistanceAnimator.getAnimatedValue();
-            maximumDistanceAnimator.end();
+            maximumDistanceAnimator.cancel();
         }
         maximumDistanceAnimator = ValueAnimator.ofFloat(originValue, distance);
         maximumDistanceAnimator.setDuration(LocationAnimator.ANIMATION_DURATION_LONG);
-        maximumDistanceAnimator.setRepeatCount(1);
         maximumDistanceAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
@@ -198,6 +205,23 @@ public class BeaconRadar extends BeaconView {
             }
         });
         deviceAccuracyAnimator.start();
+    }
+
+    public void setDeviceAngle(float deviceAngle) {
+        float originValue = deviceAngle;
+        if (deviceAngleAnimator != null) {
+            originValue = (float) deviceAngleAnimator.getAnimatedValue();
+            deviceAngleAnimator.cancel();
+        }
+        deviceAngleAnimator = ValueAnimator.ofFloat(originValue, deviceAngle);
+        deviceAngleAnimator.setDuration(200);
+        deviceAngleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                invalidate();
+            }
+        });
+        deviceAngleAnimator.start();
     }
 
 }

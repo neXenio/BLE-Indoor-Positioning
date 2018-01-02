@@ -1,6 +1,11 @@
 package com.nexenio.bleindoorpositioningdemo.ui.beaconview.radar;
 
 
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.view.LayoutInflater;
@@ -16,15 +21,21 @@ import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import com.nexenio.bleindoorpositioningdemo.R;
-import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.BeaconViewFragment;
-import com.nexenio.bleindoorpositioningdemo.ui.beaconview.radar.BeaconRadar;
 
 import java.util.UUID;
 
 public class BeaconRadarFragment extends BeaconViewFragment {
 
     private BeaconRadar beaconRadar;
+    private SensorManager sensorManager;
+    private SensorEventListener sensorEventListener;
+
+    private final float[] accelerometerReading = new float[3];
+    private final float[] magnetometerReading = new float[3];
+
+    private final float[] rotationMatrix = new float[9];
+    private final float[] orientationAngles = new float[3];
 
     public BeaconRadarFragment() {
         super();
@@ -45,6 +56,42 @@ public class BeaconRadarFragment extends BeaconViewFragment {
             }
         };
         beaconFilters.add(uuidFilter);
+
+        sensorEventListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent sensorEvent) {
+                switch (sensorEvent.sensor.getType()) {
+                    case Sensor.TYPE_ACCELEROMETER: {
+                        System.arraycopy(sensorEvent.values, 0, accelerometerReading, 0, accelerometerReading.length);
+                        break;
+                    }
+                    case Sensor.TYPE_MAGNETIC_FIELD: {
+                        System.arraycopy(sensorEvent.values, 0, magnetometerReading, 0, magnetometerReading.length);
+                        break;
+                    }
+                }
+                updateOrientationAngles();
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int i) {
+
+            }
+        };
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD), SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    public void onDetach() {
+        sensorManager.unregisterListener(sensorEventListener);
+        super.onDetach();
     }
 
     @Override
@@ -60,10 +107,6 @@ public class BeaconRadarFragment extends BeaconViewFragment {
                 if (locationProvider == IndoorPositioning.getInstance()) {
                     beaconRadar.setDeviceLocation(location);
                     beaconRadar.fitToCurrentLocations();
-                } else if (locationProvider == AndroidLocationProvider.getInstance()) {
-                    // TODO: remove artificial noise
-                    //location.setLatitude(location.getLatitude() + Math.random() * 0.0002);
-                    //location.setLongitude(location.getLongitude() + Math.random() * 0.0002);
                 }
             }
         };
@@ -85,7 +128,14 @@ public class BeaconRadarFragment extends BeaconViewFragment {
         View inflatedView = super.onCreateView(inflater, container, savedInstanceState);
         beaconRadar = inflatedView.findViewById(R.id.beaconRadar);
         beaconRadar.setBeacons(getBeacons());
+        beaconRadar.setDeviceAngle(90);
         return inflatedView;
+    }
+
+    private void updateOrientationAngles() {
+        SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading);
+        SensorManager.getOrientation(rotationMatrix, orientationAngles);
+        beaconRadar.setDeviceAngle((float) Math.toDegrees(orientationAngles[0]));
     }
 
 }
