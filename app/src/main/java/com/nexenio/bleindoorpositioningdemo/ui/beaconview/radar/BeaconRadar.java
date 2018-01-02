@@ -3,17 +3,17 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.radar;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.RadialGradient;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioningdemo.ui.LocationAnimator;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.BeaconView;
 
@@ -29,6 +29,7 @@ public class BeaconRadar extends BeaconView {
     protected ValueAnimator deviceAccuracyAnimator;
     protected ValueAnimator maximumDistanceAnimator;
     protected ValueAnimator deviceAngleAnimator;
+    protected Paint legendPaint;
 
     public BeaconRadar(Context context) {
         super(context);
@@ -50,6 +51,11 @@ public class BeaconRadar extends BeaconView {
     public void initialize() {
         super.initialize();
         startMaximumDistanceAnimation(100);
+        legendPaint = new Paint(textPaint);
+        legendPaint.setTextSize(pixelsPerDip * 12);
+        legendPaint.setStyle(Paint.Style.STROKE);
+        legendPaint.setColor(Color.BLACK);
+        legendPaint.setAlpha(25);
     }
 
     @Override
@@ -67,7 +73,7 @@ public class BeaconRadar extends BeaconView {
         float strokeRadius = (pixelsPerDip * 10) + (pixelsPerDip * 2 * animationValue);
 
         //canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, deviceRangePaint);
-        canvas.drawCircle(canvasCenter.x, canvasCenter.y, advertisingRadius, deviceRangePaint);
+        //canvas.drawCircle(canvasCenter.x, canvasCenter.y, advertisingRadius, deviceRangePaint);
         canvas.drawCircle(canvasCenter.x, canvasCenter.y, strokeRadius, whiteFillPaint);
         canvas.drawCircle(canvasCenter.x, canvasCenter.y, strokeRadius, secondaryStrokePaint);
         canvas.drawCircle(canvasCenter.x, canvasCenter.y, pixelsPerDip * 8, secondaryFillPaint);
@@ -100,20 +106,7 @@ public class BeaconRadar extends BeaconView {
     }
 
     protected void drawBeaconBackground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
-        float advertisingRadius = getCanvasUnitsFromMeters(beacon.getEstimatedAdvertisingRange());
 
-        Paint innerBeaconRangePaint = new Paint(beaconRangePaint);
-        innerBeaconRangePaint.setAlpha(100);
-        Shader rangeShader = new RadialGradient(
-                beaconCenter.x,
-                beaconCenter.y,
-                advertisingRadius - (pixelsPerDip * 0),
-                primaryFillPaint.getColor(), beaconRangePaint.getColor(),
-                Shader.TileMode.MIRROR);
-
-        innerBeaconRangePaint.setShader(rangeShader);
-        //canvas.drawCircle(beaconCenter.x, beaconCenter.y, advertisingRadius, innerBeaconRangePaint);
-        canvas.drawCircle(beaconCenter.x, beaconCenter.y, advertisingRadius, beaconRangePaint);
     }
 
     protected void drawBeaconForeground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
@@ -135,6 +128,35 @@ public class BeaconRadar extends BeaconView {
     }
 
     protected void drawLegend(Canvas canvas) {
+        float distance;
+        float canvasUnits;
+        int lineCount = 5;
+        float referenceDistance = DistanceUtil.getReasonableSmallerEvenDistance((float) maximumDistanceAnimator.getAnimatedValue());
+        float distanceStep = Math.round(referenceDistance / (float) lineCount);
+
+        String referenceText;
+        float referenceTextWidth;
+
+        for (int i = lineCount; i > 0; i--) {
+            distance = i * distanceStep;
+            canvasUnits = getCanvasUnitsFromMeters(distance);
+
+            canvas.drawCircle(
+                    canvasCenter.x,
+                    canvasCenter.y,
+                    canvasUnits,
+                    legendPaint
+            );
+
+            referenceText = String.valueOf(Math.round(distance)) + "m";
+            referenceTextWidth = legendPaint.measureText(referenceText);
+            canvas.drawText(
+                    referenceText,
+                    (canvasWidth / 2) - (referenceTextWidth / 2),
+                    canvasCenter.y + canvasUnits + (pixelsPerDip * 12),
+                    legendPaint
+            );
+        }
 
     }
 
