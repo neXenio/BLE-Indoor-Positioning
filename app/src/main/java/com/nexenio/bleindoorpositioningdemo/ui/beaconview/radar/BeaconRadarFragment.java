@@ -134,7 +134,7 @@ public class BeaconRadarFragment extends BeaconViewFragment {
     private void updateOrientationAngles() {
         SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading);
         SensorManager.getOrientation(rotationMatrix, orientationAngles);
-        beaconRadar.setDeviceAngle((float) Math.toDegrees(orientationAngles[0]));
+        beaconRadar.startDeviceAngleAnimation((float) Math.toDegrees(orientationAngles[0]));
     }
 
 }
