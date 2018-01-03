@@ -4,9 +4,11 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
-import com.nexenio.bleindoorpositioning.ble.beacon.filter.RssiArmaFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiArmaModel;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
+import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
@@ -139,14 +141,28 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public float getDistance() {
-        List<AdvertisingPacket> recentAdvertisingPackets = (List<AdvertisingPacket>) getAdvertisingPacketsFromLast(5, TimeUnit.SECONDS);
+        int timeWindow = 5;
+        List<AdvertisingPacket> recentAdvertisingPackets = (List<AdvertisingPacket>) getAdvertisingPacketsFromLast(timeWindow, TimeUnit.SECONDS);
         int[] recentRssis = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(recentAdvertisingPackets);
-        RssiArmaFilter filter = new RssiArmaFilter();
-        filter.addMeasurement((int) AdvertisingPacketUtil.getMeanRssi(recentRssis),recentRssis.length);
-        float filteredRssi = (float) filter.getFilteredRssi();
-        float distance = BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
-        //System.out.println("mac: " + macAddress + " | packets: " + recentRssis.length + " | distance: " + distance + " | filteredRssi: " + filteredRssi);
-        return distance;
+
+
+        float meanRssi = AdvertisingPacketUtil.getMeanRssi(recentRssis);
+        //TODO sampling
+
+        // RssiArmaModel arma = new RssiArmaModel();
+        // arma.addMeasurement((int) AdvertisingPacketUtil.getMeanRssi(recentRssis), getPacketFrequency(recentRssis.length,timeWindow));
+        // float armaRssi = arma.getFilteredRssi();
+        //return BeaconDistanceCalculator.calculateDistanceTo(this, armaRssi);
+
+
+        KalmanFilter kalmanFilter = new KalmanFilter();
+        float kalmanPrediction = (float) kalmanFilter.applyFilter(AdvertisingPacketUtil.getMeanRssi(recentRssis));
+
+        return BeaconDistanceCalculator.calculateDistanceTo(this, kalmanPrediction);
+    }
+
+    public static float getPacketFrequency(float packets, float time) {
+        return packets / time;
     }
 
     public float getEstimatedAdvertisingRange() {

@@ -1,6 +1,5 @@
 package com.nexenio.bleindoorpositioning.location.distance;
 
-import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
