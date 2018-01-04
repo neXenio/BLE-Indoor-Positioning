@@ -29,12 +29,36 @@ public abstract class AdvertisingPacketUtil {
         return rssis;
     }
 
-    public static float getMeanRssi(int[] rssis) {
+    public static float calculateMean(int[] values) {
         int rssiSum = 0;
-        for (int i = 0; i < rssis.length; i++) {
-            rssiSum += rssis[i];
+        for (int i = 0; i < values.length; i++) {
+            rssiSum += values[i];
         }
-        return rssiSum / (float) rssis.length;
+        return rssiSum / (float) values.length;
+    }
+
+    public static float calculateMean(float[] values) {
+        int rssiSum = 0;
+        for (int i = 0; i < values.length; i++) {
+            rssiSum += values[i];
+        }
+        return rssiSum / (float) values.length;
+    }
+
+    public static float calculateVariance(float[] values) {
+        float average = calculateMean(values);
+
+        float squaredDistanceSum = 0;
+        for (int i = 0; i < values.length; i++) {
+            squaredDistanceSum += Math.pow(values[i] - average, 2);
+        }
+        int sampleLength = Math.max(values.length - 1, 1);
+        return squaredDistanceSum / sampleLength;
+    }
+
+    public static float calculateStandardDeviation(float[] values) {
+        float variance = calculateVariance(values);
+        return (float) Math.sqrt(variance);
     }
 
 }

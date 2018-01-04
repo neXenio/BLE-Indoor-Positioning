@@ -4,11 +4,9 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
-import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
-import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiArmaModel;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
-import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
@@ -140,29 +138,17 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return getLatestAdvertisingPacket().getTimestamp() > timestamp;
     }
 
+    public float getRssi(RssiFilter filter) {
+        return filter.filter(advertisingPackets);
+    }
+
     public float getDistance() {
         int timeWindow = 5;
         List<AdvertisingPacket> recentAdvertisingPackets = (List<AdvertisingPacket>) getAdvertisingPacketsFromLast(timeWindow, TimeUnit.SECONDS);
         int[] recentRssis = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(recentAdvertisingPackets);
-
-
-        float meanRssi = AdvertisingPacketUtil.getMeanRssi(recentRssis);
-        //TODO sampling
-
-        // RssiArmaModel arma = new RssiArmaModel();
-        // arma.addMeasurement((int) AdvertisingPacketUtil.getMeanRssi(recentRssis), getPacketFrequency(recentRssis.length,timeWindow));
-        // float armaRssi = arma.getFilteredRssi();
-        //return BeaconDistanceCalculator.calculateDistanceTo(this, armaRssi);
-
-
-        KalmanFilter kalmanFilter = new KalmanFilter();
-        float kalmanPrediction = (float) kalmanFilter.applyFilter(AdvertisingPacketUtil.getMeanRssi(recentRssis));
-
-        return BeaconDistanceCalculator.calculateDistanceTo(this, kalmanPrediction);
-    }
-
-    public static float getPacketFrequency(float packets, float time) {
-        return packets / time;
+        int meanRssi = (int) AdvertisingPacketUtil.calculateMean(recentRssis);
+        // TODO evalute maxSpeed of walking = 1,38889 m/s
+        return BeaconDistanceCalculator.calculateDistanceTo(this, meanRssi);
     }
 
     public float getEstimatedAdvertisingRange() {

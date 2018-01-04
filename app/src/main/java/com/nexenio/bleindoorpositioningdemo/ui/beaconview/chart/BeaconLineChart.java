@@ -13,13 +13,15 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
-import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -359,30 +361,35 @@ public class BeaconLineChart extends BeaconChart {
     }
 
     protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket, long windowLength) {
-        List<AdvertisingPacket> recentAdvertisingPackets = null;
-        int[] recentRssis;
-        float meanRssi;
+        List<AdvertisingPacket> recentAdvertisingPackets = new ArrayList<>();
+        float filteredRssi;
 
         // make sure that the window size is at least 10 seconds when we're looking for the frequency
         windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? windowLength : Math.max(windowLength, 10000);
 
+        // TODO filter for EC:C9:24:A6:F5:E2 | Minor 5
+
         if (windowLength == 0) {
-            meanRssi = advertisingPacket.getRssi();
+            filteredRssi = advertisingPacket.getRssi();
         } else {
             recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
                     advertisingPacket.getTimestamp() - windowLength,
                     advertisingPacket.getTimestamp()
             );
-            recentRssis = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(recentAdvertisingPackets);
-            meanRssi = AdvertisingPacketUtil.getMeanRssi(recentRssis);
+
+            //RssiFilter filter = new MeanFilter(advertisingPacket.getTimestamp() - windowLength, advertisingPacket.getTimestamp());
+            //RssiFilter filter = new KalmanFilter(advertisingPacket.getTimestamp() - windowLength, advertisingPacket.getTimestamp());
+            RssiFilter filter = new ArmaFilter(advertisingPacket.getTimestamp() - windowLength, advertisingPacket.getTimestamp());
+
+            filteredRssi = filter.filter(recentAdvertisingPackets);
         }
 
         switch (valueType) {
             case VALUE_TYPE_RSSI: {
-                return meanRssi;
+                return filteredRssi;
             }
             case VALUE_TYPE_DISTANCE: {
-                return BeaconDistanceCalculator.calculateDistanceTo(beacon, meanRssi);
+                return BeaconDistanceCalculator.calculateDistanceTo(beacon, filteredRssi);
             }
             case VALUE_TYPE_FREQUENCY: {
                 return 1000 * (recentAdvertisingPackets.size() / (float) windowLength);

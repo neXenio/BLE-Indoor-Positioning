@@ -1,5 +1,10 @@
 package com.nexenio.bleindoorpositioning.ble.beacon.signal;
 
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Created by leon on 20.12.17.
  *
@@ -17,18 +22,45 @@ package com.nexenio.bleindoorpositioning.ble.beacon.signal;
  * Average Model</a>
  */
 
-public class RssiArmaModel {
+public class ArmaFilter implements RssiFilter {
 
     // How likely is it that the RSSI value changes?
     // Note: the more unlikely, the higher can that value be also, the lower the (expected) sending frequency,
     // the higher should that value be
     private static float DEFAULT_ARMA_FACTOR = 1f;
+    public static final long DURATION_DEFAULT = TimeUnit.SECONDS.toMillis(3);
+
+    private long minimumTimestamp;
+    private long maximumTimestamp;
     private static float armaFactor;
     private float armaRssi;
     private boolean isInitialized = false;
 
-    public RssiArmaModel() {
+    public ArmaFilter() {
+        maximumTimestamp = System.currentTimeMillis();
+        minimumTimestamp = maximumTimestamp - DURATION_DEFAULT;
+    }
+
+    public ArmaFilter(long minimumTimestamp, long maximumTimestamp) {
+        this.minimumTimestamp = minimumTimestamp;
+        this.maximumTimestamp = maximumTimestamp;
         this.armaFactor = DEFAULT_ARMA_FACTOR;
+    }
+
+    public ArmaFilter(long duration, TimeUnit timeUnit) {
+        this();
+        this.minimumTimestamp = this.maximumTimestamp - timeUnit.toMillis(duration);
+    }
+
+    @Override
+    public float filter(List<? extends AdvertisingPacket> advertisingPackets) {
+        for (AdvertisingPacket advertisingPacket : advertisingPackets) {
+            if (advertisingPacket.getTimestamp() < minimumTimestamp) {
+                continue;
+            }
+            addMeasurement(advertisingPacket.getRssi(),getArmaFactor(getPacketFrequency(advertisingPackets.size(),DURATION_DEFAULT)));
+        }
+        return getFilteredRssi();
     }
 
     public void addMeasurement(int rssi, float packetFrequency) {
@@ -45,14 +77,18 @@ public class RssiArmaModel {
     }
 
     public static float getArmaFactor(float packetFrequency) {
-        if (packetFrequency > 7) {
+        if (packetFrequency > 6) {
             armaFactor = 0.25f;
-        } else if (packetFrequency > 6) {
-            armaFactor = 0.5f;
         } else if (packetFrequency > 5) {
+            armaFactor = 0.5f;
+        } else if (packetFrequency > 4) {
             armaFactor = 0.75f;
         }
         return armaFactor;
+    }
+
+    public static float getPacketFrequency(float packets, float time) {
+        return packets / (time / 1000);
     }
 
 }

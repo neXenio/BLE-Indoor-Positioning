@@ -37,6 +37,8 @@ public class BeaconChartFragment extends BeaconViewFragment {
             private UUID gateDetectionUuid = UUID.fromString("f175c9a8-d51c-4d25-8449-4d3d340d1067");
             private UUID indoorPositioningUuid = UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291");
 
+            //TODO filter for one beacon
+
             @Override
             public boolean matches(IBeacon beacon) {
                 if (legacyUuid.equals(beacon.getProximityUuid())) {
