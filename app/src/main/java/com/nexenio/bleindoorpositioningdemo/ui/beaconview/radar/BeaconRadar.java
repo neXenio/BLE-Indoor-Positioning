@@ -3,21 +3,22 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.radar;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.RadialGradient;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioningdemo.ui.LocationAnimator;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.BeaconView;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -26,8 +27,44 @@ import java.util.Map;
 
 public class BeaconRadar extends BeaconView {
 
+    /*
+        Device drawing related variables
+     */
+    protected ValueAnimator deviceAngleAnimator;
     protected ValueAnimator deviceAccuracyAnimator;
+    protected float deviceAccuracyAnimationValue;
+    protected float deviceAdvertisingRange;
+    protected float deviceAdvertisingRadius;
+    protected float deviceStrokeRadius;
+
+    /*
+        Beacon drawing related variables
+     */
+    protected float beaconAccuracyAnimationValue;
+    protected float beaconRadius = pixelsPerDip * 8;
+    protected float beaconCornerRadius = pixelsPerDip * 2;
+    protected float beaconStrokeRadius;
+    protected long timeSinceLastAdvertisement;
+
+    /*
+        Legend drawing related variables
+     */
+    protected Paint legendPaint;
+    protected int referenceLineCount = 5;
+    protected float referenceDistance;
+    protected float referenceDistanceStep;
+    protected float currentReferenceDistance;
+    protected float currentReferenceCanvasUnits;
+    protected String referenceText;
+    protected float referenceTextWidth;
+
+    /*
+        Location mapping related variables
+     */
     protected ValueAnimator maximumDistanceAnimator;
+    protected double locationDistance;
+    protected double locationRadius;
+    protected double locationRotationAngle;
 
     public BeaconRadar(Context context) {
         super(context);
@@ -49,6 +86,12 @@ public class BeaconRadar extends BeaconView {
     public void initialize() {
         super.initialize();
         startMaximumDistanceAnimation(100);
+        startDeviceAngleAnimation(0);
+        legendPaint = new Paint(textPaint);
+        legendPaint.setTextSize(pixelsPerDip * 12);
+        legendPaint.setStyle(Paint.Style.STROKE);
+        legendPaint.setColor(Color.BLACK);
+        legendPaint.setAlpha(50);
     }
 
     @Override
@@ -59,16 +102,14 @@ public class BeaconRadar extends BeaconView {
 
     @Override
     protected void drawDevice(Canvas canvas) {
-        float deviceAdvertisingRange = 20; // in meters TODO: get real value based on tx power
-        float advertisingRadius = getCanvasUnitsFromMeters(deviceAdvertisingRange);
+        deviceAdvertisingRange = 20; // in meters TODO: get real value based on tx power
+        deviceAdvertisingRadius = getCanvasUnitsFromMeters(deviceAdvertisingRange);
 
-        float animationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
-        float strokeRadius = (pixelsPerDip * 10) + (pixelsPerDip * 2 * animationValue);
+        deviceAccuracyAnimationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
+        deviceStrokeRadius = (pixelsPerDip * 10) + (pixelsPerDip * 2 * deviceAccuracyAnimationValue);
 
-        //canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, deviceRangePaint);
-        canvas.drawCircle(canvasCenter.x, canvasCenter.y, advertisingRadius, deviceRangePaint);
-        canvas.drawCircle(canvasCenter.x, canvasCenter.y, strokeRadius, whiteFillPaint);
-        canvas.drawCircle(canvasCenter.x, canvasCenter.y, strokeRadius, secondaryStrokePaint);
+        canvas.drawCircle(canvasCenter.x, canvasCenter.y, deviceStrokeRadius, whiteFillPaint);
+        canvas.drawCircle(canvasCenter.x, canvasCenter.y, deviceStrokeRadius, secondaryStrokePaint);
         canvas.drawCircle(canvasCenter.x, canvasCenter.y, pixelsPerDip * 8, secondaryFillPaint);
     }
 
@@ -99,33 +140,18 @@ public class BeaconRadar extends BeaconView {
     }
 
     protected void drawBeaconBackground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
-        float advertisingRadius = getCanvasUnitsFromMeters(beacon.getEstimatedAdvertisingRange());
 
-        Paint innerBeaconRangePaint = new Paint(beaconRangePaint);
-        innerBeaconRangePaint.setAlpha(100);
-        Shader rangeShader = new RadialGradient(
-                beaconCenter.x,
-                beaconCenter.y,
-                advertisingRadius - (pixelsPerDip * 0),
-                primaryFillPaint.getColor(), beaconRangePaint.getColor(),
-                Shader.TileMode.MIRROR);
-
-        innerBeaconRangePaint.setShader(rangeShader);
-        //canvas.drawCircle(beaconCenter.x, beaconCenter.y, advertisingRadius, innerBeaconRangePaint);
-        canvas.drawCircle(beaconCenter.x, beaconCenter.y, advertisingRadius, beaconRangePaint);
     }
 
     protected void drawBeaconForeground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
         AdvertisingPacket latestAdvertisingPacket = beacon.getLatestAdvertisingPacket();
-        long timeSinceLastAdvertisement = latestAdvertisingPacket != null ? System.currentTimeMillis() - latestAdvertisingPacket.getTimestamp() : 0;
+        timeSinceLastAdvertisement = latestAdvertisingPacket != null ? System.currentTimeMillis() - latestAdvertisingPacket.getTimestamp() : 0;
 
-        float animationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
-        animationValue *= Math.max(0, 1 - (timeSinceLastAdvertisement / 1000));
-        float beaconRadius = pixelsPerDip * 8;
-        float strokeRadius = beaconRadius + (pixelsPerDip * 2) + (pixelsPerDip * 2 * animationValue);
+        beaconAccuracyAnimationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
+        beaconAccuracyAnimationValue *= Math.max(0, 1 - (timeSinceLastAdvertisement / 1000));
+        beaconStrokeRadius = beaconRadius + (pixelsPerDip * 2) + (pixelsPerDip * 2 * beaconAccuracyAnimationValue);
 
-        int beaconCornerRadius = (int) pixelsPerDip * 2;
-        RectF rect = new RectF(beaconCenter.x - strokeRadius, beaconCenter.y - strokeRadius, beaconCenter.x + strokeRadius, beaconCenter.y + strokeRadius);
+        RectF rect = new RectF(beaconCenter.x - beaconStrokeRadius, beaconCenter.y - beaconStrokeRadius, beaconCenter.x + beaconStrokeRadius, beaconCenter.y + beaconStrokeRadius);
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, whiteFillPaint);
         canvas.drawRoundRect(rect, beaconCornerRadius, beaconCornerRadius, primaryStrokePaint);
 
@@ -134,14 +160,45 @@ public class BeaconRadar extends BeaconView {
     }
 
     protected void drawLegend(Canvas canvas) {
+        referenceDistance = DistanceUtil.getReasonableSmallerEvenDistance((float) maximumDistanceAnimator.getAnimatedValue());
+        referenceDistanceStep = Math.round(referenceDistance / (float) referenceLineCount);
+
+        for (int i = referenceLineCount; i > 0; i--) {
+            currentReferenceDistance = Math.round(i * referenceDistanceStep);
+            currentReferenceCanvasUnits = getCanvasUnitsFromMeters(currentReferenceDistance);
+
+            canvas.drawCircle(
+                    canvasCenter.x,
+                    canvasCenter.y,
+                    currentReferenceCanvasUnits,
+                    legendPaint
+            );
+
+            referenceText = String.format(Locale.US, "%.0f", currentReferenceDistance) + "m";
+            referenceTextWidth = legendPaint.measureText(referenceText);
+            canvas.drawText(
+                    referenceText,
+                    canvasCenter.x - (referenceTextWidth / 2),
+                    canvasCenter.y + currentReferenceCanvasUnits + legendPaint.getTextSize(),
+                    legendPaint
+            );
+        }
 
     }
 
     protected PointF getPointFromLocation(Location location) {
-        double distance = deviceLocationAnimator != null ? location.getDistanceTo(deviceLocationAnimator.getLocation()) : 0;
-        float x = canvasCenter.x;
-        float y = canvasCenter.y - getCanvasUnitsFromMeters(distance);
-        return new PointF(x, y);
+        if (deviceLocationAnimator == null) {
+            return new PointF(canvasCenter.x, canvasCenter.y);
+        }
+        locationDistance = location.getDistanceTo(deviceLocationAnimator.getLocation());
+        locationRadius = getCanvasUnitsFromMeters(locationDistance);
+        locationRotationAngle = deviceLocationAnimator.getLocation().getAngleTo(location);
+        locationRotationAngle = (locationRotationAngle - (float) deviceAngleAnimator.getAnimatedValue()) % 360;
+        locationRotationAngle = Math.toRadians(locationRotationAngle) - (Math.PI / 2);
+        return new PointF(
+                (float) (canvasCenter.x + (locationRadius * Math.cos(locationRotationAngle))),
+                (float) (canvasCenter.y + (locationRadius * Math.sin(locationRotationAngle)))
+        );
     }
 
     protected float getCanvasUnitsFromMeters(double meters) {
@@ -153,7 +210,7 @@ public class BeaconRadar extends BeaconView {
     }
 
     public void fitToCurrentLocations() {
-        float maximumDistance = 20;
+        float maximumDistance = 10;
         // TODO: get actual maximum distance
         startMaximumDistanceAnimation(maximumDistance);
     }
@@ -168,11 +225,10 @@ public class BeaconRadar extends BeaconView {
         float originValue = distance;
         if (maximumDistanceAnimator != null) {
             originValue = (float) maximumDistanceAnimator.getAnimatedValue();
-            maximumDistanceAnimator.end();
+            maximumDistanceAnimator.cancel();
         }
         maximumDistanceAnimator = ValueAnimator.ofFloat(originValue, distance);
         maximumDistanceAnimator.setDuration(LocationAnimator.ANIMATION_DURATION_LONG);
-        maximumDistanceAnimator.setRepeatCount(1);
         maximumDistanceAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
@@ -198,6 +254,23 @@ public class BeaconRadar extends BeaconView {
             }
         });
         deviceAccuracyAnimator.start();
+    }
+
+    public void startDeviceAngleAnimation(float deviceAngle) {
+        float originValue = deviceAngle;
+        if (deviceAngleAnimator != null) {
+            originValue = (float) deviceAngleAnimator.getAnimatedValue();
+            deviceAngleAnimator.cancel();
+        }
+        deviceAngleAnimator = ValueAnimator.ofFloat(originValue, deviceAngle);
+        deviceAngleAnimator.setDuration(200);
+        deviceAngleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                invalidate();
+            }
+        });
+        deviceAngleAnimator.start();
     }
 
 }
