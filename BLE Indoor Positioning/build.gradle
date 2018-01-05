@@ -1,10 +1,141 @@
 apply plugin: 'java-library'
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"
+    }
+}
+
+plugins {
+    id 'net.researchgate.release' version '2.4.0'
+    id "com.jfrog.bintray" version "1.7.3"
+}
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.lemmingapex.trilateration:trilateration:1.0.2'
     testImplementation 'junit:junit:4.12'
 }
 
+def releaseVersionName = "${version}"
+
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+    publications = ['BintrayPublication']
+    override = true
+    pkg {
+        repo = 'BLE-Indoor-Positioning'
+        name = 'BLE-Indoor-Positioning'
+        userOrg = 'nexenio'
+        licenses = ['MIT']
+        labels = ['Indoor', 'Positioning', 'Bluetooth', 'Beacon']
+        vcsUrl = 'https://github.com/neXenio/BLE-Indoor-Positioning.git'
+        websiteUrl = 'https://github.com/neXenio/BLE-Indoor-Positioning'
+        githubRepo = 'neXenio/BLE-Indoor-Positioning/'
+        githubReleaseNotesFile = 'README.md'
+        version {
+            name = "${releaseVersionName}"
+            desc = "BLE Indoor Positioning ${releaseVersionName}"
+            released = new Date()
+            vcsTag = "${releaseVersionName}"
+            gpg {
+                sign = true
+            }
+            mavenCentralSync {
+                sync = true
+                user = project.hasProperty('mavenCentralUser') ? project.property('mavenCentralUser') : System.getenv('MAVEN_CENTRAL_USER')
+                password = project.hasProperty('mavenCentralPassword') ? project.property('mavenCentralPassword') : System.getenv('MAVEN_CENTRAL_PASSWORD')
+                close = '1'
+            }
+        }
+    }
+    filesSpec {
+        from 'build/libs'
+        into 'libs/'
+    }
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name 'The MIT License (MIT)'
+            url 'http://opensource.org/licenses/MIT'
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "neXenio"
+            name "neXenio"
+            email "info@nexenio.com"
+        }
+    }
+    scm {
+        connection 'https://github.com/neXenio/BLE-Indoor-Positioning'
+        developerConnection 'https://github.com/neXenio/BLE-Indoor-Positioning'
+        url "https://github.com/neXenio/BLE-Indoor-Positioning"
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId "${project.groupId}"
+            artifactId "${artifactId}"
+            from components.java
+            artifact sourcesJar
+        }
+        BintrayPublication(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            groupId 'com.nexenio.bleindoorpositioning'
+            artifactId 'core'
+            version "${releaseVersionName}"
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'Java implementation of the UAF protocol')
+                root.appendNode('name', 'BLE Indoor Positioning')
+                root.appendNode('url', 'https://github.com/neXenio/BLE-Indoor-Positioning/')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+// configure release plugin. See https://github.com/researchgate/gradle-release#configuration
+release {
+    failOnUnversionedFiles = false
+    failOnCommitNeeded = false
+    git {
+        requireBranch = 'release/publish'
+    }
+}
+
+// deploy artifacts when releasing
+afterReleaseBuild.dependsOn bintrayUpload
