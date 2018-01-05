@@ -1,6 +1,7 @@
-language: java
+language: android
 
-install: true
-
-script:
-  - ./gradlew ":BLE Indoor Positioning:test"
+android:
+  components:
+    - tools
+    - platform-tools
+    - extra-google-google_play_services
