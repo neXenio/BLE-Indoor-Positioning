@@ -1,11 +1,9 @@
-apply plugin: 'java-library'
-
 buildscript {
     repositories {
         jcenter()
     }
     dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.6.0"
     }
 }
 
@@ -13,6 +11,7 @@ plugins {
     id 'net.researchgate.release' version '2.4.0'
     id "com.jfrog.bintray" version "1.7.3"
 }
+apply plugin: 'java-library'
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
@@ -23,31 +22,39 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
-def releaseVersionName = "${version}"
-
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
+def releaseVersionCode = 1
+def releaseVersionName = "0.1.1"
+
+def projectName = 'BLE Indoor Positioning'
+def projectDescription = 'Java library for indoor positioing using bluetooth beacons'
+def projectGroupId = 'com.nexenio.bleindoorpositioning'
+def projectArtifactId = 'core'
+
+def repositoryName = "BLE-Indoor-Positioning"
+def repositoryUrl = "https://github.com/neXenio/${repositoryName}"
+def versionControlUrl = "${repositoryUrl}.git"
 
 bintray {
     user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
     key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
     publications = ['BintrayPublication']
     override = true
+    publish = true
     pkg {
-        repo = 'BLE-Indoor-Positioning'
-        name = 'BLE-Indoor-Positioning'
+        repo = repositoryName
+        name = repositoryName
         userOrg = 'nexenio'
         licenses = ['MIT']
         labels = ['Indoor', 'Positioning', 'Bluetooth', 'Beacon']
-        vcsUrl = 'https://github.com/neXenio/BLE-Indoor-Positioning.git'
-        websiteUrl = 'https://github.com/neXenio/BLE-Indoor-Positioning'
-        githubRepo = 'neXenio/BLE-Indoor-Positioning/'
-        githubReleaseNotesFile = 'README.md'
+        vcsUrl = versionControlUrl
+        websiteUrl = repositoryUrl
         version {
-            name = "${releaseVersionName}"
-            desc = "BLE Indoor Positioning ${releaseVersionName}"
+            name = releaseVersionName
             released = new Date()
-            vcsTag = "${releaseVersionName}"
+            vcsTag = releaseVersionName
             gpg {
                 sign = true
             }
@@ -81,32 +88,32 @@ def pomConfig = {
         }
     }
     scm {
-        connection 'https://github.com/neXenio/BLE-Indoor-Positioning'
-        developerConnection 'https://github.com/neXenio/BLE-Indoor-Positioning'
-        url "https://github.com/neXenio/BLE-Indoor-Positioning"
+        connection repositoryUrl
+        developerConnection repositoryUrl
+        url repositoryUrl
     }
 }
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            groupId "${project.groupId}"
-            artifactId "${artifactId}"
             from components.java
+            groupId projectGroupId
             artifact sourcesJar
+            artifactId projectArtifactId
         }
         BintrayPublication(MavenPublication) {
             from components.java
+            groupId projectGroupId
             artifact sourcesJar
             artifact javadocJar
-            groupId 'com.nexenio.bleindoorpositioning'
-            artifactId 'core'
-            version "${releaseVersionName}"
+            artifactId projectArtifactId
+            version releaseVersionName
             pom.withXml {
                 def root = asNode()
-                root.appendNode('description', 'Java implementation of the UAF protocol')
-                root.appendNode('name', 'BLE Indoor Positioning')
-                root.appendNode('url', 'https://github.com/neXenio/BLE-Indoor-Positioning/')
+                root.appendNode('name', projectName)
+                root.appendNode('description', projectDescription)
+                root.appendNode('url', repositoryUrl)
                 root.children().last() + pomConfig
             }
         }
