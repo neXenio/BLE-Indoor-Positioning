@@ -5,3 +5,7 @@ android:
     - tools
     - platform-tools
     - extra-google-google_play_services
+  licenses:
+    - 'android-sdk-preview-license-.+'
+    - 'android-sdk-license-.+'
+    - 'google-gdk-license-.+'
