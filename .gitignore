@@ -1,3 +1,6 @@
+# Keep the gradle wrapper
+!gradle/wrapper/*
+
 # Built application files
 *.apk
 *.ap_
