@@ -32,7 +32,7 @@ public abstract class LocationDistanceCalculator {
      * Calculates the distance between two points in latitude and longitude taking
      * the elevation delta into account. Uses the Haversine method as its base.
      *
-     * @returns Distance in Meters
+     * @return Distance in Meters
      * @see <a href="https://stackoverflow.com/a/16794680/1188330">StackOverflow</a>
      */
     public static double calculateDistanceBetween(double fromLatitude, double fromLongitude, double fromElevation,

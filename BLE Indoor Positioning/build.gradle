@@ -1,4 +1,20 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.6.0"
+    }
+}
+
+plugins {
+    id 'net.researchgate.release' version '2.4.0'
+    id "com.jfrog.bintray" version "1.7.3"
+}
 apply plugin: 'java-library'
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -8,3 +24,125 @@ dependencies {
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
+
+def releaseVersionCode = 1
+def releaseVersionName = "0.1.1"
+
+def projectName = 'BLE Indoor Positioning'
+def projectDescription = 'Java library for indoor positioing using bluetooth beacons'
+def projectGroupId = 'com.nexenio.bleindoorpositioning'
+def projectArtifactId = 'core'
+
+def repositoryName = "BLE-Indoor-Positioning"
+def repositoryUrl = "https://github.com/neXenio/${repositoryName}"
+def versionControlUrl = "${repositoryUrl}.git"
+
+bintray {
+    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+    publications = ['BintrayPublication']
+    override = true
+    publish = true
+    pkg {
+        repo = repositoryName
+        name = repositoryName
+        userOrg = 'nexenio'
+        licenses = ['MIT']
+        labels = ['Indoor', 'Positioning', 'Bluetooth', 'Beacon']
+        vcsUrl = versionControlUrl
+        websiteUrl = repositoryUrl
+        version {
+            name = releaseVersionName
+            released = new Date()
+            vcsTag = releaseVersionName
+            gpg {
+                sign = true
+            }
+            mavenCentralSync {
+                sync = true
+                user = project.hasProperty('mavenCentralUser') ? project.property('mavenCentralUser') : System.getenv('MAVEN_CENTRAL_USER')
+                password = project.hasProperty('mavenCentralPassword') ? project.property('mavenCentralPassword') : System.getenv('MAVEN_CENTRAL_PASSWORD')
+                close = '1'
+            }
+        }
+    }
+    filesSpec {
+        from 'build/libs'
+        into 'libs/'
+    }
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name 'The MIT License (MIT)'
+            url 'http://opensource.org/licenses/MIT'
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "neXenio"
+            name "neXenio"
+            email "info@nexenio.com"
+        }
+    }
+    scm {
+        connection repositoryUrl
+        developerConnection repositoryUrl
+        url repositoryUrl
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId projectGroupId
+            artifact sourcesJar
+            artifactId projectArtifactId
+        }
+        BintrayPublication(MavenPublication) {
+            from components.java
+            groupId projectGroupId
+            artifact sourcesJar
+            artifact javadocJar
+            artifactId projectArtifactId
+            version releaseVersionName
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('name', projectName)
+                root.appendNode('description', projectDescription)
+                root.appendNode('url', repositoryUrl)
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+// configure release plugin. See https://github.com/researchgate/gradle-release#configuration
+release {
+    failOnUnversionedFiles = false
+    failOnCommitNeeded = false
+    git {
+        requireBranch = 'release/publish'
+    }
+}
+
+// deploy artifacts when releasing
+afterReleaseBuild.dependsOn bintrayUpload
