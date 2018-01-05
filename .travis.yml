@@ -1,4 +1,6 @@
 language: java
 
-install:
-  - ./gradlew ":BLE Indoor Positioning:assemble"
+install: true
+
+script:
+  - ./gradlew ":BLE Indoor Positioning:test"
