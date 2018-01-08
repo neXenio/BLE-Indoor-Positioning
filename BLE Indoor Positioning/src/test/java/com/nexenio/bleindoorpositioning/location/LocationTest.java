@@ -3,6 +3,7 @@ package com.nexenio.bleindoorpositioning.location;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by steppschuh on 17.11.17.
@@ -38,4 +39,8 @@ public class LocationTest {
         assertEquals(350, angle, 5);
     }
 
+    @Test
+    public void thisShouldFail() throws Exception {
+        assertTrue(false);
+    }
 }
