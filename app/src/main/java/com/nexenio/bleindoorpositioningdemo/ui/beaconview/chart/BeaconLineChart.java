@@ -15,12 +15,15 @@ import android.util.AttributeSet;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -319,55 +322,72 @@ public class BeaconLineChart extends BeaconChart {
 
     @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
+        int windowLength = (int) TimeUnit.SECONDS.toMillis(3);
+
+        List<RssiFilter> filterList = new ArrayList<>();
+        RssiFilter meanFilter = new MeanFilter(windowLength, TimeUnit.MILLISECONDS);
+        RssiFilter kalmanFilter = new KalmanFilter(windowLength, TimeUnit.MILLISECONDS);
+        RssiFilter armaFilter = new ArmaFilter(windowLength, TimeUnit.MILLISECONDS);
+
+        filterList.add(meanFilter);
+        filterList.add(armaFilter);
+        filterList.add(kalmanFilter);
+
         currentBeaconIndex = beacons.indexOf(beacon);
 
-        linePaint.setShader(createLineShader(getBeaconColor(beacon, coloringMode, currentBeaconIndex)));
-        linePaint.setAlpha(128);
+        for (RssiFilter filter : filterList) {
+            lastLinePoint = null;
+            lastAdvertisingPacket = null;
 
-        lastLinePoint = null;
-        lastAdvertisingPacket = null;
+            //linePaint.setShader(createLineShader(getBeaconColor(beacon, coloringMode, currentBeaconIndex)));
+            linePaint.setShader(createLineShader(ColorUtil.getBeaconColor(currentBeaconIndex)));
+            linePaint.setAlpha(128);
 
-        for (AdvertisingPacket advertisingPacket : (List<AdvertisingPacket>) beacon.getAdvertisingPackets()) {
-            if (advertisingPacket.getTimestamp() < minimumAdvertisingTimestamp) {
-                continue;
-            }
-            currentLinePoint = getPointFromAdvertisingPacket(beacon, advertisingPacket, currentLinePoint);
-            canvas.drawCircle(currentLinePoint.x, currentLinePoint.y, pixelsPerDip * 1.5f, linePaint);
+            for (AdvertisingPacket advertisingPacket : (List<AdvertisingPacket>) beacon.getAdvertisingPackets()) {
 
-            if (lastLinePoint != null && lastAdvertisingPacket != null) {
-                if (advertisingPacket.getTimestamp() < lastAdvertisingPacket.getTimestamp() + 5000) {
-                    canvas.drawLine(
-                            lastLinePoint.x,
-                            lastLinePoint.y,
-                            currentLinePoint.x,
-                            currentLinePoint.y,
-                            linePaint
-                    );
+                if (advertisingPacket.getTimestamp() < minimumAdvertisingTimestamp) {
+                    continue;
                 }
-            } else {
-                lastLinePoint = new PointF();
+
+                filter.setMinimumTimestamp(advertisingPacket.getTimestamp() - windowLength);
+                filter.setMaximumTimestamp(advertisingPacket.getTimestamp());
+
+                currentLinePoint = getPointFromAdvertisingPacket(beacon, advertisingPacket, currentLinePoint, filter);
+                canvas.drawCircle(currentLinePoint.x, currentLinePoint.y, pixelsPerDip * 1.5f, linePaint);
+
+                if (lastLinePoint != null && lastAdvertisingPacket != null) {
+                    if (advertisingPacket.getTimestamp() < lastAdvertisingPacket.getTimestamp() + 5000) {
+                        canvas.drawLine(
+                                lastLinePoint.x,
+                                lastLinePoint.y,
+                                currentLinePoint.x,
+                                currentLinePoint.y,
+                                linePaint
+                        );
+                    }
+                } else {
+                    lastLinePoint = new PointF();
+                }
+
+                lastLinePoint.x = currentLinePoint.x;
+                lastLinePoint.y = currentLinePoint.y;
+                lastAdvertisingPacket = advertisingPacket;
             }
 
-            lastLinePoint.x = currentLinePoint.x;
-            lastLinePoint.y = currentLinePoint.y;
-            lastAdvertisingPacket = advertisingPacket;
             currentBeaconIndex++;
-        }
-
-        if (lastLinePoint != null) {
-            linePaint.setAlpha(255);
-            canvas.drawCircle(lastLinePoint.x, lastLinePoint.y, pixelsPerDip * 4, linePaint);
+            if (lastLinePoint != null) {
+                linePaint.setAlpha(255);
+                canvas.drawCircle(lastLinePoint.x, lastLinePoint.y, pixelsPerDip * 4, linePaint);
+            }
         }
     }
 
-    protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket, long windowLength) {
+    protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket, long windowLength, RssiFilter filter) {
         List<AdvertisingPacket> recentAdvertisingPackets = new ArrayList<>();
         float filteredRssi;
 
         // make sure that the window size is at least 10 seconds when we're looking for the frequency
         windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? windowLength : Math.max(windowLength, 10000);
-
-        // TODO filter for EC:C9:24:A6:F5:E2 | Minor 5
 
         if (windowLength == 0) {
             filteredRssi = advertisingPacket.getRssi();
@@ -376,11 +396,6 @@ public class BeaconLineChart extends BeaconChart {
                     advertisingPacket.getTimestamp() - windowLength,
                     advertisingPacket.getTimestamp()
             );
-
-            //RssiFilter filter = new MeanFilter(advertisingPacket.getTimestamp() - windowLength, advertisingPacket.getTimestamp());
-            //RssiFilter filter = new KalmanFilter(advertisingPacket.getTimestamp() - windowLength, advertisingPacket.getTimestamp());
-            RssiFilter filter = new ArmaFilter(advertisingPacket.getTimestamp() - windowLength, advertisingPacket.getTimestamp());
-
             filteredRssi = filter.filter(recentAdvertisingPackets);
         }
 
@@ -398,12 +413,12 @@ public class BeaconLineChart extends BeaconChart {
         return 0;
     }
 
-    protected PointF getPointFromAdvertisingPacket(Beacon beacon, AdvertisingPacket advertisingPacket, PointF point) {
+    protected PointF getPointFromAdvertisingPacket(Beacon beacon, AdvertisingPacket advertisingPacket, PointF point, RssiFilter filter) {
         if (point == null) {
             point = new PointF();
         }
         point.x = xAxisStartPoint.x + ((xAxisEndPoint.x - xAxisStartPoint.x) * (xAxisRange - (System.currentTimeMillis() - advertisingPacket.getTimestamp()))) / xAxisRange;
-        point.y = yAxisStartPoint.y - ((yAxisStartPoint.y - yAxisEndPoint.y) * (getValue(beacon, advertisingPacket, 2000) - (float) yAxisMinimumAnimator.getAnimatedValue())) / yAxisRange;
+        point.y = yAxisStartPoint.y - ((yAxisStartPoint.y - yAxisEndPoint.y) * (getValue(beacon, advertisingPacket, 2000, filter) - (float) yAxisMinimumAnimator.getAnimatedValue())) / yAxisRange;
         return point;
     }
 

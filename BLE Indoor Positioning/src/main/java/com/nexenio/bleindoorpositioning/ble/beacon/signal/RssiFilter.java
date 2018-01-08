@@ -12,4 +12,8 @@ public interface RssiFilter {
 
     float filter(List<? extends AdvertisingPacket> advertisingPackets);
 
+    void setMinimumTimestamp(long minimumTimestamp);
+
+    void setMaximumTimestamp(long maximumTimestamp);
+
 }

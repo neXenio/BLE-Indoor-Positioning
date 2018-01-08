@@ -133,8 +133,6 @@ public abstract class BeaconView extends View {
     protected abstract void drawDevice(Canvas canvas);
 
     protected void drawBeacons(Canvas canvas) {
-        //TODO indexOf
-
         for (Beacon beacon : beacons) {
             drawBeacon(canvas, beacon);
         }

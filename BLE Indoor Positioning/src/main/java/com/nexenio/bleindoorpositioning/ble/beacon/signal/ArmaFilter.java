@@ -91,4 +91,24 @@ public class ArmaFilter implements RssiFilter {
         return packets / (time / 1000);
     }
 
+    /*
+        Getter & Setter
+     */
+
+    public long getMinimumTimestamp() {
+        return minimumTimestamp;
+    }
+
+    public void setMinimumTimestamp(long minimumTimestamp) {
+        this.minimumTimestamp = minimumTimestamp;
+    }
+
+    public long getMaximumTimestamp() {
+        return maximumTimestamp;
+    }
+
+    public void setMaximumTimestamp(long maximumTimestamp) {
+        this.maximumTimestamp = maximumTimestamp;
+    }
+
 }

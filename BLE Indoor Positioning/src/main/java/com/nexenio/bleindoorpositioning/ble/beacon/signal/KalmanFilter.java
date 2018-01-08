@@ -56,6 +56,8 @@ public class KalmanFilter implements RssiFilter {
     public KalmanFilter(long duration, TimeUnit timeUnit) {
         this();
         this.minimumTimestamp = this.maximumTimestamp - timeUnit.toMillis(duration);
+        this.processNoise = 0.008;
+        this.measurementNoise = 1;
     }
 
     @Override
@@ -65,8 +67,12 @@ public class KalmanFilter implements RssiFilter {
         double priorErrorCovarianceRSSI;
 
         //TODO get variance of rssi signal to determine measurementNoise
-        //float[] rssiArray = advertisingPackets.toArray(new float[advertisingPackets.size()]);
-        //AdvertisingPacketUtil.calculateVariance(rssiArray);
+        /*float[] rssiArray = new float[advertisingPackets.size()];
+        int i = 0;
+        for (Float f : advertisingPackets) {
+            rssiArray[i++] = (f != null ? f : Float.NaN); // Or whatever default you want.
+        }
+        AdvertisingPacketUtil.calculateVariance(rssiArray);*/
 
         for (AdvertisingPacket advertisingPacket : advertisingPackets) {
             if (advertisingPacket.getTimestamp() < minimumTimestamp) {
@@ -87,6 +93,26 @@ public class KalmanFilter implements RssiFilter {
             errorCovarianceRSSI = (1 - kalmanGain) * priorErrorCovarianceRSSI;
         }
         return (float) estimatedRSSI;
+    }
+
+    /*
+        Getter & Setter
+     */
+
+    public long getMinimumTimestamp() {
+        return minimumTimestamp;
+    }
+
+    public void setMinimumTimestamp(long minimumTimestamp) {
+        this.minimumTimestamp = minimumTimestamp;
+    }
+
+    public long getMaximumTimestamp() {
+        return maximumTimestamp;
+    }
+
+    public void setMaximumTimestamp(long maximumTimestamp) {
+        this.maximumTimestamp = maximumTimestamp;
     }
 
 }

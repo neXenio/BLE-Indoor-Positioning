@@ -31,6 +31,7 @@ import com.nexenio.bleindoorpositioningdemo.location.TestLocations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class BeaconViewFragment extends Fragment {
 
@@ -127,8 +128,11 @@ public abstract class BeaconViewFragment extends Fragment {
         for (Beacon beacon : beaconManager.getBeaconMap().values()) {
             for (BeaconFilter beaconFilter : beaconFilters) {
                 if (beaconFilter.matches(beacon)) {
-                    beacons.add(beacon);
-                    break;
+                    //TODO remove beacon filter
+                    if (Objects.equals(beacon.getMacAddress(), "E2:38:2E:68:46:E9")) {
+                        beacons.add(beacon);
+                        break;
+                    }
                 }
             }
         }
