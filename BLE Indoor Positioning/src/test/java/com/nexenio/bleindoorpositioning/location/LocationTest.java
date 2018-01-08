@@ -39,8 +39,4 @@ public class LocationTest {
         assertEquals(350, angle, 5);
     }
 
-    @Test
-    public void thisShouldFail() throws Exception {
-        assertTrue(false);
-    }
 }
