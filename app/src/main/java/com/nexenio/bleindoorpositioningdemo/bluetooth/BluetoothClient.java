@@ -150,9 +150,9 @@ public class BluetoothClient {
                 }
                 Log.d(TAG, macAddress + " data received for the first time: " + advertisingPacket);
             } else if (isNewAdvertisingData) {
-                Log.v(TAG, macAddress + " data changed to: " + advertisingPacket);
+                //Log.v(TAG, macAddress + " data changed to: " + advertisingPacket);
             } else {
-                Log.v(TAG, macAddress + " data unchanged: " + advertisingPacket);
+                //Log.v(TAG, macAddress + " data unchanged: " + advertisingPacket);
             }
 
         }
@@ -180,6 +180,11 @@ public class BluetoothClient {
             case 4: {
                 location.setLatitude(52.512426);
                 location.setLongitude(13.390887);
+                break;
+            }
+            case 5: {
+                location.setLatitude(52.512369);
+                location.setLongitude(13.390838);
                 break;
             }
         }

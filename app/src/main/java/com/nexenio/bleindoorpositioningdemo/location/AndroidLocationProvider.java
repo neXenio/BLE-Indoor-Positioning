@@ -31,7 +31,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
+import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.HashSet;

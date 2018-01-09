@@ -4,6 +4,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
@@ -100,6 +101,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         }
         advertisingPackets.add(advertisingPacket);
         trimAdvertisingPackets();
+        trimAdvertisingPackets();
     }
 
     public void applyPropertiesFromAdvertisingPacket(P advertisingPacket) {
@@ -143,11 +145,19 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public float getDistance() {
+        return getDistance(3, TimeUnit.SECONDS);
+    }
+
+    public float getDistance(long timeWindow, TimeUnit timeUnit) {
         // TODO evalute maxSpeed of walking = 1,38889 m/s
-        int timeWindow = 5;
-        RssiFilter armaFilter = new ArmaFilter(timeWindow, TimeUnit.SECONDS);
+        RssiFilter armaFilter = new ArmaFilter(timeWindow, timeUnit);
         float filteredRssi = getRssi(armaFilter);
         return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
+    }
+
+    public float getMeanRssi(long amount, TimeUnit timeUnit) {
+        RssiFilter meanFilter = new MeanFilter(amount, timeUnit);
+        return getRssi(meanFilter);
     }
 
     public float getEstimatedAdvertisingRange() {

@@ -16,16 +16,16 @@ public class LocationDistanceCalculatorTest {
         final double tolerableDelta = 1;
 
         double calculatedFieldWidth = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.SOCCER_FIELD_TOP_LEFT, LocationTest.SOCCER_FIELD_TOP_RIGHT);
-        assertEquals(LocationTest.SOCKER_FIELD_WIDTH, calculatedFieldWidth, tolerableDelta);
+        assertEquals(LocationTest.SOCCER_FIELD_WIDTH, calculatedFieldWidth, tolerableDelta);
 
         calculatedFieldWidth = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.SOCCER_FIELD_BOTTOM_LEFT, LocationTest.SOCCER_FIELD_BOTTOM_RIGHT);
-        assertEquals(LocationTest.SOCKER_FIELD_WIDTH, calculatedFieldWidth, tolerableDelta);
+        assertEquals(LocationTest.SOCCER_FIELD_WIDTH, calculatedFieldWidth, tolerableDelta);
 
         double calculatedFieldHeight = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.SOCCER_FIELD_TOP_LEFT, LocationTest.SOCCER_FIELD_BOTTOM_LEFT);
-        assertEquals(LocationTest.SOCKER_FIELD_HEIGHT, calculatedFieldHeight, tolerableDelta);
+        assertEquals(LocationTest.SOCCER_FIELD_HEIGHT, calculatedFieldHeight, tolerableDelta);
 
         calculatedFieldHeight = LocationDistanceCalculator.calculateDistanceBetween(LocationTest.SOCCER_FIELD_TOP_RIGHT, LocationTest.SOCCER_FIELD_BOTTOM_RIGHT);
-        assertEquals(LocationTest.SOCKER_FIELD_HEIGHT, calculatedFieldHeight, tolerableDelta);
+        assertEquals(LocationTest.SOCCER_FIELD_HEIGHT, calculatedFieldHeight, tolerableDelta);
     }
 
     @Test

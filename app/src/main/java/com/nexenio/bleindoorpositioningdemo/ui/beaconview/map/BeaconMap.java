@@ -15,7 +15,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
-import com.nexenio.bleindoorpositioning.location.listener.LocationListener;
+import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 import com.nexenio.bleindoorpositioning.location.projection.EquirectangularProjection;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -294,6 +294,9 @@ public class BeaconMap extends BeaconView {
     }
 
     protected void startDeviceRadiusAnimation() {
+        if (deviceAccuracyAnimator != null && deviceAccuracyAnimator.isRunning()) {
+            return;
+        }
         deviceAccuracyAnimator = ValueAnimator.ofFloat(0, 1);
         deviceAccuracyAnimator.setDuration(LocationAnimator.ANIMATION_DURATION_LONG);
         deviceAccuracyAnimator.setRepeatCount(1);
