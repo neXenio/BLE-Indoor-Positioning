@@ -37,15 +37,7 @@ public abstract class AdvertisingPacketUtil {
         return rssiSum / (float) values.length;
     }
 
-    public static float calculateMean(float[] values) {
-        int rssiSum = 0;
-        for (int i = 0; i < values.length; i++) {
-            rssiSum += values[i];
-        }
-        return rssiSum / (float) values.length;
-    }
-
-    public static float calculateVariance(float[] values) {
+    public static float calculateVariance(int[] values) {
         float average = calculateMean(values);
 
         float squaredDistanceSum = 0;
@@ -54,11 +46,6 @@ public abstract class AdvertisingPacketUtil {
         }
         int sampleLength = Math.max(values.length - 1, 1);
         return squaredDistanceSum / sampleLength;
-    }
-
-    public static float calculateStandardDeviation(float[] values) {
-        float variance = calculateVariance(values);
-        return (float) Math.sqrt(variance);
     }
 
 }

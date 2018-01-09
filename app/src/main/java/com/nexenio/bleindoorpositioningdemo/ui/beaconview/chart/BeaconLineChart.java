@@ -322,7 +322,7 @@ public class BeaconLineChart extends BeaconChart {
 
     @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
-        int windowLength = (int) TimeUnit.SECONDS.toMillis(3);
+        int windowLength = (int) TimeUnit.SECONDS.toMillis(5);
 
         List<RssiFilter> filterList = new ArrayList<>();
         RssiFilter meanFilter = new MeanFilter(windowLength, TimeUnit.MILLISECONDS);

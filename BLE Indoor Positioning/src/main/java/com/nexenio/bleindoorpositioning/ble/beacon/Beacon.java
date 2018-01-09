@@ -1,9 +1,9 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
-import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
@@ -143,12 +143,11 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public float getDistance() {
-        int timeWindow = 5;
-        List<AdvertisingPacket> recentAdvertisingPackets = (List<AdvertisingPacket>) getAdvertisingPacketsFromLast(timeWindow, TimeUnit.SECONDS);
-        int[] recentRssis = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(recentAdvertisingPackets);
-        int meanRssi = (int) AdvertisingPacketUtil.calculateMean(recentRssis);
         // TODO evalute maxSpeed of walking = 1,38889 m/s
-        return BeaconDistanceCalculator.calculateDistanceTo(this, meanRssi);
+        int timeWindow = 5;
+        RssiFilter armaFilter = new ArmaFilter(timeWindow, TimeUnit.SECONDS);
+        float filteredRssi = getRssi(armaFilter);
+        return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
     }
 
     public float getEstimatedAdvertisingRange() {

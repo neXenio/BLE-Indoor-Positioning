@@ -27,7 +27,7 @@ public class ArmaFilter implements RssiFilter {
     // How likely is it that the RSSI value changes?
     // Note: the more unlikely, the higher can that value be also, the lower the (expected) sending frequency,
     // the higher should that value be
-    private static float DEFAULT_ARMA_FACTOR = 1f;
+    private static float DEFAULT_ARMA_FACTOR = 0.95f;
     public static final long DURATION_DEFAULT = TimeUnit.SECONDS.toMillis(3);
 
     private long minimumTimestamp;
@@ -35,6 +35,7 @@ public class ArmaFilter implements RssiFilter {
     private static float armaFactor;
     private float armaRssi;
     private boolean isInitialized = false;
+    private long duration;
 
     public ArmaFilter() {
         maximumTimestamp = System.currentTimeMillis();
@@ -50,6 +51,7 @@ public class ArmaFilter implements RssiFilter {
     public ArmaFilter(long duration, TimeUnit timeUnit) {
         this();
         this.minimumTimestamp = this.maximumTimestamp - timeUnit.toMillis(duration);
+        this.duration = duration;
     }
 
     @Override
@@ -58,7 +60,8 @@ public class ArmaFilter implements RssiFilter {
             if (advertisingPacket.getTimestamp() < minimumTimestamp) {
                 continue;
             }
-            addMeasurement(advertisingPacket.getRssi(),getArmaFactor(getPacketFrequency(advertisingPackets.size(),DURATION_DEFAULT)));
+            addMeasurement(advertisingPacket.getRssi(),getArmaFactor(getPacketFrequency(advertisingPackets.size(),duration)));
+            System.out.println("duration: " + duration);
         }
         return getFilteredRssi();
     }
@@ -69,7 +72,7 @@ public class ArmaFilter implements RssiFilter {
             armaRssi = rssi;
             isInitialized = true;
         }
-        armaRssi = armaRssi - getArmaFactor(packetFrequency) * (armaRssi - rssi);
+        armaRssi = armaRssi - (getArmaFactor(packetFrequency) * (armaRssi - rssi));
     }
 
     public float getFilteredRssi() {
@@ -77,17 +80,20 @@ public class ArmaFilter implements RssiFilter {
     }
 
     public static float getArmaFactor(float packetFrequency) {
-        if (packetFrequency > 6) {
+        if (packetFrequency > 4) {
+            armaFactor = 0.1f;
+        } else if (packetFrequency > 3) {
             armaFactor = 0.25f;
-        } else if (packetFrequency > 5) {
+        } else if (packetFrequency > 2) {
             armaFactor = 0.5f;
-        } else if (packetFrequency > 4) {
+        } else if (packetFrequency > 1) {
             armaFactor = 0.75f;
         }
         return armaFactor;
     }
 
     public static float getPacketFrequency(float packets, float time) {
+        //TODO make output more robust to different time inputs
         return packets / (time / 1000);
     }
 

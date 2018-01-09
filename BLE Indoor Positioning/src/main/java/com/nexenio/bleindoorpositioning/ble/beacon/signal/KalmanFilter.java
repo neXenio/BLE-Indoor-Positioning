@@ -66,13 +66,8 @@ public class KalmanFilter implements RssiFilter {
         double kalmanGain;
         double priorErrorCovarianceRSSI;
 
-        //TODO get variance of rssi signal to determine measurementNoise
-        /*float[] rssiArray = new float[advertisingPackets.size()];
-        int i = 0;
-        for (Float f : advertisingPackets) {
-            rssiArray[i++] = (f != null ? f : Float.NaN); // Or whatever default you want.
-        }
-        AdvertisingPacketUtil.calculateVariance(rssiArray);*/
+        int[] rssiArray = AdvertisingPacketUtil.getRssisFromAdvertisingPackets((List<AdvertisingPacket>) advertisingPackets);
+        measurementNoise = AdvertisingPacketUtil.calculateVariance(rssiArray);
 
         for (AdvertisingPacket advertisingPacket : advertisingPackets) {
             if (advertisingPacket.getTimestamp() < minimumTimestamp) {
