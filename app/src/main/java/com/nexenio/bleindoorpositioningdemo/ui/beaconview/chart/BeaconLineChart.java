@@ -82,6 +82,12 @@ public class BeaconLineChart extends BeaconChart {
     protected PointF lastLinePoint;
     protected AdvertisingPacket lastAdvertisingPacket;
 
+    protected long windowLength = TimeUnit.SECONDS.toMillis(5);
+
+    RssiFilter meanFilter = new MeanFilter(windowLength, TimeUnit.MILLISECONDS);
+    RssiFilter armaFilter = new ArmaFilter(windowLength, TimeUnit.MILLISECONDS);
+    RssiFilter kalmanFilter = new KalmanFilter(windowLength, TimeUnit.MILLISECONDS);
+
     public BeaconLineChart(Context context) {
         super(context);
     }
@@ -323,14 +329,7 @@ public class BeaconLineChart extends BeaconChart {
 
     @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
-        long windowLength = TimeUnit.SECONDS.toMillis(5);
-
-        //TODO move
         List<RssiFilter> filterList = new ArrayList<>();
-        RssiFilter meanFilter = new MeanFilter(windowLength, TimeUnit.MILLISECONDS);
-        RssiFilter armaFilter = new ArmaFilter(windowLength, TimeUnit.MILLISECONDS);
-        RssiFilter kalmanFilter = new KalmanFilter(windowLength, TimeUnit.MILLISECONDS);
-
         filterList.add(meanFilter);
         filterList.add(armaFilter);
         filterList.add(kalmanFilter);
