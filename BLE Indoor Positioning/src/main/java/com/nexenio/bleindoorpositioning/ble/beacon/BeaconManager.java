@@ -70,12 +70,12 @@ public class BeaconManager {
         return macAddress + "-" + beaconType;
     }
 
-    public static Eddystone getEddystone(String macAddress) {
-        return (Eddystone) getBeacon(macAddress, Eddystone.class);
-    }
-
     public static IBeacon getIBeacon(String macAddress) {
         return (IBeacon) getBeacon(macAddress, IBeacon.class);
+    }
+
+    public static Eddystone getEddystone(String macAddress) {
+        return (Eddystone) getBeacon(macAddress, Eddystone.class);
     }
 
     public static Beacon getBeacon(String macAddress, Class<? extends Beacon> beaconClass) {
