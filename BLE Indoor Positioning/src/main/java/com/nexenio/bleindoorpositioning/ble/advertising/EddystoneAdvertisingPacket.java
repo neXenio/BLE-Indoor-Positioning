@@ -2,7 +2,6 @@ package com.nexenio.bleindoorpositioning.ble.advertising;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
-import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 
 import java.util.Arrays;
 
