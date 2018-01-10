@@ -9,26 +9,10 @@ import java.util.concurrent.TimeUnit;
  * Created by leon on 03.01.18.
  */
 
-public class MeanFilter implements RssiFilter {
-
-    public static final long DURATION_DEFAULT = TimeUnit.SECONDS.toMillis(3);
-
-    private long minimumTimestamp;
-    private long maximumTimestamp;
-
-    public MeanFilter() {
-        maximumTimestamp = System.currentTimeMillis();
-        minimumTimestamp = maximumTimestamp - DURATION_DEFAULT;
-    }
-
-    public MeanFilter(long minimumTimestamp, long maximumTimestamp) {
-        this.minimumTimestamp = minimumTimestamp;
-        this.maximumTimestamp = maximumTimestamp;
-    }
+public class MeanFilter extends WindowFilter {
 
     public MeanFilter(long duration, TimeUnit timeUnit) {
-        this();
-        this.minimumTimestamp = this.maximumTimestamp - timeUnit.toMillis(duration);
+        super(duration,timeUnit);
     }
 
     @Override
@@ -43,25 +27,5 @@ public class MeanFilter implements RssiFilter {
             rssiCount++;
         }
         return rssiSum / (float) rssiCount;
-    }
-
-    /*
-        Getter & Setter
-     */
-
-    public long getMinimumTimestamp() {
-        return minimumTimestamp;
-    }
-
-    public void setMinimumTimestamp(long minimumTimestamp) {
-        this.minimumTimestamp = minimumTimestamp;
-    }
-
-    public long getMaximumTimestamp() {
-        return maximumTimestamp;
-    }
-
-    public void setMaximumTimestamp(long maximumTimestamp) {
-        this.maximumTimestamp = maximumTimestamp;
     }
 }

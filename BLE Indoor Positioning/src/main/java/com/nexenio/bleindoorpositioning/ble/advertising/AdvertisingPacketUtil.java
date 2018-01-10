@@ -30,11 +30,11 @@ public abstract class AdvertisingPacketUtil {
     }
 
     public static float calculateMean(int[] values) {
-        int rssiSum = 0;
+        int sum = 0;
         for (int i = 0; i < values.length; i++) {
-            rssiSum += values[i];
+            sum += values[i];
         }
-        return rssiSum / (float) values.length;
+        return sum / (float) values.length;
     }
 
     public static float calculateVariance(int[] values) {
@@ -46,6 +46,14 @@ public abstract class AdvertisingPacketUtil {
         }
         int sampleLength = Math.max(values.length - 1, 1);
         return squaredDistanceSum / sampleLength;
+    }
+
+    public static float getPacketFrequency(int packets, long time) {
+        //TODO make output more robust to different time inputs
+        if (time == 0) {
+            return 0;
+        }
+        return ((float) packets) / (time / 1000);
     }
 
 }

@@ -149,7 +149,7 @@ public abstract class BeaconViewFragment extends Fragment {
             for (BeaconFilter beaconFilter : beaconFilters) {
                 if (beaconFilter.matches(beacon)) {
                     //TODO remove beacon filter
-                    if (Objects.equals(beacon.getMacAddress(), "E2:38:2E:68:46:E9")) {
+                    if (beacon.getMacAddress().equals("E2:38:2E:68:46:E9")) {
                         beacons.add(beacon);
                         break;
                     }

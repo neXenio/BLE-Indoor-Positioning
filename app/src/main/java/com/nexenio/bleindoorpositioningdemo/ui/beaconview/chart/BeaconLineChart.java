@@ -18,6 +18,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioningdemo.R;
@@ -322,12 +323,13 @@ public class BeaconLineChart extends BeaconChart {
 
     @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
-        int windowLength = (int) TimeUnit.SECONDS.toMillis(5);
+        long windowLength = TimeUnit.SECONDS.toMillis(5);
 
+        //TODO move
         List<RssiFilter> filterList = new ArrayList<>();
         RssiFilter meanFilter = new MeanFilter(windowLength, TimeUnit.MILLISECONDS);
-        RssiFilter kalmanFilter = new KalmanFilter(windowLength, TimeUnit.MILLISECONDS);
         RssiFilter armaFilter = new ArmaFilter(windowLength, TimeUnit.MILLISECONDS);
+        RssiFilter kalmanFilter = new KalmanFilter(windowLength, TimeUnit.MILLISECONDS);
 
         filterList.add(meanFilter);
         filterList.add(armaFilter);

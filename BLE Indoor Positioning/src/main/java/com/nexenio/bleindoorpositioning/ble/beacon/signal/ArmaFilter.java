@@ -1,14 +1,13 @@
 package com.nexenio.bleindoorpositioning.ble.beacon.signal;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Created by leon on 20.12.17.
- *
- * taken from https://github.com/AltBeacon/android-beacon-library/blob/master/src/main/java/org/altbeacon/beacon/service/ArmaRssiFilter.java
  *
  * This filter calculates its rssi on base of an auto regressive moving average (ARMA) It needs only
  * the current value to do this; the general formula is  n(t) = n(t-1) - c * (n(t-1) - n(t)) where c
@@ -18,40 +17,26 @@ import java.util.concurrent.TimeUnit;
  * means the actual value is changed by 10% of the difference between the actual measurement and the
  * actual average) For signals at lower rates (10Hz) a value of 0.25 to 0.5 would be appropriate.
  *
- * <a href="https://en.wikipedia.org/wiki/Autoregressive–moving-average_model">Autoregressive Moving
- * Average Model</a>
+ * @see <a href="https://en.wikipedia.org/wiki/Autoregressive–moving-average_model">Autoregressive
+ * Moving Average Model</a>
+ * @see <a href="https://github.com/AltBeacon/android-beacon-library/blob/master/src/main/java/org/altbeacon/beacon/service/ArmaRssiFilter.java">Example
+ * Implementation</a>
  */
 
-public class ArmaFilter implements RssiFilter {
+public class ArmaFilter extends WindowFilter {
 
-    // How likely is it that the RSSI value changes?
-    // Note: the more unlikely, the higher can that value be also, the lower the (expected) sending frequency,
-    // the higher should that value be
+    /**
+     * Arma smoothing factor - the percentage of how much of the new signal will be discarded
+     **/
     private static float DEFAULT_ARMA_FACTOR = 0.95f;
-    public static final long DURATION_DEFAULT = TimeUnit.SECONDS.toMillis(3);
 
-    private long minimumTimestamp;
-    private long maximumTimestamp;
-    private static float armaFactor;
+    private float armaFactor;
     private float armaRssi;
     private boolean isInitialized = false;
-    private long duration;
-
-    public ArmaFilter() {
-        maximumTimestamp = System.currentTimeMillis();
-        minimumTimestamp = maximumTimestamp - DURATION_DEFAULT;
-    }
-
-    public ArmaFilter(long minimumTimestamp, long maximumTimestamp) {
-        this.minimumTimestamp = minimumTimestamp;
-        this.maximumTimestamp = maximumTimestamp;
-        this.armaFactor = DEFAULT_ARMA_FACTOR;
-    }
 
     public ArmaFilter(long duration, TimeUnit timeUnit) {
-        this();
-        this.minimumTimestamp = this.maximumTimestamp - timeUnit.toMillis(duration);
-        this.duration = duration;
+        super(duration,timeUnit);
+        this.armaFactor = DEFAULT_ARMA_FACTOR;
     }
 
     @Override
@@ -60,8 +45,7 @@ public class ArmaFilter implements RssiFilter {
             if (advertisingPacket.getTimestamp() < minimumTimestamp) {
                 continue;
             }
-            addMeasurement(advertisingPacket.getRssi(),getArmaFactor(getPacketFrequency(advertisingPackets.size(),duration)));
-            System.out.println("duration: " + duration);
+            addMeasurement(advertisingPacket.getRssi(), getArmaFactor(AdvertisingPacketUtil.getPacketFrequency(advertisingPackets.size(), duration)));
         }
         return getFilteredRssi();
     }
@@ -79,7 +63,7 @@ public class ArmaFilter implements RssiFilter {
         return armaRssi;
     }
 
-    public static float getArmaFactor(float packetFrequency) {
+    public float getArmaFactor(float packetFrequency) {
         if (packetFrequency > 4) {
             armaFactor = 0.1f;
         } else if (packetFrequency > 3) {
@@ -90,31 +74,6 @@ public class ArmaFilter implements RssiFilter {
             armaFactor = 0.75f;
         }
         return armaFactor;
-    }
-
-    public static float getPacketFrequency(float packets, float time) {
-        //TODO make output more robust to different time inputs
-        return packets / (time / 1000);
-    }
-
-    /*
-        Getter & Setter
-     */
-
-    public long getMinimumTimestamp() {
-        return minimumTimestamp;
-    }
-
-    public void setMinimumTimestamp(long minimumTimestamp) {
-        this.minimumTimestamp = minimumTimestamp;
-    }
-
-    public long getMaximumTimestamp() {
-        return maximumTimestamp;
-    }
-
-    public void setMaximumTimestamp(long maximumTimestamp) {
-        this.maximumTimestamp = maximumTimestamp;
     }
 
 }

@@ -101,7 +101,6 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         }
         advertisingPackets.add(advertisingPacket);
         trimAdvertisingPackets();
-        trimAdvertisingPackets();
     }
 
     public void applyPropertiesFromAdvertisingPacket(P advertisingPacket) {
@@ -149,7 +148,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public float getDistance(long timeWindow, TimeUnit timeUnit) {
-        // TODO evalute maxSpeed of walking = 1,38889 m/s
+        // TODO evaluate maxSpeed of walking = 1,38889 m/s
         RssiFilter armaFilter = new ArmaFilter(timeWindow, timeUnit);
         float filteredRssi = getRssi(armaFilter);
         return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);

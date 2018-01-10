@@ -15,49 +15,40 @@ import java.util.concurrent.TimeUnit;
  * single measurement alone, by using Bayesian inference and estimating a joint probability
  * distribution over the variables for each timeframe.
  *
- * <a href="https://en.wikipedia.org/wiki/Kalman_filter">Kalman Filter</a> <a
- * href="https://www.wouterbulten.nl/blog/tech/kalman-filters-explained-removing-noise-from-rssi-signals/">Kalman
- * Explained</a>
  *
  * Since RSSI signals are largely influenced by signal noise, taking samples from the signal seems
  * likely to be beneficial. --> Evaluate Unscented Kalman filter
  *
- * inspired by https://github.com/fgroch/beacon-rssi-resolver/blob/master/src/main/java/tools/blocks/filter/KalmanFilter.java
+ * @see <a href="https://en.wikipedia.org/wiki/Kalman_filter">Kalman Filter</a>
+ * @see <a href="https://www.wouterbulten.nl/blog/tech/kalman-filters-explained-removing-noise-from-rssi-signals/">Kalman
+ * Explained</a>
+ * @see <a href="https://github.com/fgroch/beacon-rssi-resolver/blob/master/src/main/java/tools/blocks/filter/KalmanFilter.java">Example
+ * Implementation</a>
  */
 
-public class KalmanFilter implements RssiFilter {
+public class KalmanFilter extends WindowFilter {
 
-    public static final long DURATION_DEFAULT = TimeUnit.SECONDS.toMillis(3);
+    /**
+     * We use a low value for the process noise (i.e. 0.008).
+     * We assume that most of the noise is caused by the measurements.
+     **/
+    private static float DEFAULT_PROCESS_NOISE = 0.008f;
+    /**
+     * Measurement noise is set to a value that relates to the noise in the actual measurements
+     * (i.e. the variance of the RSSI signal).
+     */
+    private static float DEFAULT_MEASUREMENT_NOISE = 10;
 
-    private long minimumTimestamp;
-    private long maximumTimestamp;
     private double processNoise;
     private double measurementNoise;
     private double estimatedRSSI;
     private double errorCovarianceRSSI;
     private boolean isInitialized = false;
 
-    public KalmanFilter() {
-        maximumTimestamp = System.currentTimeMillis();
-        minimumTimestamp = maximumTimestamp - DURATION_DEFAULT;
-    }
-
-    public KalmanFilter(long minimumTimestamp, long maximumTimestamp) {
-        this.minimumTimestamp = minimumTimestamp;
-        this.maximumTimestamp = maximumTimestamp;
-        //For the RSSI example we use a low value for the process noise (e.g. 0.008);
-        // we assume that most of the noise is caused by the measurements.
-        this.processNoise = 0.008; //0.125
-        // Measurement Noise is set to a value that relates to the noise in the actual measurements
-        // (e.g. the variance of the RSSI signal).
-        this.measurementNoise = 1;
-    }
-
     public KalmanFilter(long duration, TimeUnit timeUnit) {
-        this();
-        this.minimumTimestamp = this.maximumTimestamp - timeUnit.toMillis(duration);
-        this.processNoise = 0.008;
-        this.measurementNoise = 1;
+        super(duration,timeUnit);
+        this.processNoise = DEFAULT_PROCESS_NOISE;
+        this.measurementNoise = DEFAULT_MEASUREMENT_NOISE;
     }
 
     @Override
