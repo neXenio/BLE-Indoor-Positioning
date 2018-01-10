@@ -132,19 +132,18 @@ public class BluetoothClient {
         AdvertisingPacket advertisingPacket = AdvertisingPacket.from(data);
 
         if (advertisingPacket != null) {
-            String beaconKey = BeaconManager.getBeaconKey(macAddress, advertisingPacket);
             advertisingPacket.setRssi(scanResult.getRssi());
 
-            Beacon beacon = beaconManager.getBeaconMap().get(beaconKey);
+            Beacon beacon = BeaconManager.getBeacon(macAddress, advertisingPacket.getBeaconClass());
             AdvertisingPacket lastAdvertisingPacket = beacon == null ? null : beacon.getLatestAdvertisingPacket();
 
             boolean isNewBeacon = beacon == null;
             boolean isNewAdvertisingData = lastAdvertisingPacket == null || !advertisingPacket.dataEquals(lastAdvertisingPacket);
 
-            beaconManager.processAdvertisingPacket(macAddress, advertisingPacket);
+            BeaconManager.processAdvertisingPacket(macAddress, advertisingPacket);
 
             if (isNewBeacon) {
-                beacon = beaconManager.getBeaconMap().get(beaconKey);
+                beacon = BeaconManager.getBeacon(macAddress, advertisingPacket.getBeaconClass());
                 if (beacon instanceof IBeacon) {
                     beacon.setLocationProvider(createDebuggingLocationProvider((IBeacon) beacon));
                 }

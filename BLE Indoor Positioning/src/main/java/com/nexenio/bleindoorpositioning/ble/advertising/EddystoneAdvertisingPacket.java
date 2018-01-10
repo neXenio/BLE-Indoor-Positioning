@@ -1,5 +1,9 @@
 package com.nexenio.bleindoorpositioning.ble.advertising;
 
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
+import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
+
 import java.util.Arrays;
 
 /**
@@ -25,6 +29,11 @@ public class EddystoneAdvertisingPacket extends AdvertisingPacket {
         flagsBytes = getFlags(data);
         eddystoneUuidBytes = getEddystoneUuid(data);
         frameBytes = getFrameBytes(data);
+    }
+
+    @Override
+    public Class<? extends Beacon> getBeaconClass() {
+        return Eddystone.class;
     }
 
     public static boolean meetsSpecification(byte[] data) {
