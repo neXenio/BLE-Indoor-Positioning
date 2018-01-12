@@ -22,7 +22,7 @@ public class BeaconManager {
 
     private Set<BeaconUpdateListener> beaconUpdateListeners = new HashSet<>();
 
-    private long inactivityDuration = TimeUnit.MINUTES.toMillis(1);
+    private long inactivityDuration = TimeUnit.MINUTES.toMillis(3);
 
     private BeaconManager() {
 
@@ -42,6 +42,7 @@ public class BeaconManager {
         if (instance.beaconMap.containsKey(key)) {
             beacon = instance.beaconMap.get(key);
         } else {
+            removeInactiveBeacons();
             beacon = Beacon.from(advertisingPacket);
             if (beacon == null) {
                 return;
