@@ -30,21 +30,22 @@ public class BeaconManager {
         return instance;
     }
 
-    public void processAdvertisingPacket(String macAddress, AdvertisingPacket advertisingPacket) {
+    public static void processAdvertisingPacket(String macAddress, AdvertisingPacket advertisingPacket) {
+        BeaconManager instance = getInstance();
         String key = getBeaconKey(macAddress, advertisingPacket);
         Beacon beacon;
-        if (beaconMap.containsKey(key)) {
-            beacon = beaconMap.get(key);
+        if (instance.beaconMap.containsKey(key)) {
+            beacon = instance.beaconMap.get(key);
         } else {
             beacon = Beacon.from(advertisingPacket);
             if (beacon == null) {
                 return;
             }
             beacon.setMacAddress(macAddress);
-            beaconMap.put(key, beacon);
+            instance.beaconMap.put(key, beacon);
         }
         beacon.addAdvertisingPacket(advertisingPacket);
-        notifyBeaconUpdateListeners(beacon);
+        instance.notifyBeaconUpdateListeners(beacon);
     }
 
     private void notifyBeaconUpdateListeners(Beacon beacon) {
@@ -62,7 +63,24 @@ public class BeaconManager {
     }
 
     public static String getBeaconKey(String macAddress, AdvertisingPacket advertisingPacket) {
-        return macAddress + "-" + advertisingPacket.getClass().getSimpleName();
+        return getBeaconKey(macAddress, BeaconUtil.getReadableBeaconType(advertisingPacket));
+    }
+
+    private static String getBeaconKey(String macAddress, String beaconType) {
+        return macAddress + "-" + beaconType;
+    }
+
+    public static IBeacon getIBeacon(String macAddress) {
+        return (IBeacon) getBeacon(macAddress, IBeacon.class);
+    }
+
+    public static Eddystone getEddystone(String macAddress) {
+        return (Eddystone) getBeacon(macAddress, Eddystone.class);
+    }
+
+    public static Beacon getBeacon(String macAddress, Class<? extends Beacon> beaconClass) {
+        String key = getBeaconKey(macAddress, BeaconUtil.getReadableBeaconType(beaconClass));
+        return getInstance().beaconMap.get(key);
     }
 
     /*
