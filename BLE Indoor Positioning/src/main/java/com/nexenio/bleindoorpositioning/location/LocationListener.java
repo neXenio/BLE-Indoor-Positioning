@@ -1,6 +1,5 @@
 package com.nexenio.bleindoorpositioning.location;
 
-import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 /**

@@ -51,12 +51,10 @@ You need to implement some sort of Bluetooth scanning in order to get the advert
 You'll get a scan result, which you can extract the beacon mac address and raw advertising data from. Forward that data to the `BeaconManager` singleton and it will take care of everything else.
 
 ```Java
-private BeaconManager beaconManager = BeaconManager.getInstance();
-
 private void processScanResult(ScanResult scanResult) {
     String macAddress = scanResult.getBleDevice().getMacAddress();
     byte[] data = scanResult.getScanRecord().getBytes();
-    beaconManager.processAdvertisingPacket(macAddress, AdvertisingPacket.from(data));
+    BeaconManager.processAdvertisingPacket(macAddress, AdvertisingPacket.from(data));
 }
 ```
 

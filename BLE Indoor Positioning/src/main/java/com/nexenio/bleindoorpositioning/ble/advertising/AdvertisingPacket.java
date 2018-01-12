@@ -1,5 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.advertising;
 
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+
 import java.util.Arrays;
 
 /**
@@ -27,12 +29,23 @@ public abstract class AdvertisingPacket {
         return advertisingPacket;
     }
 
+    public abstract Class<? extends Beacon> getBeaconClass();
+
     public boolean dataEquals(AdvertisingPacket advertisingPacket) {
         if (advertisingPacket == null) {
             return false;
         }
         return Arrays.equals(data, advertisingPacket.data);
     }
+
+    @Override
+    public String toString() {
+        return AdvertisingPacketUtil.toHexadecimalString(data);
+    }
+
+    /*
+        Getter & Setter
+     */
 
     public byte[] getData() {
         return data;
@@ -56,11 +69,6 @@ public abstract class AdvertisingPacket {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
-    }
-
-    @Override
-    public String toString() {
-        return AdvertisingPacketUtil.toHexadecimalString(data);
     }
 
 }
