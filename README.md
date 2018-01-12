@@ -1,4 +1,4 @@
-[![Travis](https://img.shields.io/travis/neXenio/BLE-Indoor-Positioning/master.svg)](https://travis-ci.org/neXenio/BLE-Indoor-Positioning/builds) [![GitHub release](https://img.shields.io/github/release/neXenio/BLE-Indoor-Positioning.svg)](https://github.com/neXenio/BLE-Indoor-Positioning/releases) [![license](https://img.shields.io/github/license/neXenio/BLE-Indoor-Positioning.svg)](https://github.com/neXenio/BLE-Indoor-Positioning/blob/master/LICENSE)
+[![Travis](https://img.shields.io/travis/neXenio/BLE-Indoor-Positioning/master.svg)](https://travis-ci.org/neXenio/BLE-Indoor-Positioning/builds) [![GitHub release](https://img.shields.io/github/release/neXenio/BLE-Indoor-Positioning.svg)](https://github.com/neXenio/BLE-Indoor-Positioning/releases) [![JitPack](https://img.shields.io/jitpack/v/neXenio/BLE-Indoor-Positioning.svg)](https://jitpack.io/#neXenio/BLE-Indoor-Positioning/) [![license](https://img.shields.io/github/license/neXenio/BLE-Indoor-Positioning.svg)](https://github.com/neXenio/BLE-Indoor-Positioning/blob/master/LICENSE)
 
 # BLE Indoor Positioning
 
@@ -8,14 +8,31 @@ This repo contains a [Java library][package_core] that is capable of estimating 
 
 ## Integration
 
-### Gradle
+#### Gradle
+
+Release artefacts are available through [Bintray][bintray]. 
+
 ```groovy
 dependencies {
     compile 'com.nexenio.bleindoorpositioning:core:0.1.1'
 }
 ```
 
-### Maven
+If you want to use branch snapshots or specific commits, use [JitPack][jitpack].
+
+```groovy
+allprojects {
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+dependencies {
+    compile 'com.github.neXenio:BLE-Indoor-Positioning:dev-SNAPSHOT'
+}
+```
+
+#### Maven
 ```xml
 <dependency>
   <groupId>com.nexenio.bleindoorpositioning</groupId>
@@ -24,7 +41,7 @@ dependencies {
 </dependency>
 ```
 
-### JAR
+#### JAR
 You can download the latest `.jar` files from [GitHub][releases] or [Bintray][bintray].
 
 ## Bluetooth Scanning
@@ -78,6 +95,7 @@ The `Location` will contain latitude, longitude and altitude, as well as some co
 > This assumes that the geo coordinates of the beacons are known. You can assign a `BeaconLocationProvider` to any beacon instance, which could read the geo coordinates from the advertising data or some external API.
 
 [releases]: https://github.com/neXenio/BLE-Indoor-Positioning/releases
+[jitpack]: https://jitpack.io/#neXenio/BLE-Indoor-Positioning/
 [bintray]: https://bintray.com/nexenio/BLE-Indoor-Positioning
 [package_core]: https://github.com/neXenio/BLE-Indoor-Positioning/tree/master/BLE%20Indoor%20Positioning/src/main/java/com/nexenio/bleindoorpositioning
 [package_app]: https://github.com/neXenio/BLE-Indoor-Positioning/tree/master/app/src/main/java/com/nexenio/bleindoorpositioningdemo
