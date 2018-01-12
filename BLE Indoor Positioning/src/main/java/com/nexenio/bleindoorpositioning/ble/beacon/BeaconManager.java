@@ -2,10 +2,13 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by steppschuh on 07.12.17.
@@ -18,6 +21,8 @@ public class BeaconManager {
     private Map<String, Beacon> beaconMap = new LinkedHashMap<>();
 
     private Set<BeaconUpdateListener> beaconUpdateListeners = new HashSet<>();
+
+    private long inactivityDuration = TimeUnit.MINUTES.toMillis(1);
 
     private BeaconManager() {
 
@@ -83,12 +88,41 @@ public class BeaconManager {
         return getInstance().beaconMap.get(key);
     }
 
+    public static void removeInactiveBeacons() {
+        removeInactiveBeacons(getInstance().inactivityDuration, TimeUnit.MILLISECONDS);
+    }
+
+    public static void removeInactiveBeacons(long inactivityDuration, TimeUnit timeUnit) {
+        removeInactiveBeacons(System.currentTimeMillis() - timeUnit.toMillis(inactivityDuration));
+    }
+
+    public static void removeInactiveBeacons(long minimumAdvertisingTimestamp) {
+        BeaconManager instance = getInstance();
+        AdvertisingPacket latestAdvertisingPacket;
+        List<String> inactiveBeaconKeys = new ArrayList<>();
+        for (Map.Entry<String, Beacon> beaconEntry : instance.beaconMap.entrySet()) {
+            latestAdvertisingPacket = beaconEntry.getValue().getLatestAdvertisingPacket();
+            if (latestAdvertisingPacket == null || latestAdvertisingPacket.getTimestamp() < minimumAdvertisingTimestamp) {
+                inactiveBeaconKeys.add(beaconEntry.getKey());
+            }
+        }
+        instance.beaconMap.keySet().removeAll(inactiveBeaconKeys);
+    }
+
     /*
         Getter & Setter
      */
 
     public Map<String, Beacon> getBeaconMap() {
         return beaconMap;
+    }
+
+    public long getInactivityDuration() {
+        return inactivityDuration;
+    }
+
+    public void setInactivityDuration(long inactivityDuration) {
+        this.inactivityDuration = inactivityDuration;
     }
 
 }
