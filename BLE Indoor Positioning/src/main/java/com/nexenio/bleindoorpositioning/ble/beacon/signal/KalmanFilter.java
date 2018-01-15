@@ -39,16 +39,14 @@ public class KalmanFilter extends WindowFilter {
      */
     private static float DEFAULT_MEASUREMENT_NOISE = 10;
 
-    private double processNoise;
-    private double measurementNoise;
+    private double processNoise = DEFAULT_PROCESS_NOISE;
+    private double measurementNoise = DEFAULT_MEASUREMENT_NOISE;
     private double estimatedRSSI;
     private double errorCovarianceRSSI;
     private boolean isInitialized = false;
 
     public KalmanFilter(long duration, TimeUnit timeUnit) {
-        super(duration,timeUnit);
-        this.processNoise = DEFAULT_PROCESS_NOISE;
-        this.measurementNoise = DEFAULT_MEASUREMENT_NOISE;
+        super(duration, timeUnit);
     }
 
     @Override

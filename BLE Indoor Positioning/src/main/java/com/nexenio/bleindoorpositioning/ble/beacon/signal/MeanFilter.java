@@ -12,20 +12,24 @@ import java.util.concurrent.TimeUnit;
 public class MeanFilter extends WindowFilter {
 
     public MeanFilter(long duration, TimeUnit timeUnit) {
-        super(duration,timeUnit);
+        super(duration, timeUnit);
     }
 
     @Override
     public float filter(List<? extends AdvertisingPacket> advertisingPackets) {
-        float rssiSum = 0;
-        int rssiCount = 0;
+        float sum = 0;
+        int count = 0;
         for (AdvertisingPacket advertisingPacket : advertisingPackets) {
             if (advertisingPacket.getTimestamp() < minimumTimestamp) {
                 continue;
             }
-            rssiSum += advertisingPacket.getRssi();
-            rssiCount++;
+            sum += advertisingPacket.getRssi();
+            count++;
         }
-        return rssiSum / (float) rssiCount;
+        if ( count != 0) {
+            return sum / (float) count;
+        } else {
+            return 0;
+        }
     }
 }

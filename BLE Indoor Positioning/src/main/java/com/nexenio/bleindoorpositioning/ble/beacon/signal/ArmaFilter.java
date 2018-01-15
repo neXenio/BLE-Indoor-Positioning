@@ -33,10 +33,12 @@ public class ArmaFilter extends WindowFilter {
     private float armaFactor;
     private float armaRssi;
     private boolean isInitialized = false;
+    private TimeUnit timeUnit;
 
     public ArmaFilter(long duration, TimeUnit timeUnit) {
         super(duration,timeUnit);
         this.armaFactor = DEFAULT_ARMA_FACTOR;
+        this.timeUnit = timeUnit;
     }
 
     @Override
@@ -45,7 +47,9 @@ public class ArmaFilter extends WindowFilter {
             if (advertisingPacket.getTimestamp() < minimumTimestamp) {
                 continue;
             }
-            addMeasurement(advertisingPacket.getRssi(), getArmaFactor(AdvertisingPacketUtil.getPacketFrequency(advertisingPackets.size(), duration)));
+            addMeasurement(advertisingPacket.getRssi(), getArmaFactor(
+                    AdvertisingPacketUtil.getPacketFrequency(advertisingPackets.size(), duration, timeUnit)
+            ));
         }
         return getFilteredRssi();
     }
@@ -64,6 +68,7 @@ public class ArmaFilter extends WindowFilter {
     }
 
     public float getArmaFactor(float packetFrequency) {
+        //TODO make more robust to different packet frequencies
         if (packetFrequency > 4) {
             armaFactor = 0.1f;
         } else if (packetFrequency > 3) {

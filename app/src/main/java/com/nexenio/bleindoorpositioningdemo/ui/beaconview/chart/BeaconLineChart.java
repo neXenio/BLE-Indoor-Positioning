@@ -419,7 +419,7 @@ public class BeaconLineChart extends BeaconChart {
             point = new PointF();
         }
         point.x = xAxisStartPoint.x + ((xAxisEndPoint.x - xAxisStartPoint.x) * (xAxisRange - (System.currentTimeMillis() - advertisingPacket.getTimestamp()))) / xAxisRange;
-        point.y = yAxisStartPoint.y - ((yAxisStartPoint.y - yAxisEndPoint.y) * (getValue(beacon, advertisingPacket, 2000, filter) - (float) yAxisMinimumAnimator.getAnimatedValue())) / yAxisRange;
+        point.y = yAxisStartPoint.y - ((yAxisStartPoint.y - yAxisEndPoint.y) * (getValue(beacon, advertisingPacket, windowLength, filter) - (float) yAxisMinimumAnimator.getAnimatedValue())) / yAxisRange;
         return point;
     }
 

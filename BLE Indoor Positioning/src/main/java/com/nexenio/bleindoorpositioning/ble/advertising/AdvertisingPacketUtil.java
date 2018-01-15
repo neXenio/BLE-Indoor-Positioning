@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by steppschuh on 06.12.17.
@@ -48,12 +49,11 @@ public abstract class AdvertisingPacketUtil {
         return squaredDistanceSum / sampleLength;
     }
 
-    public static float getPacketFrequency(int packets, long time) {
-        //TODO make output more robust to different time inputs
+    public static float getPacketFrequency(int packets, long time, TimeUnit timeUnit) {
         if (time == 0) {
             return 0;
         }
-        return ((float) packets) / (time / 1000);
+        return ((float) packets) / (timeUnit.toSeconds(time));
     }
 
 }
