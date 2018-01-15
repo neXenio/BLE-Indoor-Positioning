@@ -1,5 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+
 /**
  * Created by steppschuh on 24.11.17.
  */
@@ -43,6 +45,14 @@ public abstract class BeaconUtil {
      */
     public static float getAdvertisingRange(int transmissionPower, int calibratedTransmissionPower, int calibratedRange) {
         return (calibratedRange * (transmissionPower + 100)) / (float) (calibratedTransmissionPower + 100);
+    }
+
+    public static String getReadableBeaconType(AdvertisingPacket advertisingPacket) {
+        return getReadableBeaconType(advertisingPacket.getBeaconClass());
+    }
+
+    public static String getReadableBeaconType(Class<? extends Beacon> beaconClass) {
+        return beaconClass.getSimpleName();
     }
 
 }
