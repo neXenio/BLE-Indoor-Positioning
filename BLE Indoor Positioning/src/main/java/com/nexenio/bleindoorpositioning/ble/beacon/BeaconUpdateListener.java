@@ -6,6 +6,6 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 
 public interface BeaconUpdateListener {
 
-    public void onBeaconUpdated(Beacon beacon);
+    void onBeaconUpdated(Beacon beacon);
 
 }
