@@ -26,10 +26,6 @@ public class MeanFilter extends WindowFilter {
             sum += advertisingPacket.getRssi();
             count++;
         }
-        if ( count != 0) {
-            return sum / (float) count;
-        } else {
-            return 0;
-        }
+        return count > 0 ? (sum / (float) count) : 0;
     }
 }

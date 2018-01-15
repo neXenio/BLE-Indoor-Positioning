@@ -43,39 +43,40 @@ public class ArmaFilter extends WindowFilter {
 
     @Override
     public float filter(List<? extends AdvertisingPacket> advertisingPackets) {
+        float frequency = AdvertisingPacketUtil.getPacketFrequency(advertisingPackets.size(), duration, timeUnit);
+        armaFactor = getArmaFactor(frequency);
         for (AdvertisingPacket advertisingPacket : advertisingPackets) {
             if (advertisingPacket.getTimestamp() < minimumTimestamp) {
                 continue;
             }
-            addMeasurement(advertisingPacket.getRssi(), getArmaFactor(
-                    AdvertisingPacketUtil.getPacketFrequency(advertisingPackets.size(), duration, timeUnit)
-            ));
+            addMeasurement(advertisingPacket.getRssi(), armaFactor);
         }
         return getFilteredRssi();
     }
 
-    public void addMeasurement(int rssi, float packetFrequency) {
+    public void addMeasurement(int rssi, float armaFactor) {
         //use first measurement as initialization
         if (!isInitialized) {
             armaRssi = rssi;
             isInitialized = true;
         }
-        armaRssi = armaRssi - (getArmaFactor(packetFrequency) * (armaRssi - rssi));
+        armaRssi = armaRssi - (armaFactor * (armaRssi - rssi));
     }
 
     public float getFilteredRssi() {
         return armaRssi;
     }
 
-    public float getArmaFactor(float packetFrequency) {
+    public static float getArmaFactor(float packetFrequency) {
         //TODO make more robust to different packet frequencies
-        if (packetFrequency > 4) {
+        float armaFactor = 1;
+        if (packetFrequency > 6) {
             armaFactor = 0.1f;
-        } else if (packetFrequency > 3) {
+        } else if (packetFrequency > 5) {
             armaFactor = 0.25f;
-        } else if (packetFrequency > 2) {
+        } else if (packetFrequency > 4) {
             armaFactor = 0.5f;
-        } else if (packetFrequency > 1) {
+        } else if (packetFrequency > 3) {
             armaFactor = 0.75f;
         }
         return armaFactor;

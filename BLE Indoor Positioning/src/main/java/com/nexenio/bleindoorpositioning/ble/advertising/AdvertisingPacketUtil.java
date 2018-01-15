@@ -39,21 +39,20 @@ public abstract class AdvertisingPacketUtil {
     }
 
     public static float calculateVariance(int[] values) {
-        float average = calculateMean(values);
-
+        float mean = calculateMean(values);
         float squaredDistanceSum = 0;
         for (int i = 0; i < values.length; i++) {
-            squaredDistanceSum += Math.pow(values[i] - average, 2);
+            squaredDistanceSum += Math.pow(values[i] - mean, 2);
         }
         int sampleLength = Math.max(values.length - 1, 1);
-        return squaredDistanceSum / sampleLength;
+        return squaredDistanceSum / (float) sampleLength;
     }
 
-    public static float getPacketFrequency(int packets, long time, TimeUnit timeUnit) {
-        if (time == 0) {
+    public static float getPacketFrequency(int packetCount, long duration, TimeUnit timeUnit) {
+        if (duration == 0) {
             return 0;
         }
-        return ((float) packets) / (timeUnit.toSeconds(time));
+        return packetCount / (float) (timeUnit.toSeconds(duration));
     }
 
 }

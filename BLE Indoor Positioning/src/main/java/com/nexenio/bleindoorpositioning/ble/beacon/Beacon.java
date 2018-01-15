@@ -148,7 +148,6 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public float getDistance(long timeWindow, TimeUnit timeUnit) {
-        // TODO evaluate maxSpeed of walking = 1,38889 m/s
         RssiFilter armaFilter = new ArmaFilter(timeWindow, timeUnit);
         float filteredRssi = getRssi(armaFilter);
         return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
