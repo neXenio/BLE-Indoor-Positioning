@@ -11,8 +11,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MeanFilter extends WindowFilter {
 
-    public MeanFilter(long duration, TimeUnit timeUnit) {
-        super(duration, timeUnit);
+    public MeanFilter() {
     }
 
     @Override

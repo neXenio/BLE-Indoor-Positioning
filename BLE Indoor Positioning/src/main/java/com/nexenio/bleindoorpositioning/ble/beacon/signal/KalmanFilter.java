@@ -4,7 +4,6 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by leon on 02.01.18.
@@ -39,23 +38,22 @@ public class KalmanFilter extends WindowFilter {
      */
     private static float DEFAULT_MEASUREMENT_NOISE = 10;
 
-    private double processNoise = DEFAULT_PROCESS_NOISE;
-    private double measurementNoise = DEFAULT_MEASUREMENT_NOISE;
-    private double estimatedRSSI;
-    private double errorCovarianceRSSI;
+    private float processNoise = DEFAULT_PROCESS_NOISE;
+    private float measurementNoise = DEFAULT_MEASUREMENT_NOISE;
+    private float estimatedRssi;
+    private float errorCovarianceRssi;
     private boolean isInitialized = false;
 
-    public KalmanFilter(long duration, TimeUnit timeUnit) {
-        super(duration, timeUnit);
+    public KalmanFilter() {
     }
 
     @Override
     public float filter(List<? extends AdvertisingPacket> advertisingPackets) {
-        double priorRSSI;
-        double kalmanGain;
-        double priorErrorCovarianceRSSI;
+        float priorRssi;
+        float kalmanGain;
+        float priorErrorCovarianceRssi;
 
-        int[] rssiArray = AdvertisingPacketUtil.getRssisFromAdvertisingPackets((List<AdvertisingPacket>) advertisingPackets);
+        int[] rssiArray = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(advertisingPackets);
         measurementNoise = AdvertisingPacketUtil.calculateVariance(rssiArray);
 
         for (AdvertisingPacket advertisingPacket : advertisingPackets) {
@@ -64,39 +62,19 @@ public class KalmanFilter extends WindowFilter {
             }
 
             if (!isInitialized) {
-                priorRSSI = advertisingPacket.getRssi();
-                priorErrorCovarianceRSSI = 1;
+                priorRssi = advertisingPacket.getRssi();
+                priorErrorCovarianceRssi = 1;
                 isInitialized = true;
             } else {
-                priorRSSI = estimatedRSSI;
-                priorErrorCovarianceRSSI = errorCovarianceRSSI + processNoise;
+                priorRssi = estimatedRssi;
+                priorErrorCovarianceRssi = errorCovarianceRssi + processNoise;
             }
 
-            kalmanGain = priorErrorCovarianceRSSI / (priorErrorCovarianceRSSI + measurementNoise);
-            estimatedRSSI = priorRSSI + (kalmanGain * (advertisingPacket.getRssi() - priorRSSI));
-            errorCovarianceRSSI = (1 - kalmanGain) * priorErrorCovarianceRSSI;
+            kalmanGain = priorErrorCovarianceRssi / (priorErrorCovarianceRssi + measurementNoise);
+            estimatedRssi = priorRssi + (kalmanGain * (advertisingPacket.getRssi() - priorRssi));
+            errorCovarianceRssi = (1 - kalmanGain) * priorErrorCovarianceRssi;
         }
-        return (float) estimatedRSSI;
-    }
-
-    /*
-        Getter & Setter
-     */
-
-    public long getMinimumTimestamp() {
-        return minimumTimestamp;
-    }
-
-    public void setMinimumTimestamp(long minimumTimestamp) {
-        this.minimumTimestamp = minimumTimestamp;
-    }
-
-    public long getMaximumTimestamp() {
-        return maximumTimestamp;
-    }
-
-    public void setMaximumTimestamp(long maximumTimestamp) {
-        this.maximumTimestamp = maximumTimestamp;
+        return estimatedRssi;
     }
 
 }

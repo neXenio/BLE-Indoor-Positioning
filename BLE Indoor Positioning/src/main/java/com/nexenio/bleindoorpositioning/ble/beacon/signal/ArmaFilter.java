@@ -30,15 +30,11 @@ public class ArmaFilter extends WindowFilter {
      **/
     private static float DEFAULT_ARMA_FACTOR = 0.95f;
 
-    private float armaFactor;
+    private float armaFactor = DEFAULT_ARMA_FACTOR;
     private float armaRssi;
     private boolean isInitialized = false;
-    private TimeUnit timeUnit;
 
-    public ArmaFilter(long duration, TimeUnit timeUnit) {
-        super(duration,timeUnit);
-        this.armaFactor = DEFAULT_ARMA_FACTOR;
-        this.timeUnit = timeUnit;
+    public ArmaFilter() {
     }
 
     @Override

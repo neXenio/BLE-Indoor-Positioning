@@ -8,13 +8,20 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class WindowFilter implements RssiFilter {
 
-    protected long duration;
+    public static long DEFAULT_DURATION = TimeUnit.SECONDS.toMillis(5);
+
+    protected long duration = DEFAULT_DURATION;
     protected long maximumTimestamp;
     protected long minimumTimestamp;
+    protected TimeUnit timeUnit;
+
+    public WindowFilter() {
+        this(DEFAULT_DURATION,TimeUnit.MILLISECONDS);
+    }
 
     public WindowFilter(long duration, TimeUnit timeUnit) {
         this.minimumTimestamp = this.maximumTimestamp - timeUnit.toMillis(duration);
-        this.duration = timeUnit.toMillis(duration);
+        this.timeUnit = timeUnit;
     }
 
     /*
@@ -25,9 +32,9 @@ public abstract class WindowFilter implements RssiFilter {
         return duration;
     }
 
-    //TODO adjust timestamps
-    public void setDuration(long duration) {
+    public void setDuration(long duration, TimeUnit timeUnit) {
         this.duration = duration;
+        this.minimumTimestamp = this.maximumTimestamp - timeUnit.toMillis(duration);
     }
 
     public long getMaximumTimestamp() {

@@ -6,6 +6,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -144,17 +145,17 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public float getDistance() {
-        return getDistance(3, TimeUnit.SECONDS);
+        RssiFilter armaFilter = new ArmaFilter();
+        return getDistance(armaFilter);
     }
 
-    public float getDistance(long timeWindow, TimeUnit timeUnit) {
-        RssiFilter armaFilter = new ArmaFilter(timeWindow, timeUnit);
-        float filteredRssi = getRssi(armaFilter);
+    public float getDistance(RssiFilter filter) {
+        float filteredRssi = getRssi(filter);
         return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
     }
 
-    public float getMeanRssi(long amount, TimeUnit timeUnit) {
-        RssiFilter meanFilter = new MeanFilter(amount, timeUnit);
+    public float getMeanRssi() {
+        RssiFilter meanFilter = new MeanFilter();
         return getRssi(meanFilter);
     }
 

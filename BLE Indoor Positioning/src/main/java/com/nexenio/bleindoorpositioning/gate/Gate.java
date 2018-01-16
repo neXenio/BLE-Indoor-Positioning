@@ -35,12 +35,8 @@ public class Gate {
     }
 
     public Beacon getClosestBeacon() {
-        return getClosestBeacon(2, TimeUnit.SECONDS);
-    }
-
-    public Beacon getClosestBeacon(long amount, TimeUnit timeUnit) {
         if (leftBeacon != null && rightBeacon != null) {
-            return (leftBeacon.getMeanRssi(amount, timeUnit) > rightBeacon.getMeanRssi(amount, timeUnit)) ? leftBeacon : rightBeacon;
+            return (leftBeacon.getMeanRssi() > rightBeacon.getMeanRssi()) ? leftBeacon : rightBeacon;
         } else if (leftBeacon == null && rightBeacon != null) {
             return rightBeacon;
         } else if (leftBeacon != null && rightBeacon == null) {

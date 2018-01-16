@@ -49,7 +49,7 @@ public class Multilateration {
     public static double[] getDistances(List<Beacon> beacons) {
         double[] distances = new double[beacons.size()];
         for (int beaconIndex = 0; beaconIndex < beacons.size(); beaconIndex++) {
-            distances[beaconIndex] = beacons.get(beaconIndex).getDistance(5, TimeUnit.SECONDS);
+            distances[beaconIndex] = beacons.get(beaconIndex).getDistance();
         }
         return distances;
     }

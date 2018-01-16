@@ -56,7 +56,8 @@ public class BeaconChartFragment extends BeaconViewFragment {
 
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.fragment_beacon_chart;
+        //return R.layout.fragment_beacon_chart;
+        return R.layout.fragment_rssi_filter_chart;
     }
 
     @Override

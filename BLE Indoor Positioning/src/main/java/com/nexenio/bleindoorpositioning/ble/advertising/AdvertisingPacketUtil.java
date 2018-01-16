@@ -22,7 +22,7 @@ public abstract class AdvertisingPacketUtil {
         return new UUID(bb.getLong(), bb.getLong());
     }
 
-    public static int[] getRssisFromAdvertisingPackets(List<AdvertisingPacket> advertisingPackets) {
+    public static int[] getRssisFromAdvertisingPackets(List<? extends AdvertisingPacket> advertisingPackets) {
         int[] rssis = new int[advertisingPackets.size()];
         for (int i = 0; i < advertisingPackets.size(); i++) {
             rssis[i] = advertisingPackets.get(i).getRssi();
