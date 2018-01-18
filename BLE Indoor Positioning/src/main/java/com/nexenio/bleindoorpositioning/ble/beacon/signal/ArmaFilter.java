@@ -4,7 +4,6 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by leon on 20.12.17.

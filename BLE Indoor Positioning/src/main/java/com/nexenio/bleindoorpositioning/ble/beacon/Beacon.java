@@ -140,23 +140,24 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return getLatestAdvertisingPacket().getTimestamp() > timestamp;
     }
 
-    public float getRssi(RssiFilter filter) {
-        return filter.filter(advertisingPackets);
+    public float getRssi(WindowFilter filter) {
+        List<AdvertisingPacket> recentAdvertisingPackets = (List<AdvertisingPacket>) getAdvertisingPacketsFromLast(filter.getDuration(),filter.getTimeUnit());
+        return filter.filter(recentAdvertisingPackets);
     }
 
     public float getDistance() {
         RssiFilter armaFilter = new ArmaFilter();
-        return getDistance(armaFilter);
+        return getDistance((WindowFilter) armaFilter);
     }
 
-    public float getDistance(RssiFilter filter) {
+    public float getDistance(WindowFilter filter) {
         float filteredRssi = getRssi(filter);
         return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
     }
 
     public float getMeanRssi() {
         RssiFilter meanFilter = new MeanFilter();
-        return getRssi(meanFilter);
+        return getRssi((WindowFilter) meanFilter);
     }
 
     public float getEstimatedAdvertisingRange() {

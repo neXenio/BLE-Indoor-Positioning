@@ -148,10 +148,10 @@ public abstract class BeaconViewFragment extends Fragment {
         for (Beacon beacon : beaconManager.getBeaconMap().values()) {
             for (BeaconFilter beaconFilter : beaconFilters) {
                 if (beaconFilter.matches(beacon)) {
-                    if (beacon.getMacAddress().equals("E2:38:2E:68:46:E9")) {
+                    //if (beacon.getMacAddress().equals("E2:38:2E:68:46:E9")) {
                         beacons.add(beacon);
                         break;
-                    }
+                    //}
                 }
             }
         }

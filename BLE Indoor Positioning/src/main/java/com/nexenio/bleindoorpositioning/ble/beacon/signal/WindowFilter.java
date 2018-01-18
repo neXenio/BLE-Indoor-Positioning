@@ -16,7 +16,7 @@ public abstract class WindowFilter implements RssiFilter {
     protected TimeUnit timeUnit;
 
     public WindowFilter() {
-        this(DEFAULT_DURATION,TimeUnit.MILLISECONDS);
+        this(DEFAULT_DURATION, TimeUnit.MILLISECONDS);
     }
 
     public WindowFilter(long duration, TimeUnit timeUnit) {
@@ -27,6 +27,10 @@ public abstract class WindowFilter implements RssiFilter {
     /*
         Getter & Setter
      */
+
+    public TimeUnit getTimeUnit() {
+        return timeUnit;
+    }
 
     public long getDuration() {
         return duration;
