@@ -45,7 +45,7 @@ public abstract class AdvertisingPacketUtil {
             squaredDistanceSum += Math.pow(values[i] - mean, 2);
         }
         int sampleLength = Math.max(values.length - 1, 1);
-        return squaredDistanceSum / (float) sampleLength;
+        return squaredDistanceSum / sampleLength;
     }
 
     public static float getPacketFrequency(int packetCount, long duration, TimeUnit timeUnit) {

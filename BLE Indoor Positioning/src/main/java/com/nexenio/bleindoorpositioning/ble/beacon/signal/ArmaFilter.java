@@ -4,6 +4,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by leon on 20.12.17.
@@ -22,7 +23,7 @@ import java.util.List;
  * Implementation</a>
  */
 
-public class ArmaFilter extends WindowFilter {
+public class ArmaFilter extends SignalFilter {
 
     /**
      * Arma smoothing factor - the percentage of how much of the new signal will be discarded
@@ -34,6 +35,10 @@ public class ArmaFilter extends WindowFilter {
     private boolean isInitialized = false;
 
     public ArmaFilter() {
+    }
+
+    public ArmaFilter(long duration, TimeUnit timeUnit){
+        super(duration,timeUnit);
     }
 
     @Override
@@ -64,15 +69,13 @@ public class ArmaFilter extends WindowFilter {
 
     public static float getArmaFactor(float packetFrequency) {
         //TODO make more robust to different packet frequencies
-        float armaFactor = 1;
+        float armaFactor = DEFAULT_ARMA_FACTOR;
         if (packetFrequency > 6) {
             armaFactor = 0.1f;
         } else if (packetFrequency > 5) {
             armaFactor = 0.25f;
         } else if (packetFrequency > 4) {
             armaFactor = 0.5f;
-        } else if (packetFrequency > 3) {
-            armaFactor = 0.75f;
         }
         return armaFactor;
     }

@@ -4,6 +4,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by leon on 02.01.18.
@@ -25,7 +26,7 @@ import java.util.List;
  * Implementation</a>
  */
 
-public class KalmanFilter extends WindowFilter {
+public class KalmanFilter extends SignalFilter {
 
     /**
      * We use a low value for the process noise (i.e. 0.008).
@@ -45,6 +46,16 @@ public class KalmanFilter extends WindowFilter {
     private boolean isInitialized = false;
 
     public KalmanFilter() {
+    }
+
+    public KalmanFilter(long duration, TimeUnit timeUnit) {
+        super(duration,timeUnit);
+    }
+
+    public KalmanFilter(long duration, TimeUnit timeUnit, float processNoise, float measurementNoise){
+        super(duration,timeUnit);
+        this.processNoise = processNoise;
+        this.measurementNoise = measurementNoise;
     }
 
     @Override

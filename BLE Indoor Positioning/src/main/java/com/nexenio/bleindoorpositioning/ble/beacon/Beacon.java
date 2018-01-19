@@ -6,7 +6,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
-import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.SignalFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -140,24 +140,24 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return getLatestAdvertisingPacket().getTimestamp() > timestamp;
     }
 
-    public float getRssi(WindowFilter filter) {
+    public float getRssi(SignalFilter filter) {
         List<AdvertisingPacket> recentAdvertisingPackets = (List<AdvertisingPacket>) getAdvertisingPacketsFromLast(filter.getDuration(),filter.getTimeUnit());
         return filter.filter(recentAdvertisingPackets);
     }
 
     public float getDistance() {
         RssiFilter armaFilter = new ArmaFilter();
-        return getDistance((WindowFilter) armaFilter);
+        return getDistance((SignalFilter) armaFilter);
     }
 
-    public float getDistance(WindowFilter filter) {
+    public float getDistance(SignalFilter filter) {
         float filteredRssi = getRssi(filter);
         return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
     }
 
     public float getMeanRssi() {
         RssiFilter meanFilter = new MeanFilter();
-        return getRssi((WindowFilter) meanFilter);
+        return getRssi((SignalFilter) meanFilter);
     }
 
     public float getEstimatedAdvertisingRange() {

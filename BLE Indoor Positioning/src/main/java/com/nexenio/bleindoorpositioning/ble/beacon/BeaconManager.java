@@ -24,6 +24,8 @@ public class BeaconManager {
 
     private long inactivityDuration = TimeUnit.MINUTES.toMillis(3);
 
+    private Beacon closestBeacon;
+
     private BeaconManager() {
 
     }
@@ -51,7 +53,20 @@ public class BeaconManager {
             instance.beaconMap.put(key, beacon);
         }
         beacon.addAdvertisingPacket(advertisingPacket);
+        processClosestBeacon(beacon);
         instance.notifyBeaconUpdateListeners(beacon);
+    }
+
+    public static void processClosestBeacon(Beacon beacon) {
+        if (instance.closestBeacon == null) {
+            instance.setClosestBeacon(beacon);
+        } else {
+            if (instance.getClosestBeacon().getMacAddress() != beacon.getMacAddress()){
+                if (beacon.getDistance() < instance.closestBeacon.getDistance()) {
+                    instance.setClosestBeacon(beacon);
+                }
+            }
+        }
     }
 
     private void notifyBeaconUpdateListeners(Beacon beacon) {
@@ -113,6 +128,14 @@ public class BeaconManager {
     /*
         Getter & Setter
      */
+
+    public Beacon getClosestBeacon() {
+        return closestBeacon;
+    }
+
+    public void setClosestBeacon(Beacon closestBeacon) {
+        this.closestBeacon = closestBeacon;
+    }
 
     public Map<String, Beacon> getBeaconMap() {
         return beaconMap;

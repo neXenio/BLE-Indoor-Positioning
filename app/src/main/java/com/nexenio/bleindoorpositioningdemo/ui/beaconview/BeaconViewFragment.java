@@ -21,6 +21,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.GenericBeaconFilter;
 import com.nexenio.bleindoorpositioning.gate.ClosestGateChangeListener;
 import com.nexenio.bleindoorpositioning.gate.Gate;
 import com.nexenio.bleindoorpositioning.gate.GateDetection;
@@ -148,10 +149,8 @@ public abstract class BeaconViewFragment extends Fragment {
         for (Beacon beacon : beaconManager.getBeaconMap().values()) {
             for (BeaconFilter beaconFilter : beaconFilters) {
                 if (beaconFilter.matches(beacon)) {
-                    //if (beacon.getMacAddress().equals("E2:38:2E:68:46:E9")) {
                         beacons.add(beacon);
                         break;
-                    //}
                 }
             }
         }
