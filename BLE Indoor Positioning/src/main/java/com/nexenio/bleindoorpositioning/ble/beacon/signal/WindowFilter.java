@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
  * Created by leon on 09.01.18.
  */
 
-public abstract class SignalFilter implements RssiFilter {
+public abstract class WindowFilter implements RssiFilter {
 
     public static long DEFAULT_DURATION = TimeUnit.SECONDS.toMillis(5);
 
@@ -15,11 +15,11 @@ public abstract class SignalFilter implements RssiFilter {
     protected long minimumTimestamp;
     protected TimeUnit timeUnit;
 
-    public SignalFilter() {
+    public WindowFilter() {
         this(DEFAULT_DURATION, TimeUnit.MILLISECONDS);
     }
 
-    public SignalFilter(long duration, TimeUnit timeUnit) {
+    public WindowFilter(long duration, TimeUnit timeUnit) {
         this.duration = duration;
         this.timeUnit = timeUnit;
     }

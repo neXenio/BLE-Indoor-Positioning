@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
  * Created by leon on 03.01.18.
  */
 
-public class MeanFilter extends SignalFilter {
+public class MeanFilter extends WindowFilter {
 
     public MeanFilter() {
     }

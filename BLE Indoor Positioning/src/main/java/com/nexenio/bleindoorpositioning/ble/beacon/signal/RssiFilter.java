@@ -3,6 +3,7 @@ package com.nexenio.bleindoorpositioning.ble.beacon.signal;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by leon on 03.01.18.
@@ -15,5 +16,9 @@ public interface RssiFilter {
     void setMinimumTimestamp(long minimumTimestamp);
 
     void setMaximumTimestamp(long maximumTimestamp);
+
+    long getDuration();
+
+    TimeUnit getTimeUnit();
 
 }

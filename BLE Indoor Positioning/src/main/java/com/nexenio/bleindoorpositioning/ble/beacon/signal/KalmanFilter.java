@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  * Implementation</a>
  */
 
-public class KalmanFilter extends SignalFilter {
+public class KalmanFilter extends WindowFilter {
 
     /**
      * We use a low value for the process noise (i.e. 0.008).

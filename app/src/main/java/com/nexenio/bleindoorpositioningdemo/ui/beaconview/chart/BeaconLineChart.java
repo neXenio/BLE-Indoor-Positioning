@@ -16,7 +16,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
-import com.nexenio.bleindoorpositioning.ble.beacon.signal.SignalFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioningdemo.R;
@@ -31,10 +31,10 @@ import java.util.concurrent.TimeUnit;
 
 public class BeaconLineChart extends BeaconChart {
 
-    public static long SECONDS_10_IN_MILLIS = TimeUnit.SECONDS.toMillis(10);
-    public static long SECONDS_5_IN_MILLIS = TimeUnit.SECONDS.toMillis(5);
+    public static final long WINDOW_10_SECONDS = TimeUnit.SECONDS.toMillis(10);
+    public static final long WINDOW_5_SECONDS = TimeUnit.SECONDS.toMillis(5);
 
-    protected long windowLength = SignalFilter.DEFAULT_DURATION;
+    protected long windowLength = WindowFilter.DEFAULT_DURATION;
 
     protected Paint axisPaint;
     protected Paint axisLabelPaint;
@@ -350,7 +350,7 @@ public class BeaconLineChart extends BeaconChart {
         canvas.drawCircle(currentLinePoint.x, currentLinePoint.y, pixelsPerDip * 1.5f, linePaint);
 
         if (lastLinePoint != null && lastAdvertisingPacket != null) {
-            if (advertisingPacket.getTimestamp() < lastAdvertisingPacket.getTimestamp() + SECONDS_5_IN_MILLIS) {
+            if (advertisingPacket.getTimestamp() < lastAdvertisingPacket.getTimestamp() + WINDOW_5_SECONDS) {
                 canvas.drawLine(
                         lastLinePoint.x,
                         lastLinePoint.y,
@@ -380,7 +380,7 @@ public class BeaconLineChart extends BeaconChart {
         float filteredRssi;
 
         // make sure that the window size is at least 10 seconds when we're looking for the frequency
-        windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? windowLength : Math.max(windowLength, SECONDS_10_IN_MILLIS);
+        windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? windowLength : Math.max(windowLength, WINDOW_10_SECONDS);
 
         if (windowLength == 0) {
             filteredRssi = advertisingPacket.getRssi();

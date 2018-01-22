@@ -149,8 +149,8 @@ public abstract class BeaconViewFragment extends Fragment {
         for (Beacon beacon : beaconManager.getBeaconMap().values()) {
             for (BeaconFilter beaconFilter : beaconFilters) {
                 if (beaconFilter.matches(beacon)) {
-                        beacons.add(beacon);
-                        break;
+                    beacons.add(beacon);
+                    break;
                 }
             }
         }

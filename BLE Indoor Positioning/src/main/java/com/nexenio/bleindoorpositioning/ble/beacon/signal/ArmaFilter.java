@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * Implementation</a>
  */
 
-public class ArmaFilter extends SignalFilter {
+public class ArmaFilter extends WindowFilter {
 
     /**
      * Arma smoothing factor - the percentage of how much of the new signal will be discarded
@@ -32,7 +32,7 @@ public class ArmaFilter extends SignalFilter {
 
     private float armaFactor = DEFAULT_ARMA_FACTOR;
     private float armaRssi;
-    private boolean isInitialized = false;
+    private boolean isInitialized;
 
     public ArmaFilter() {
     }

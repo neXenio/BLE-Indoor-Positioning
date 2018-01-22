@@ -1,6 +1,8 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,6 +27,8 @@ public class BeaconManager {
     private long inactivityDuration = TimeUnit.MINUTES.toMillis(3);
 
     private Beacon closestBeacon;
+
+    static RssiFilter meanFilter = new MeanFilter(30,TimeUnit.SECONDS);
 
     private BeaconManager() {
 
@@ -59,11 +63,12 @@ public class BeaconManager {
 
     public static void processClosestBeacon(Beacon beacon) {
         if (instance.closestBeacon == null) {
-            instance.setClosestBeacon(beacon);
+            instance.closestBeacon = beacon;
         } else {
-            if (instance.getClosestBeacon().getMacAddress() != beacon.getMacAddress()){
-                if (beacon.getDistance() < instance.closestBeacon.getDistance()) {
+            if (instance.closestBeacon != beacon){
+                if (beacon.getDistance(meanFilter) < instance.closestBeacon.getDistance()) {
                     instance.setClosestBeacon(beacon);
+                    System.out.println("close: " + instance.closestBeacon);
                 }
             }
         }

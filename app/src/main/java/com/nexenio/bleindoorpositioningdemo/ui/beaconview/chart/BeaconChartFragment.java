@@ -11,9 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -23,10 +26,14 @@ import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class BeaconChartFragment extends BeaconViewFragment {
 
     private BeaconChart beaconChart;
+
+    protected BeaconManager beaconManager = BeaconManager.getInstance();
+    private Boolean filterView = true;
 
     public BeaconChartFragment() {
         super();
@@ -39,14 +46,20 @@ public class BeaconChartFragment extends BeaconViewFragment {
 
             @Override
             public boolean matches(IBeacon beacon) {
-                if (legacyUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                if (gateDetectionUuid.equals(beacon.getProximityUuid())) {
-                    return true;
+                if (filterView) {
+                    if (beaconManager.getClosestBeacon().equals(beacon)) {
+                        return true;
+                    }
+                } else {
+                    if (legacyUuid.equals(beacon.getProximityUuid())) {
+                        return true;
+                    }
+                    if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
+                        return true;
+                    }
+                    if (gateDetectionUuid.equals(beacon.getProximityUuid())) {
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -56,8 +69,11 @@ public class BeaconChartFragment extends BeaconViewFragment {
 
     @Override
     protected int getLayoutResourceId() {
-        //return R.layout.fragment_beacon_chart;
-        return R.layout.fragment_rssi_filter_chart;
+        if(filterView){
+            return R.layout.fragment_rssi_filter_chart;
+        } else {
+            return R.layout.fragment_beacon_chart;
+        }
     }
 
     @Override

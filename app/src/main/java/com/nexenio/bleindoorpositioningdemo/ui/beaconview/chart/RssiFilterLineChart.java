@@ -7,9 +7,9 @@ import android.util.AttributeSet;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
-import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
@@ -22,10 +22,7 @@ import java.util.List;
 
 public class RssiFilterLineChart extends BeaconLineChart {
 
-    protected BeaconManager beaconManager = BeaconManager.getInstance();
-
-    RssiFilter armaFilter = new ArmaFilter();
-    RssiFilter kalmanFilter = new KalmanFilter();
+    public static List<RssiFilter> filterList = new ArrayList<>();
 
     public RssiFilterLineChart(Context context) {
         super(context);
@@ -38,23 +35,18 @@ public class RssiFilterLineChart extends BeaconLineChart {
     @Override
     public void initialize() {
         super.initialize();
+        filterList.add(new MeanFilter());
+        filterList.add(new ArmaFilter());
+        filterList.add(new KalmanFilter());
     }
 
+    @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
-        List<RssiFilter> filterList = new ArrayList<>();
-        filterList.add(meanFilter);
-        filterList.add(armaFilter);
-        filterList.add(kalmanFilter);
-
-        beacon = beaconManager.getClosestBeacon();
-        //TODO prevent switches between beacons
-
-        currentBeaconIndex = beacons.indexOf(beacon);
         int filterIndex = 0;
         for (RssiFilter filter : filterList) {
-            filterIndex++;
+
             prepareDraw(beacon);
-            linePaint.setShader(createLineShader(ColorUtil.getBeaconColor(currentBeaconIndex + filterIndex)));
+            linePaint.setShader(createLineShader(ColorUtil.getBeaconColor(filterIndex)));
 
             for (AdvertisingPacket advertisingPacket : (List<AdvertisingPacket>) beacon.getAdvertisingPackets()) {
                 if (advertisingPacket.getTimestamp() < minimumAdvertisingTimestamp) {
@@ -68,7 +60,7 @@ public class RssiFilterLineChart extends BeaconLineChart {
                 drawNextPoint(canvas, beacon, advertisingPacket);
             }
 
-            currentBeaconIndex++;
+            filterIndex++;
             fadeLastPoint(canvas);
         }
     }
