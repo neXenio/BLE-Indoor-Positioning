@@ -68,7 +68,6 @@ public class BeaconManager {
             if (instance.closestBeacon != beacon){
                 if (beacon.getDistance(meanFilter) < instance.closestBeacon.getDistance()) {
                     instance.setClosestBeacon(beacon);
-                    System.out.println("close: " + instance.closestBeacon);
                 }
             }
         }
