@@ -28,7 +28,7 @@ public class BeaconManager {
 
     private Beacon closestBeacon;
 
-    static RssiFilter meanFilter = new MeanFilter(15,TimeUnit.SECONDS);
+    static RssiFilter meanFilter = new MeanFilter(15, TimeUnit.SECONDS);
 
     private BeaconManager() {
 
@@ -57,6 +57,7 @@ public class BeaconManager {
             instance.beaconMap.put(key, beacon);
         }
         beacon.addAdvertisingPacket(advertisingPacket);
+        //TODO move outside method
         processClosestBeacon(beacon);
         instance.notifyBeaconUpdateListeners(beacon);
     }
@@ -65,11 +66,9 @@ public class BeaconManager {
         if (instance.closestBeacon == null) {
             instance.closestBeacon = beacon;
         } else {
-            if (instance.closestBeacon != beacon){
-                if(beacon.getLatestAdvertisingPacket().getTimestamp() > System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(10)){
-                    if (beacon.getDistance(meanFilter) + 1 < instance.closestBeacon.getDistance(meanFilter)) {
-                        instance.setClosestBeacon(beacon);
-                    }
+            if (instance.closestBeacon != beacon) {
+                if (beacon.getDistance(meanFilter) + 1 < instance.closestBeacon.getDistance(meanFilter)) {
+                    instance.setClosestBeacon(beacon);
                 }
             }
         }

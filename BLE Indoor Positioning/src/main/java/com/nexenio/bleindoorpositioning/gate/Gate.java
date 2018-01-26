@@ -3,8 +3,6 @@ package com.nexenio.bleindoorpositioning.gate;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Created by steppschuh on 21.12.17.
  */
@@ -47,6 +45,7 @@ public class Gate {
     }
 
     public float getClosestDistance() {
+        //TODO use closest Beacon from BeaconManager
         Beacon closestBeacon = getClosestBeacon();
         if (closestBeacon == null) {
             return Float.MAX_VALUE;

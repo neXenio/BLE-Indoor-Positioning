@@ -2,6 +2,7 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.PointF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
@@ -11,6 +12,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
+import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ import java.util.List;
 
 public class RssiFilterLineChart extends BeaconLineChart {
 
-    public static List<RssiFilter> filterList = new ArrayList<>();
+    public static List<RssiFilter> filterList;
 
     public RssiFilterLineChart(Context context) {
         super(context);
@@ -35,6 +37,7 @@ public class RssiFilterLineChart extends BeaconLineChart {
     @Override
     public void initialize() {
         super.initialize();
+        filterList = new ArrayList<>();
         filterList.add(new MeanFilter());
         filterList.add(new ArmaFilter());
         filterList.add(new KalmanFilter());
@@ -44,7 +47,6 @@ public class RssiFilterLineChart extends BeaconLineChart {
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
         int filterIndex = 0;
         for (RssiFilter filter : filterList) {
-
             prepareDraw(beacon);
             linePaint.setShader(createLineShader(ColorUtil.getBeaconColor(filterIndex)));
 
@@ -52,10 +54,6 @@ public class RssiFilterLineChart extends BeaconLineChart {
                 if (advertisingPacket.getTimestamp() < minimumAdvertisingTimestamp) {
                     continue;
                 }
-
-                filter.setMinimumTimestamp(advertisingPacket.getTimestamp() - windowLength);
-                filter.setMaximumTimestamp(advertisingPacket.getTimestamp());
-
                 currentLinePoint = getPointFromAdvertisingPacket(beacon, advertisingPacket, currentLinePoint, filter);
                 drawNextPoint(canvas, beacon, advertisingPacket);
             }
@@ -63,6 +61,49 @@ public class RssiFilterLineChart extends BeaconLineChart {
             filterIndex++;
             fadeLastPoint(canvas);
         }
+    }
+
+    protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket, RssiFilter filter) {
+        List<AdvertisingPacket> recentAdvertisingPackets = new ArrayList<>();
+        float filteredRssi;
+
+        // make sure that the window size is at least 10 seconds when we're looking for the frequency
+        long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, WINDOW_10_SECONDS);
+
+        if (windowLength == 0) {
+            filteredRssi = advertisingPacket.getRssi();
+        } else {
+            recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
+                    advertisingPacket.getTimestamp() - windowLength,
+                    advertisingPacket.getTimestamp()
+            );
+
+            filter.setMaximumTimestamp(advertisingPacket.getTimestamp());
+            filter.setMinimumTimestamp(advertisingPacket.getTimestamp() - windowLength);
+            filteredRssi = filter.filter(beacon);
+        }
+
+        switch (valueType) {
+            case VALUE_TYPE_RSSI: {
+                return filteredRssi;
+            }
+            case VALUE_TYPE_DISTANCE: {
+                return BeaconDistanceCalculator.calculateDistanceTo(beacon, filteredRssi);
+            }
+            case VALUE_TYPE_FREQUENCY: {
+                return 1000 * (recentAdvertisingPackets.size() / (float) windowLength);
+            }
+        }
+        return 0;
+    }
+
+    protected PointF getPointFromAdvertisingPacket(Beacon beacon, AdvertisingPacket advertisingPacket, PointF point, RssiFilter filter) {
+        if (point == null) {
+            point = new PointF();
+        }
+        point.x = xAxisStartPoint.x + ((xAxisEndPoint.x - xAxisStartPoint.x) * (xAxisRange - (System.currentTimeMillis() - advertisingPacket.getTimestamp()))) / xAxisRange;
+        point.y = yAxisStartPoint.y - ((yAxisStartPoint.y - yAxisEndPoint.y) * (getValue(beacon, advertisingPacket, filter) - (float) yAxisMinimumAnimator.getAnimatedValue())) / yAxisRange;
+        return point;
     }
 
 }

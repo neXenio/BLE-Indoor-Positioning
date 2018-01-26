@@ -2,6 +2,7 @@ package com.nexenio.bleindoorpositioning.ble.beacon.signal;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -49,21 +50,22 @@ public class KalmanFilter extends WindowFilter {
     }
 
     public KalmanFilter(long duration, TimeUnit timeUnit) {
-        super(duration,timeUnit);
+        super(duration, timeUnit);
     }
 
-    public KalmanFilter(long duration, TimeUnit timeUnit, float processNoise, float measurementNoise){
-        super(duration,timeUnit);
+    public KalmanFilter(long duration, TimeUnit timeUnit, float processNoise, float measurementNoise) {
+        super(duration, timeUnit);
         this.processNoise = processNoise;
         this.measurementNoise = measurementNoise;
     }
 
     @Override
-    public float filter(List<? extends AdvertisingPacket> advertisingPackets) {
+    public float filter(Beacon beacon) {
         float priorRssi;
         float kalmanGain;
         float priorErrorCovarianceRssi;
 
+        List<AdvertisingPacket> advertisingPackets = getRecentAdvertisingPackets(beacon);
         int[] rssiArray = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(advertisingPackets);
         measurementNoise = AdvertisingPacketUtil.calculateVariance(rssiArray);
 

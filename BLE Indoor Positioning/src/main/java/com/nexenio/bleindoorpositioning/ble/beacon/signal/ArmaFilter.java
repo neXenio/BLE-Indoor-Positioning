@@ -2,6 +2,7 @@ package com.nexenio.bleindoorpositioning.ble.beacon.signal;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -37,12 +38,13 @@ public class ArmaFilter extends WindowFilter {
     public ArmaFilter() {
     }
 
-    public ArmaFilter(long duration, TimeUnit timeUnit){
-        super(duration,timeUnit);
+    public ArmaFilter(long duration, TimeUnit timeUnit) {
+        super(duration, timeUnit);
     }
 
     @Override
-    public float filter(List<? extends AdvertisingPacket> advertisingPackets) {
+    public float filter(Beacon beacon) {
+        List<AdvertisingPacket> advertisingPackets = getRecentAdvertisingPackets(beacon);
         float frequency = AdvertisingPacketUtil.getPacketFrequency(advertisingPackets.size(), duration, timeUnit);
         armaFactor = getArmaFactor(frequency);
         for (AdvertisingPacket advertisingPacket : advertisingPackets) {

@@ -15,8 +15,6 @@ import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
-import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
-import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -26,19 +24,41 @@ import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
 import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public class BeaconChartFragment extends BeaconViewFragment {
 
     private BeaconChart beaconChart;
 
     protected BeaconManager beaconManager = BeaconManager.getInstance();
-    private Boolean filterView = true;
+    private boolean rssiFilterView;
 
-    public BeaconChartFragment() {
+    //TODO default constructor
+
+    public BeaconChartFragment(boolean rssiFilterView) {
         super();
+        this.rssiFilterView = rssiFilterView;
+        if (this.rssiFilterView) {
+            beaconFilters.add(createClosestBeaconFilter());
+        } else {
+            beaconFilters.add(createUuidFilter());
+        }
+    }
 
-        IBeaconFilter uuidFilter = new IBeaconFilter() {
+    public IBeaconFilter createClosestBeaconFilter() {
+        return new IBeaconFilter() {
+
+            @Override
+            public boolean matches(IBeacon beacon) {
+                if (beaconManager.getClosestBeacon().equals(beacon)) {
+                    return true;
+                }
+                return false;
+            }
+        };
+    }
+
+    public IBeaconFilter createUuidFilter() {
+        return new IBeaconFilter() {
 
             private UUID legacyUuid = UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01");
             private UUID gateDetectionUuid = UUID.fromString("f175c9a8-d51c-4d25-8449-4d3d340d1067");
@@ -46,30 +66,23 @@ public class BeaconChartFragment extends BeaconViewFragment {
 
             @Override
             public boolean matches(IBeacon beacon) {
-                if (filterView) {
-                    if (beaconManager.getClosestBeacon().equals(beacon)) {
-                        return true;
-                    }
-                } else {
-                    if (legacyUuid.equals(beacon.getProximityUuid())) {
-                        return true;
-                    }
-                    if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
-                        return true;
-                    }
-                    if (gateDetectionUuid.equals(beacon.getProximityUuid())) {
-                        return true;
-                    }
+                if (legacyUuid.equals(beacon.getProximityUuid())) {
+                    return true;
+                }
+                if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
+                    return true;
+                }
+                if (gateDetectionUuid.equals(beacon.getProximityUuid())) {
+                    return true;
                 }
                 return false;
             }
         };
-        beaconFilters.add(uuidFilter);
     }
 
     @Override
     protected int getLayoutResourceId() {
-        if(filterView){
+        if (rssiFilterView) {
             return R.layout.fragment_rssi_filter_chart;
         } else {
             return R.layout.fragment_beacon_chart;
