@@ -16,6 +16,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
+import com.nexenio.bleindoorpositioning.location.provider.DeviceLocationPredictor;
 import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 import com.nexenio.bleindoorpositioning.location.projection.EquirectangularProjection;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -41,6 +42,8 @@ public class BeaconMap extends BeaconView {
     protected LocationAnimator bottomRightLocationAnimator;
 
     protected CanvasProjection canvasProjection;
+
+    DeviceLocationPredictor deviceLocationPredictor = new DeviceLocationPredictor();
 
     public BeaconMap(Context context) {
         super(context);
@@ -92,6 +95,15 @@ public class BeaconMap extends BeaconView {
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, whiteFillPaint);
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, secondaryStrokePaint);
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, pixelsPerDip * 8, secondaryFillPaint);
+
+        drawDeviceLocationPrediction(canvas, deviceCenter);
+    }
+
+    protected void drawDeviceLocationPrediction(Canvas canvas, PointF deviceCenter ) {
+        if (deviceLocationAnimator != null) {
+            PointF predictionCenter = getPointFromLocation(deviceLocationPredictor.predictNewLocation(deviceLocationAnimator.getLocation()));
+            canvas.drawLine(deviceCenter.x,deviceCenter.y,predictionCenter.x,predictionCenter.y,primaryStrokePaint);
+        }
     }
 
     @Override
@@ -291,6 +303,10 @@ public class BeaconMap extends BeaconView {
     public void onDeviceLocationChanged() {
         startDeviceRadiusAnimation();
         super.onDeviceLocationChanged();
+        //TODO
+        if (deviceLocationAnimator != null) {
+            deviceLocationPredictor.saveCurrentLocation(deviceLocationAnimator.getLocation());
+        }
     }
 
     protected void startDeviceRadiusAnimation() {
