@@ -78,7 +78,7 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
                 break;
             }
             case R.id.navigation_chart: {
-                selectedFragment = new BeaconChartFragment(true);
+                selectedFragment = new BeaconChartFragment(false);
                 break;
             }
         }
