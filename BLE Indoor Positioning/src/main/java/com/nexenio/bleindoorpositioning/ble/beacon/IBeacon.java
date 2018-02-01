@@ -14,9 +14,9 @@ public class IBeacon extends Beacon<IBeaconAdvertisingPacket> {
 
     public static final int CALIBRATION_DISTANCE_DEFAULT = 1;
 
-    private UUID proximityUuid;
-    private int major;
-    private int minor;
+    protected UUID proximityUuid;
+    protected int major;
+    protected int minor;
 
     public IBeacon() {
         this.calibratedDistance = CALIBRATION_DISTANCE_DEFAULT;
@@ -30,10 +30,10 @@ public class IBeacon extends Beacon<IBeaconAdvertisingPacket> {
     @Override
     public void applyPropertiesFromAdvertisingPacket(IBeaconAdvertisingPacket advertisingPacket) {
         super.applyPropertiesFromAdvertisingPacket(advertisingPacket);
-        proximityUuid = advertisingPacket.getProximityUuid();
-        major = advertisingPacket.getMajor();
-        minor = advertisingPacket.getMinor();
-        calibratedRssi = advertisingPacket.getMeasuredPowerByte();
+        setProximityUuid(advertisingPacket.getProximityUuid());
+        setMajor(advertisingPacket.getMajor());
+        setMinor(advertisingPacket.getMinor());
+        setCalibratedRssi(advertisingPacket.getMeasuredPowerByte());
     }
 
     /*
