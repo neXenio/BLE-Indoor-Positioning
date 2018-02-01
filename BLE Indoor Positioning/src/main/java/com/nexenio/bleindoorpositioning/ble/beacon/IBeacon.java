@@ -10,7 +10,7 @@ import java.util.UUID;
  * Created by steppschuh on 15.11.17.
  */
 
-public class IBeacon extends Beacon<IBeaconAdvertisingPacket> {
+public class IBeacon<P extends IBeaconAdvertisingPacket> extends Beacon<P> {
 
     public static final int CALIBRATION_DISTANCE_DEFAULT = 1;
 
@@ -28,7 +28,7 @@ public class IBeacon extends Beacon<IBeaconAdvertisingPacket> {
     }
 
     @Override
-    public void applyPropertiesFromAdvertisingPacket(IBeaconAdvertisingPacket advertisingPacket) {
+    public void applyPropertiesFromAdvertisingPacket(P advertisingPacket) {
         super.applyPropertiesFromAdvertisingPacket(advertisingPacket);
         setProximityUuid(advertisingPacket.getProximityUuid());
         setMajor(advertisingPacket.getMajor());
