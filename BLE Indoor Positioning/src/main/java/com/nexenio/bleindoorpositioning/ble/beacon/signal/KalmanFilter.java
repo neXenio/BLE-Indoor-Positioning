@@ -40,52 +40,50 @@ public class KalmanFilter extends WindowFilter {
      */
     private static float DEFAULT_MEASUREMENT_NOISE = 10;
 
-    private float processNoise = DEFAULT_PROCESS_NOISE;
-    private float measurementNoise = DEFAULT_MEASUREMENT_NOISE;
-    private float estimatedRssi;
-    private float errorCovarianceRssi;
-    private boolean isInitialized = false;
+    private float processNoise;
+    private float measurementNoise;
 
     public KalmanFilter() {
+        this(DEFAULT_DURATION, TimeUnit.MILLISECONDS);
     }
 
     public KalmanFilter(long duration, TimeUnit timeUnit) {
-        super(duration, timeUnit);
+        this(duration, timeUnit, DEFAULT_PROCESS_NOISE, DEFAULT_MEASUREMENT_NOISE);
     }
 
     public KalmanFilter(long duration, TimeUnit timeUnit, float processNoise, float measurementNoise) {
-        super(duration, timeUnit);
+        this.duration = duration;
+        this.timeUnit = timeUnit;
         this.processNoise = processNoise;
         this.measurementNoise = measurementNoise;
     }
 
     @Override
     public float filter(Beacon beacon) {
-        float priorRssi;
-        float kalmanGain;
-        float priorErrorCovarianceRssi;
-
         List<AdvertisingPacket> advertisingPackets = getRecentAdvertisingPackets(beacon);
         int[] rssiArray = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(advertisingPackets);
         measurementNoise = AdvertisingPacketUtil.calculateVariance(rssiArray);
+        return calculateKalmanRssi(advertisingPackets, processNoise, measurementNoise);
+    }
 
+    private static float calculateKalmanRssi(List<AdvertisingPacket> advertisingPackets,
+                                             float processNoise, float measurementNoise) {
+        float kalmanGain;
+        float lastErrorCovarianceRssi = 1;
+        float errorCovarianceRssi = 0;
+        boolean isInitialized = false;
+        float estimatedRssi = 0;
         for (AdvertisingPacket advertisingPacket : advertisingPackets) {
-            if (advertisingPacket.getTimestamp() < minimumTimestamp) {
-                continue;
-            }
-
             if (!isInitialized) {
-                priorRssi = advertisingPacket.getRssi();
-                priorErrorCovarianceRssi = 1;
+                estimatedRssi = advertisingPacket.getRssi();
                 isInitialized = true;
             } else {
-                priorRssi = estimatedRssi;
-                priorErrorCovarianceRssi = errorCovarianceRssi + processNoise;
+                lastErrorCovarianceRssi = errorCovarianceRssi + processNoise;
             }
 
-            kalmanGain = priorErrorCovarianceRssi / (priorErrorCovarianceRssi + measurementNoise);
-            estimatedRssi = priorRssi + (kalmanGain * (advertisingPacket.getRssi() - priorRssi));
-            errorCovarianceRssi = (1 - kalmanGain) * priorErrorCovarianceRssi;
+            kalmanGain = lastErrorCovarianceRssi / (lastErrorCovarianceRssi + measurementNoise);
+            estimatedRssi = estimatedRssi + (kalmanGain * (advertisingPacket.getRssi() - estimatedRssi));
+            errorCovarianceRssi = (1 - kalmanGain) * lastErrorCovarianceRssi;
         }
         return estimatedRssi;
     }

@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.view.LayoutInflater;
@@ -32,8 +33,11 @@ public class BeaconChartFragment extends BeaconViewFragment {
     protected BeaconManager beaconManager = BeaconManager.getInstance();
     private boolean rssiFilterView;
 
-    //TODO default constructor
+    public BeaconChartFragment() {
+        this(false);
+    }
 
+    @SuppressLint("ValidFragment")
     public BeaconChartFragment(boolean rssiFilterView) {
         super();
         this.rssiFilterView = rssiFilterView;

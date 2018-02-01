@@ -45,12 +45,6 @@ public abstract class WindowFilter implements RssiFilter {
         return duration;
     }
 
-    public void setDuration(long duration, TimeUnit timeUnit) {
-        this.duration = duration;
-        this.minimumTimestamp = this.maximumTimestamp - timeUnit.toMillis(duration);
-        this.maximumTimestamp = this.minimumTimestamp + duration;
-    }
-
     public long getMaximumTimestamp() {
         return maximumTimestamp;
     }
@@ -58,7 +52,7 @@ public abstract class WindowFilter implements RssiFilter {
     @Override
     public void setMaximumTimestamp(long maximumTimestamp) {
         this.maximumTimestamp = maximumTimestamp;
-        this.duration = maximumTimestamp - this.minimumTimestamp;
+        updateDuration(this.minimumTimestamp,maximumTimestamp);
     }
 
     public long getMinimumTimestamp() {
@@ -68,6 +62,10 @@ public abstract class WindowFilter implements RssiFilter {
     @Override
     public void setMinimumTimestamp(long minimumTimestamp) {
         this.minimumTimestamp = minimumTimestamp;
-        this.duration = this.maximumTimestamp - this.duration;
+        updateDuration(minimumTimestamp,this.maximumTimestamp);
+    }
+
+    public void updateDuration(long minimumTimestamp, long maximumTimestamp) {
+        this.duration = maximumTimestamp - minimumTimestamp;
     }
 }
