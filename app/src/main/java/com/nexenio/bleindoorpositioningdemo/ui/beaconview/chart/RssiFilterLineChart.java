@@ -69,7 +69,7 @@ public class RssiFilterLineChart extends BeaconLineChart {
         float filteredRssi;
 
         // make sure that the window size is at least 10 seconds when we're looking for the frequency
-        long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, WINDOW_10_SECONDS);
+        long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, MINIMUM_WINDOW_FREQUENCY);
 
         if (windowLength == 0) {
             filteredRssi = advertisingPacket.getRssi();

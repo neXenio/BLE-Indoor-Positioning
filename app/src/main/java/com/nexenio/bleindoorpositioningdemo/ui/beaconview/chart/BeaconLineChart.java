@@ -29,8 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BeaconLineChart extends BeaconChart {
 
-    public static final long WINDOW_10_SECONDS = TimeUnit.SECONDS.toMillis(10);
-    public static final long WINDOW_5_SECONDS = TimeUnit.SECONDS.toMillis(5);
+    public static final long MINIMUM_WINDOW_FREQUENCY = TimeUnit.SECONDS.toMillis(10);
 
     protected long windowLength = WindowFilter.DEFAULT_DURATION;
 
@@ -349,7 +348,7 @@ public class BeaconLineChart extends BeaconChart {
 
     protected void drawNextPoint(Canvas canvas, AdvertisingPacket advertisingPacket) {
         if (lastLinePoint != null && lastAdvertisingPacket != null) {
-            if (advertisingPacket.getTimestamp() < lastAdvertisingPacket.getTimestamp() + WINDOW_5_SECONDS) {
+            if (advertisingPacket.getTimestamp() < lastAdvertisingPacket.getTimestamp() + TimeUnit.SECONDS.toMillis(5)) {
                 canvas.drawLine(
                         lastLinePoint.x,
                         lastLinePoint.y,
@@ -386,7 +385,7 @@ public class BeaconLineChart extends BeaconChart {
             }
             case VALUE_TYPE_FREQUENCY: {
                 // make sure that the window size is at least 10 seconds when we're looking for the frequency
-                long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, WINDOW_10_SECONDS);
+                long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, MINIMUM_WINDOW_FREQUENCY);
                 List<AdvertisingPacket> recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
                         advertisingPacket.getTimestamp() - windowLength,
                         advertisingPacket.getTimestamp()
