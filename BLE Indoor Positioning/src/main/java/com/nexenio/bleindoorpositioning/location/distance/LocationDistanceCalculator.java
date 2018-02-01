@@ -49,4 +49,12 @@ public abstract class LocationDistanceCalculator {
         return Math.sqrt(distance);
     }
 
+    /**
+     * Convenience distance calculation without elevation
+     */
+
+    public static double calculateDistanceBetweeen(double fromLatitude, double fromLongitude, double toLatitude, double toLongitude) {
+        return calculateDistanceBetween(fromLatitude, fromLongitude, 0, toLatitude, toLongitude, 0);
+    }
+
 }
