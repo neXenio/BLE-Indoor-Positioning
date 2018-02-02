@@ -8,7 +8,7 @@ import java.util.UUID;
  * Created by steppschuh on 19.12.17.
  */
 
-public class IBeaconFilter extends GenericBeaconFilter<IBeacon> {
+public class IBeaconFilter<B extends IBeacon> extends GenericBeaconFilter<B> {
 
     protected UUID proximityUuid;
     protected int major;
@@ -19,7 +19,7 @@ public class IBeaconFilter extends GenericBeaconFilter<IBeacon> {
     protected boolean matchMinor;
 
     @Override
-    public boolean matches(IBeacon beacon) {
+    public boolean matches(B beacon) {
         if (!super.matches(beacon)) {
             return false;
         }

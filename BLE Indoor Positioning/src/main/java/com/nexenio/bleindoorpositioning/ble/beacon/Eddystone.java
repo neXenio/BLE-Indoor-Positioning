@@ -8,7 +8,7 @@ import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
  * Created by steppschuh on 15.11.17.
  */
 
-public class Eddystone extends Beacon<EddystoneAdvertisingPacket> {
+public class Eddystone<P extends EddystoneAdvertisingPacket> extends Beacon<P> {
 
     public static final int CALIBRATION_DISTANCE_DEFAULT = 0;
 
