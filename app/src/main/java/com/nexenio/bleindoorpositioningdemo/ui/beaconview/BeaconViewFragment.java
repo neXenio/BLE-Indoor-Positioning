@@ -21,7 +21,6 @@ import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
-import com.nexenio.bleindoorpositioning.ble.beacon.filter.GenericBeaconFilter;
 import com.nexenio.bleindoorpositioning.gate.ClosestGateChangeListener;
 import com.nexenio.bleindoorpositioning.gate.Gate;
 import com.nexenio.bleindoorpositioning.gate.GateDetection;
@@ -32,7 +31,6 @@ import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public abstract class BeaconViewFragment extends Fragment {
 

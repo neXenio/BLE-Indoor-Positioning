@@ -29,8 +29,6 @@ import java.util.UUID;
 public class BeaconChartFragment extends BeaconViewFragment {
 
     private BeaconChart beaconChart;
-
-    protected BeaconManager beaconManager = BeaconManager.getInstance();
     private boolean rssiFilterView;
 
     public BeaconChartFragment() {
@@ -53,7 +51,7 @@ public class BeaconChartFragment extends BeaconViewFragment {
 
             @Override
             public boolean matches(IBeacon beacon) {
-                if (beaconManager.getClosestBeacon().equals(beacon)) {
+                if (BeaconManager.getInstance().getClosestBeacon().equals(beacon)) {
                     return true;
                 }
                 return false;
@@ -121,7 +119,7 @@ public class BeaconChartFragment extends BeaconViewFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View inflatedView = super.onCreateView(inflater, container, savedInstanceState);
         beaconChart = inflatedView.findViewById(R.id.beaconChart);
-        beaconChart.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
+        beaconChart.setBeacons(new ArrayList<>(BeaconManager.getInstance().getBeaconMap().values()));
         return inflatedView;
     }
 
