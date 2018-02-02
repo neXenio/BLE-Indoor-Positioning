@@ -18,6 +18,8 @@ public class BeaconManager {
 
     private static BeaconManager instance;
 
+    private BeaconFactory beaconFactory = new BeaconFactory();
+
     private Map<String, Beacon> beaconMap = new LinkedHashMap<>();
 
     private Set<BeaconUpdateListener> beaconUpdateListeners = new HashSet<>();
@@ -43,7 +45,7 @@ public class BeaconManager {
             beacon = instance.beaconMap.get(key);
         } else {
             removeInactiveBeacons();
-            beacon = Beacon.from(advertisingPacket);
+            beacon = instance.beaconFactory.createBeacon(advertisingPacket);
             if (beacon == null) {
                 return;
             }
@@ -113,6 +115,10 @@ public class BeaconManager {
     /*
         Getter & Setter
      */
+
+    public BeaconFactory getBeaconFactory() {
+        return beaconFactory;
+    }
 
     public Map<String, Beacon> getBeaconMap() {
         return beaconMap;
