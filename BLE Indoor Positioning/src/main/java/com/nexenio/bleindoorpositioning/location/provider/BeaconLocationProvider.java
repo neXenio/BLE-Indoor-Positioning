@@ -7,12 +7,12 @@ import com.nexenio.bleindoorpositioning.location.Location;
  * Created by steppschuh on 15.11.17.
  */
 
-public abstract class BeaconLocationProvider<T extends Beacon> implements LocationProvider {
+public abstract class BeaconLocationProvider<B extends Beacon> implements LocationProvider {
 
-    protected T beacon;
+    protected B beacon;
     protected Location location;
 
-    public BeaconLocationProvider(T beacon) {
+    public BeaconLocationProvider(B beacon) {
         this.beacon = beacon;
     }
 
