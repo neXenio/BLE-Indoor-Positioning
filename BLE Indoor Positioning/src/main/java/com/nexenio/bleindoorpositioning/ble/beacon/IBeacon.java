@@ -10,13 +10,13 @@ import java.util.UUID;
  * Created by steppschuh on 15.11.17.
  */
 
-public class IBeacon extends Beacon<IBeaconAdvertisingPacket> {
+public class IBeacon<P extends IBeaconAdvertisingPacket> extends Beacon<P> {
 
     public static final int CALIBRATION_DISTANCE_DEFAULT = 1;
 
-    private UUID proximityUuid;
-    private int major;
-    private int minor;
+    protected UUID proximityUuid;
+    protected int major;
+    protected int minor;
 
     public IBeacon() {
         this.calibratedDistance = CALIBRATION_DISTANCE_DEFAULT;
@@ -28,12 +28,12 @@ public class IBeacon extends Beacon<IBeaconAdvertisingPacket> {
     }
 
     @Override
-    public void applyPropertiesFromAdvertisingPacket(IBeaconAdvertisingPacket advertisingPacket) {
+    public void applyPropertiesFromAdvertisingPacket(P advertisingPacket) {
         super.applyPropertiesFromAdvertisingPacket(advertisingPacket);
-        proximityUuid = advertisingPacket.getProximityUuid();
-        major = advertisingPacket.getMajor();
-        minor = advertisingPacket.getMinor();
-        calibratedRssi = advertisingPacket.getMeasuredPowerByte();
+        setProximityUuid(advertisingPacket.getProximityUuid());
+        setMajor(advertisingPacket.getMajor());
+        setMinor(advertisingPacket.getMinor());
+        setCalibratedRssi(advertisingPacket.getMeasuredPowerByte());
     }
 
     /*

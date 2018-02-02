@@ -8,9 +8,9 @@ import com.nexenio.bleindoorpositioning.location.Location;
  * Created by steppschuh on 16.11.17.
  */
 
-public class IBeaconLocationProvider extends BeaconLocationProvider<IBeacon> {
+public class IBeaconLocationProvider<B extends IBeacon> extends BeaconLocationProvider<B> {
 
-    public IBeaconLocationProvider(IBeacon beacon) {
+    public IBeaconLocationProvider(B beacon) {
         super(beacon);
     }
 
