@@ -145,8 +145,8 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public float getDistance() {
         RssiFilter filter = new ArmaFilter();
-        filter.setMaximumTimestamp(this.getLatestAdvertisingPacket().getTimestamp());
-        filter.setMinimumTimestamp(this.getLatestAdvertisingPacket().getTimestamp() - filter.getDuration());
+        filter.setMinimumTimestamp(getLatestAdvertisingPacket().getTimestamp() - filter.getDuration());
+        filter.setMaximumTimestamp(getLatestAdvertisingPacket().getTimestamp());
         return getDistance(filter);
     }
 

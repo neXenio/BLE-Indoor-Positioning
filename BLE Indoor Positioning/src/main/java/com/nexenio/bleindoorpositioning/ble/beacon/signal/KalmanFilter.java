@@ -34,56 +34,44 @@ public class KalmanFilter extends WindowFilter {
      * We assume that most of the noise is caused by the measurements.
      **/
     private static float DEFAULT_PROCESS_NOISE = 0.008f;
-    /**
-     * Measurement noise is set to a value that relates to the noise in the actual measurements
-     * (i.e. the variance of the RSSI signal).
-     */
-    private static float DEFAULT_MEASUREMENT_NOISE = 10;
 
     private float processNoise;
-    private float measurementNoise;
 
     public KalmanFilter() {
         this(DEFAULT_DURATION, TimeUnit.MILLISECONDS);
     }
 
     public KalmanFilter(long duration, TimeUnit timeUnit) {
-        this(duration, timeUnit, DEFAULT_PROCESS_NOISE, DEFAULT_MEASUREMENT_NOISE);
+        this(duration, timeUnit, DEFAULT_PROCESS_NOISE);
     }
 
-    public KalmanFilter(long duration, TimeUnit timeUnit, float processNoise, float measurementNoise) {
-        this.duration = duration;
-        this.timeUnit = timeUnit;
+    public KalmanFilter(long duration, TimeUnit timeUnit, float processNoise) {
+        super(duration,timeUnit);
         this.processNoise = processNoise;
-        this.measurementNoise = measurementNoise;
     }
 
     @Override
     public float filter(Beacon beacon) {
         List<AdvertisingPacket> advertisingPackets = getRecentAdvertisingPackets(beacon);
         int[] rssiArray = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(advertisingPackets);
-        measurementNoise = AdvertisingPacketUtil.calculateVariance(rssiArray);
-        return calculateKalmanRssi(advertisingPackets, processNoise, measurementNoise);
+        // Measurement noise is set to a value that relates to the noise in the actual measurements
+        // (i.e. the variance of the RSSI signal).
+        float measurementNoise = AdvertisingPacketUtil.calculateVariance(rssiArray);
+        // used for initialization of kalman filter
+        float meanRssi = AdvertisingPacketUtil.calculateMean(rssiArray);
+        return calculateKalmanRssi(advertisingPackets, processNoise, measurementNoise, meanRssi);
     }
 
     private static float calculateKalmanRssi(List<AdvertisingPacket> advertisingPackets,
-                                             float processNoise, float measurementNoise) {
-        float kalmanGain;
+                                             float processNoise, float measurementNoise, float meanRssi) {
+        float errorCovarianceRssi;
         float lastErrorCovarianceRssi = 1;
-        float errorCovarianceRssi = 0;
-        boolean isInitialized = false;
-        float estimatedRssi = 0;
+        float estimatedRssi = meanRssi;
         for (AdvertisingPacket advertisingPacket : advertisingPackets) {
-            if (!isInitialized) {
-                estimatedRssi = advertisingPacket.getRssi();
-                isInitialized = true;
-            } else {
-                lastErrorCovarianceRssi = errorCovarianceRssi + processNoise;
-            }
-
-            kalmanGain = lastErrorCovarianceRssi / (lastErrorCovarianceRssi + measurementNoise);
+            float kalmanGain = lastErrorCovarianceRssi / (lastErrorCovarianceRssi + measurementNoise);
             estimatedRssi = estimatedRssi + (kalmanGain * (advertisingPacket.getRssi() - estimatedRssi));
             errorCovarianceRssi = (1 - kalmanGain) * lastErrorCovarianceRssi;
+            lastErrorCovarianceRssi = errorCovarianceRssi + processNoise;
         }
         return estimatedRssi;
     }

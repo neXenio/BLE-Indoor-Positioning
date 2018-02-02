@@ -12,7 +12,6 @@ import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
-import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
 import java.util.ArrayList;
@@ -65,11 +64,7 @@ public class RssiFilterLineChart extends BeaconLineChart {
     }
 
     protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket, RssiFilter filter) {
-        List<AdvertisingPacket> recentAdvertisingPackets;
         float filteredRssi;
-
-        // make sure that the window size is at least 10 seconds when we're looking for the frequency
-        long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, MINIMUM_WINDOW_FREQUENCY);
 
         if (windowLength == 0) {
             filteredRssi = advertisingPacket.getRssi();
@@ -79,22 +74,7 @@ public class RssiFilterLineChart extends BeaconLineChart {
             filteredRssi = filter.filter(beacon);
         }
 
-        switch (valueType) {
-            case VALUE_TYPE_RSSI: {
-                return filteredRssi;
-            }
-            case VALUE_TYPE_DISTANCE: {
-                return BeaconDistanceCalculator.calculateDistanceTo(beacon, filteredRssi);
-            }
-            case VALUE_TYPE_FREQUENCY: {
-                recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
-                        advertisingPacket.getTimestamp() - windowLength,
-                        advertisingPacket.getTimestamp()
-                );
-                return 1000 * (recentAdvertisingPackets.size() / (float) windowLength);
-            }
-        }
-        return 0;
+        return processReturnValue(beacon, advertisingPacket, filteredRssi);
     }
 
     protected PointF getPointFromAdvertisingPacket(Beacon beacon, AdvertisingPacket advertisingPacket, PointF point, RssiFilter filter) {
