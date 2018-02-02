@@ -43,6 +43,10 @@ public class ArmaFilter extends WindowFilter {
         super(duration, timeUnit);
     }
 
+    public ArmaFilter(long maximumTimestamp) {
+        super(maximumTimestamp);
+    }
+
     @Override
     public float filter(Beacon beacon) {
         List<AdvertisingPacket> advertisingPackets = getRecentAdvertisingPackets(beacon);

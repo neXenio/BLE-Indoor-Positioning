@@ -20,12 +20,22 @@ public abstract class WindowFilter implements RssiFilter {
     protected TimeUnit timeUnit;
 
     public WindowFilter() {
-        this(DEFAULT_DURATION, TimeUnit.MILLISECONDS);
+        this(DEFAULT_DURATION, TimeUnit.MILLISECONDS, System.currentTimeMillis());
     }
 
     public WindowFilter(long duration, TimeUnit timeUnit) {
+        this(duration, timeUnit, System.currentTimeMillis());
+    }
+
+    public WindowFilter(long maximumTimestamp) {
+        this(DEFAULT_DURATION, TimeUnit.MILLISECONDS, maximumTimestamp);
+    }
+
+    public WindowFilter(long duration, TimeUnit timeUnit, long maximumTimestamp) {
         this.duration = duration;
         this.timeUnit = timeUnit;
+        this.maximumTimestamp = maximumTimestamp;
+        this.minimumTimestamp = maximumTimestamp - duration;
     }
 
     public List<AdvertisingPacket> getRecentAdvertisingPackets(Beacon beacon) {
@@ -52,7 +62,7 @@ public abstract class WindowFilter implements RssiFilter {
     @Override
     public void setMaximumTimestamp(long maximumTimestamp) {
         this.maximumTimestamp = maximumTimestamp;
-        this.minimumTimestamp = maximumTimestamp - duration;
+        updateDuration();
     }
 
     public long getMinimumTimestamp() {
@@ -62,6 +72,10 @@ public abstract class WindowFilter implements RssiFilter {
     @Override
     public void setMinimumTimestamp(long minimumTimestamp) {
         this.minimumTimestamp = minimumTimestamp;
-        this.maximumTimestamp = minimumTimestamp + duration;
+        updateDuration();
+    }
+
+    public void updateDuration() {
+        duration = maximumTimestamp - minimumTimestamp;
     }
 }
