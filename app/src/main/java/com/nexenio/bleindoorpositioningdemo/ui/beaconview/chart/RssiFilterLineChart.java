@@ -55,7 +55,8 @@ public class RssiFilterLineChart extends BeaconLineChart {
                     continue;
                 }
                 currentLinePoint = getPointFromAdvertisingPacket(beacon, advertisingPacket, currentLinePoint, filter);
-                drawNextPoint(canvas, beacon, advertisingPacket);
+                drawCircleForPreviousPoint(canvas);
+                drawNextPoint(canvas, advertisingPacket);
             }
 
             filterIndex++;
@@ -64,20 +65,15 @@ public class RssiFilterLineChart extends BeaconLineChart {
     }
 
     protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket, RssiFilter filter) {
-        List<AdvertisingPacket> recentAdvertisingPackets = new ArrayList<>();
+        List<AdvertisingPacket> recentAdvertisingPackets;
         float filteredRssi;
 
         // make sure that the window size is at least 10 seconds when we're looking for the frequency
-        long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, WINDOW_10_SECONDS);
+        long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, MINIMUM_WINDOW_FREQUENCY);
 
         if (windowLength == 0) {
             filteredRssi = advertisingPacket.getRssi();
         } else {
-            recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
-                    advertisingPacket.getTimestamp() - windowLength,
-                    advertisingPacket.getTimestamp()
-            );
-
             filter.setMaximumTimestamp(advertisingPacket.getTimestamp());
             filter.setMinimumTimestamp(advertisingPacket.getTimestamp() - windowLength);
             filteredRssi = filter.filter(beacon);
@@ -91,6 +87,10 @@ public class RssiFilterLineChart extends BeaconLineChart {
                 return BeaconDistanceCalculator.calculateDistanceTo(beacon, filteredRssi);
             }
             case VALUE_TYPE_FREQUENCY: {
+                recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
+                        advertisingPacket.getTimestamp() - windowLength,
+                        advertisingPacket.getTimestamp()
+                );
                 return 1000 * (recentAdvertisingPackets.size() / (float) windowLength);
             }
         }

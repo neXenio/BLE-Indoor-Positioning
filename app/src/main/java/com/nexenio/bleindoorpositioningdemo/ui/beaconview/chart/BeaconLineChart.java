@@ -20,7 +20,6 @@ import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculat
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -30,8 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BeaconLineChart extends BeaconChart {
 
-    public static final long WINDOW_10_SECONDS = TimeUnit.SECONDS.toMillis(10);
-    public static final long WINDOW_5_SECONDS = TimeUnit.SECONDS.toMillis(5);
+    public static final long MINIMUM_WINDOW_FREQUENCY = TimeUnit.SECONDS.toMillis(10);
 
     protected long windowLength = WindowFilter.DEFAULT_DURATION;
 
@@ -329,10 +327,15 @@ public class BeaconLineChart extends BeaconChart {
                 continue;
             }
             currentLinePoint = getPointFromAdvertisingPacket(beacon, advertisingPacket, currentLinePoint);
-            drawNextPoint(canvas, beacon, advertisingPacket);
+            drawCircleForPreviousPoint(canvas);
+            drawNextPoint(canvas, advertisingPacket);
         }
         currentBeaconIndex++;
         fadeLastPoint(canvas);
+    }
+
+    protected void drawCircleForPreviousPoint(Canvas canvas) {
+        canvas.drawCircle(currentLinePoint.x, currentLinePoint.y, pixelsPerDip * 1.5f, linePaint);
     }
 
     protected void prepareDraw(Beacon beacon) {
@@ -343,11 +346,9 @@ public class BeaconLineChart extends BeaconChart {
         linePaint.setAlpha(128);
     }
 
-    protected void drawNextPoint(Canvas canvas, Beacon beacon, AdvertisingPacket advertisingPacket) {
-        canvas.drawCircle(currentLinePoint.x, currentLinePoint.y, pixelsPerDip * 1.5f, linePaint);
-
+    protected void drawNextPoint(Canvas canvas, AdvertisingPacket advertisingPacket) {
         if (lastLinePoint != null && lastAdvertisingPacket != null) {
-            if (advertisingPacket.getTimestamp() < lastAdvertisingPacket.getTimestamp() + WINDOW_5_SECONDS) {
+            if (advertisingPacket.getTimestamp() < lastAdvertisingPacket.getTimestamp() + TimeUnit.SECONDS.toMillis(5)) {
                 canvas.drawLine(
                         lastLinePoint.x,
                         lastLinePoint.y,
@@ -373,30 +374,22 @@ public class BeaconLineChart extends BeaconChart {
     }
 
     protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket) {
-        List<AdvertisingPacket> recentAdvertisingPackets = new ArrayList<>();
-        int rssi;
-
-        // make sure that the window size is at least 10 seconds when we're looking for the frequency
-        long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, WINDOW_10_SECONDS);
-
-        if (windowLength == 0) {
-            rssi = advertisingPacket.getRssi();
-        } else {
-            rssi = advertisingPacket.getRssi();
-            recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
-                    advertisingPacket.getTimestamp() - windowLength,
-                    advertisingPacket.getTimestamp()
-            );
-        }
+        int rssi = advertisingPacket.getRssi();
 
         switch (valueType) {
             case VALUE_TYPE_RSSI: {
                 return rssi;
             }
             case VALUE_TYPE_DISTANCE: {
-                return BeaconDistanceCalculator.calculateDistanceTo(beacon, advertisingPacket.getRssi());
+                return BeaconDistanceCalculator.calculateDistanceTo(beacon, rssi);
             }
             case VALUE_TYPE_FREQUENCY: {
+                // make sure that the window size is at least 10 seconds when we're looking for the frequency
+                long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, MINIMUM_WINDOW_FREQUENCY);
+                List<AdvertisingPacket> recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
+                        advertisingPacket.getTimestamp() - windowLength,
+                        advertisingPacket.getTimestamp()
+                );
                 return 1000 * (recentAdvertisingPackets.size() / (float) windowLength);
             }
         }

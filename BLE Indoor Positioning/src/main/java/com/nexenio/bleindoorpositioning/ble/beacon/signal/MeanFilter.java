@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.beacon.signal;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 
 import java.util.List;
@@ -21,16 +22,8 @@ public class MeanFilter extends WindowFilter {
 
     @Override
     public float filter(Beacon beacon) {
-        float sum = 0;
-        int count = 0;
-        List<AdvertisingPacket> recentAdvertisingPackets = getRecentAdvertisingPackets(beacon);
-        for (AdvertisingPacket advertisingPacket : recentAdvertisingPackets) {
-            if (advertisingPacket.getTimestamp() < minimumTimestamp) {
-                continue;
-            }
-            sum += advertisingPacket.getRssi();
-            count++;
-        }
-        return count > 0 ? (sum / (float) count) : 0;
+        List<AdvertisingPacket> advertisingPackets = getRecentAdvertisingPackets(beacon);
+        int[] rssiArray = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(advertisingPackets);
+        return AdvertisingPacketUtil.calculateMean(rssiArray);
     }
 }

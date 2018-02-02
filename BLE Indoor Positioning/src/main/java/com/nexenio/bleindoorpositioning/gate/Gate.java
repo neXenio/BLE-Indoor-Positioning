@@ -37,7 +37,7 @@ public class Gate {
             return (leftBeacon.getMeanRssi() > rightBeacon.getMeanRssi()) ? leftBeacon : rightBeacon;
         } else if (leftBeacon == null && rightBeacon != null) {
             return rightBeacon;
-        } else if (leftBeacon != null && rightBeacon == null) {
+        } else if (leftBeacon != null) {
             return leftBeacon;
         } else {
             return null;
