@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BeaconLineChart extends BeaconChart {
 
-    public static final long MINIMUM_WINDOW_FREQUENCY = TimeUnit.SECONDS.toMillis(10);
+    public static final long MINIMUM_WINDOW_LENGTH_FREQUENCY = TimeUnit.SECONDS.toMillis(10);
 
     protected long windowLength = WindowFilter.DEFAULT_DURATION;
 
@@ -375,7 +375,10 @@ public class BeaconLineChart extends BeaconChart {
 
     protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket) {
         int rssi = advertisingPacket.getRssi();
+        return processReturnValue(beacon,advertisingPacket, rssi);
+    }
 
+    protected float processReturnValue(Beacon beacon, AdvertisingPacket advertisingPacket, float rssi) {
         switch (valueType) {
             case VALUE_TYPE_RSSI: {
                 return rssi;
@@ -385,12 +388,13 @@ public class BeaconLineChart extends BeaconChart {
             }
             case VALUE_TYPE_FREQUENCY: {
                 // make sure that the window size is at least 10 seconds when we're looking for the frequency
-                long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, MINIMUM_WINDOW_FREQUENCY);
+                long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, MINIMUM_WINDOW_LENGTH_FREQUENCY);
                 List<AdvertisingPacket> recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
                         advertisingPacket.getTimestamp() - windowLength,
                         advertisingPacket.getTimestamp()
                 );
-                return 1000 * (recentAdvertisingPackets.size() / (float) windowLength);
+                // convert frequency from milliseconds to seconds to receive Hertz
+                return TimeUnit.SECONDS.toMillis(1) * (recentAdvertisingPackets.size() / (float) windowLength);
             }
         }
         return 0;

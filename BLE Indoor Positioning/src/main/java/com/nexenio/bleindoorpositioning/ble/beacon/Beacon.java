@@ -144,9 +144,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public float getDistance() {
-        RssiFilter filter = new ArmaFilter();
-        filter.setMaximumTimestamp(this.getLatestAdvertisingPacket().getTimestamp());
-        filter.setMinimumTimestamp(this.getLatestAdvertisingPacket().getTimestamp() - filter.getDuration());
+        RssiFilter filter = new ArmaFilter(getLatestTimestamp());
         return getDistance(filter);
     }
 
@@ -162,6 +160,10 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public float getEstimatedAdvertisingRange() {
         return BeaconUtil.getAdvertisingRange(transmissionPower);
+    }
+
+    public long getLatestTimestamp() {
+        return getLatestAdvertisingPacket().getTimestamp();
     }
 
     public static Comparator<Beacon> RssiComparator = new Comparator<Beacon>() {

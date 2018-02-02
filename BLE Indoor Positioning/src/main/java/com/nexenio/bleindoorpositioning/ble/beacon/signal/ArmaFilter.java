@@ -36,10 +36,15 @@ public class ArmaFilter extends WindowFilter {
     private boolean isInitialized;
 
     public ArmaFilter() {
+        this(DEFAULT_DURATION,TimeUnit.MILLISECONDS);
     }
 
     public ArmaFilter(long duration, TimeUnit timeUnit) {
         super(duration, timeUnit);
+    }
+
+    public ArmaFilter(long maximumTimestamp) {
+        super(maximumTimestamp);
     }
 
     @Override
