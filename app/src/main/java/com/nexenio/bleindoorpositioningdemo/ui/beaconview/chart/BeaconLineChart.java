@@ -16,7 +16,6 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
@@ -374,17 +373,16 @@ public class BeaconLineChart extends BeaconChart {
     }
 
     protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket) {
-        int rssi = advertisingPacket.getRssi();
-        return processReturnValue(beacon, advertisingPacket, rssi);
+        return processReturnValue(beacon, advertisingPacket);
     }
 
-    protected float processReturnValue(Beacon beacon, AdvertisingPacket advertisingPacket, float rssi) {
+    protected float processReturnValue(Beacon beacon, AdvertisingPacket advertisingPacket) {
         switch (valueType) {
             case VALUE_TYPE_RSSI: {
-                return rssi;
+                return beacon.getFilteredRssi();
             }
             case VALUE_TYPE_DISTANCE: {
-                return BeaconDistanceCalculator.calculateDistanceTo(beacon, rssi);
+                return beacon.getDistance();
             }
             case VALUE_TYPE_FREQUENCY: {
                 // make sure that the window size is at least 10 seconds when we're looking for the frequency

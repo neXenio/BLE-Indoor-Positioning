@@ -153,6 +153,11 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
     }
 
+    public float getFilteredRssi() {
+        RssiFilter armaFilter = new ArmaFilter(getLatestTimestamp());
+        return getRssi(armaFilter);
+    }
+
     public float getMeanRssi() {
         RssiFilter meanFilter = new MeanFilter();
         return getRssi(meanFilter);
