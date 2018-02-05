@@ -40,14 +40,17 @@ public class BeaconManager {
         return instance;
     }
 
-    public static void processAdvertisingData(String macAddress, byte[] advertisingData) {
+    public static AdvertisingPacket processAdvertisingData(String macAddress, byte[] advertisingData, int rssi) {
         AdvertisingPacket advertisingPacket = getInstance().advertisingPacketFactoryManager.createAdvertisingPacket(advertisingData);
-        processAdvertisingPacket(macAddress, advertisingPacket);
+        if (advertisingPacket != null) {
+            advertisingPacket.setRssi(rssi);
+        }
+        return processAdvertisingPacket(macAddress, advertisingPacket);
     }
 
-    public static void processAdvertisingPacket(String macAddress, AdvertisingPacket advertisingPacket) {
+    public static AdvertisingPacket processAdvertisingPacket(String macAddress, AdvertisingPacket advertisingPacket) {
         if (advertisingPacket == null) {
-            return;
+            return null;
         }
         BeaconManager instance = getInstance();
         String key = getBeaconKey(macAddress, advertisingPacket);
@@ -58,13 +61,14 @@ public class BeaconManager {
             removeInactiveBeacons();
             beacon = instance.beaconFactory.createBeacon(advertisingPacket);
             if (beacon == null) {
-                return;
+                return advertisingPacket;
             }
             beacon.setMacAddress(macAddress);
             instance.beaconMap.put(key, beacon);
         }
         beacon.addAdvertisingPacket(advertisingPacket);
         instance.notifyBeaconUpdateListeners(beacon);
+        return advertisingPacket;
     }
 
     private void notifyBeaconUpdateListeners(Beacon beacon) {

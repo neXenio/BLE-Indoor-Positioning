@@ -57,7 +57,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     @Override
     public String toString() {
-        return new StringBuilder("iBeacon Advertising Packet (")
+        return new StringBuilder(getBeaconClass().getSimpleName() + " Advertising Packet (")
                 .append("Proximity UUID: ").append(getProximityUuid(getProximityUuidBytes())).append(" ")
                 .append("Major: ").append(getMajor(getMajorBytes())).append(" ")
                 .append("Minor: ").append(getMinor(getMinorBytes())).append(" ")

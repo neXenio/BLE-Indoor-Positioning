@@ -59,4 +59,16 @@ public class BeaconFactory {
         beaconClasses.put(advertisingPacketClass, beaconClass);
     }
 
+    /*
+        Getter & Setter
+     */
+
+    public Map<Class<? extends AdvertisingPacket>, Class<? extends Beacon>> getBeaconClasses() {
+        return beaconClasses;
+    }
+
+    public void setBeaconClasses(Map<Class<? extends AdvertisingPacket>, Class<? extends Beacon>> beaconClasses) {
+        this.beaconClasses = beaconClasses;
+    }
+
 }
