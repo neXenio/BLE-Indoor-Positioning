@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  *
  *
  * Since RSSI signals are largely influenced by signal noise, taking samples from the signal seems
- * likely to be beneficial. --> Evaluate Unscented Kalman filter
+ * likely to be beneficial. Evaluate Unscented Kalman filter
  *
  * @see <a href="https://en.wikipedia.org/wiki/Kalman_filter">Kalman Filter</a>
  * @see <a href="https://www.wouterbulten.nl/blog/tech/kalman-filters-explained-removing-noise-from-rssi-signals/">Kalman
