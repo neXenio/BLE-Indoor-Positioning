@@ -8,14 +8,17 @@ import android.util.AttributeSet;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
+import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by leon on 16.01.18.
