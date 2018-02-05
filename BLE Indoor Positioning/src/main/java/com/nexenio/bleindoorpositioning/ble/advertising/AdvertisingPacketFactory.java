@@ -6,6 +6,8 @@ package com.nexenio.bleindoorpositioning.ble.advertising;
 
 public interface AdvertisingPacketFactory {
 
+    boolean couldCreateAdvertisingPacket(byte[] advertisingData);
+
     AdvertisingPacket createAdvertisingPacket(byte[] advertisingData);
 
 }

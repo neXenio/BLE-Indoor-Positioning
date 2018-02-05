@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketFactoryManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,6 +21,8 @@ public class BeaconManager {
 
     private BeaconFactory beaconFactory = new BeaconFactory();
 
+    private AdvertisingPacketFactoryManager advertisingPacketFactoryManager = new AdvertisingPacketFactoryManager();
+
     private Map<String, Beacon> beaconMap = new LinkedHashMap<>();
 
     private Set<BeaconUpdateListener> beaconUpdateListeners = new HashSet<>();
@@ -37,7 +40,15 @@ public class BeaconManager {
         return instance;
     }
 
+    public static void processAdvertisingData(String macAddress, byte[] advertisingData) {
+        AdvertisingPacket advertisingPacket = getInstance().advertisingPacketFactoryManager.createAdvertisingPacket(advertisingData);
+        processAdvertisingPacket(macAddress, advertisingPacket);
+    }
+
     public static void processAdvertisingPacket(String macAddress, AdvertisingPacket advertisingPacket) {
+        if (advertisingPacket == null) {
+            return;
+        }
         BeaconManager instance = getInstance();
         String key = getBeaconKey(macAddress, advertisingPacket);
         Beacon beacon;
@@ -118,6 +129,18 @@ public class BeaconManager {
 
     public BeaconFactory getBeaconFactory() {
         return beaconFactory;
+    }
+
+    public void setBeaconFactory(BeaconFactory beaconFactory) {
+        this.beaconFactory = beaconFactory;
+    }
+
+    public AdvertisingPacketFactoryManager getAdvertisingPacketFactoryManager() {
+        return advertisingPacketFactoryManager;
+    }
+
+    public void setAdvertisingPacketFactoryManager(AdvertisingPacketFactoryManager advertisingPacketFactoryManager) {
+        this.advertisingPacketFactoryManager = advertisingPacketFactoryManager;
     }
 
     public Map<String, Beacon> getBeaconMap() {
