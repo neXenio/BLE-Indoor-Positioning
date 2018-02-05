@@ -46,7 +46,7 @@ public class KalmanFilter extends WindowFilter {
     }
 
     public KalmanFilter(long duration, TimeUnit timeUnit, float processNoise) {
-        super(duration,timeUnit);
+        super(duration, timeUnit);
         this.processNoise = processNoise;
     }
 

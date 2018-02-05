@@ -35,7 +35,7 @@ public class ArmaFilter extends WindowFilter {
     private float armaRssi;
 
     public ArmaFilter() {
-        this(DEFAULT_DURATION,TimeUnit.MILLISECONDS);
+        this(DEFAULT_DURATION, TimeUnit.MILLISECONDS);
     }
 
     public ArmaFilter(long duration, TimeUnit timeUnit) {

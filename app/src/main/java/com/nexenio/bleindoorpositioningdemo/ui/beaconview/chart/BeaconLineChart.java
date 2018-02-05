@@ -375,7 +375,7 @@ public class BeaconLineChart extends BeaconChart {
 
     protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket) {
         int rssi = advertisingPacket.getRssi();
-        return processReturnValue(beacon,advertisingPacket, rssi);
+        return processReturnValue(beacon, advertisingPacket, rssi);
     }
 
     protected float processReturnValue(Beacon beacon, AdvertisingPacket advertisingPacket, float rssi) {
