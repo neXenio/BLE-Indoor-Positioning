@@ -11,7 +11,6 @@ import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer
 import org.apache.commons.math3.linear.RealVector;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by steppschuh on 14.12.17.
@@ -49,7 +48,7 @@ public class Multilateration {
     public static double[] getDistances(List<Beacon> beacons) {
         double[] distances = new double[beacons.size()];
         for (int beaconIndex = 0; beaconIndex < beacons.size(); beaconIndex++) {
-            distances[beaconIndex] = beacons.get(beaconIndex).getDistance(5, TimeUnit.SECONDS);
+            distances[beaconIndex] = beacons.get(beaconIndex).getDistance();
         }
         return distances;
     }

@@ -7,8 +7,6 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,10 +19,6 @@ import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
-import com.nexenio.bleindoorpositioning.gate.ClosestGateChangeListener;
-import com.nexenio.bleindoorpositioning.gate.Gate;
-import com.nexenio.bleindoorpositioning.gate.GateDetection;
-import com.nexenio.bleindoorpositioning.gate.GateGroup;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
@@ -38,7 +32,6 @@ public abstract class BeaconViewFragment extends Fragment {
     protected LocationListener deviceLocationListener;
     protected BeaconUpdateListener beaconUpdateListener;
     protected List<BeaconFilter> beaconFilters = new ArrayList<>();
-    protected ClosestGateChangeListener closestGateChangeListener;
 
     protected CoordinatorLayout coordinatorLayout;
 
@@ -48,23 +41,6 @@ public abstract class BeaconViewFragment extends Fragment {
     public BeaconViewFragment() {
         deviceLocationListener = createDeviceLocationListener();
         beaconUpdateListener = createBeaconUpdateListener();
-        closestGateChangeListener = new ClosestGateChangeListener() {
-            @Override
-            public void onClosestGateDistanceChanged(GateGroup gateGroup, Gate gate, float distance) {
-                Log.v("Gate", "Closest gate distance changed to: " + String.format("%.2f", distance) + " meters");
-                ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Gate " + gate.getIndex() + " - " + String.format("%.2f", distance) + "m");
-            }
-
-            @Override
-            public void onClosestGateChanged(GateGroup gateGroup, Gate gate, float distance) {
-                Log.d("Gate", "Closest gate changed to: " + gate);
-            }
-
-            @Override
-            public void onClosestGateGroupChanged(GateGroup gateGroup, Gate gate, float distance) {
-                Log.d("Gate", "Closest gate group changed to: " + gateGroup);
-            }
-        };
     }
 
     protected abstract LocationListener createDeviceLocationListener();
@@ -96,7 +72,6 @@ public abstract class BeaconViewFragment extends Fragment {
         AndroidLocationProvider.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.requestLastKnownLocation();
         BeaconManager.registerBeaconUpdateListener(beaconUpdateListener);
-        GateDetection.registerClosestGateChangeListener(closestGateChangeListener);
     }
 
     @CallSuper
@@ -105,7 +80,6 @@ public abstract class BeaconViewFragment extends Fragment {
         IndoorPositioning.unregisterLocationListener(deviceLocationListener);
         AndroidLocationProvider.unregisterLocationListener(deviceLocationListener);
         BeaconManager.unregisterBeaconUpdateListener(beaconUpdateListener);
-        GateDetection.unregisterClosestGateChangeListener(closestGateChangeListener);
         super.onDetach();
     }
 

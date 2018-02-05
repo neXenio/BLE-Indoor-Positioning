@@ -20,7 +20,7 @@ public abstract class BeaconDistanceCalculator {
      * path loss model</a>.
      */
     public static float calculateDistanceTo(Beacon beacon) {
-        return calculateDistanceTo(beacon, beacon.getRssi());
+        return calculateDistanceTo(beacon, beacon.getFilteredRssi());
     }
 
     /**
