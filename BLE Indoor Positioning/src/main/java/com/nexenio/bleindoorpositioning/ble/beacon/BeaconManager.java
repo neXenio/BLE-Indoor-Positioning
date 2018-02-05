@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketFactoryManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 
@@ -19,6 +20,10 @@ import java.util.concurrent.TimeUnit;
 public class BeaconManager {
 
     private static BeaconManager instance;
+
+    private BeaconFactory beaconFactory = new BeaconFactory();
+
+    private AdvertisingPacketFactoryManager advertisingPacketFactoryManager = new AdvertisingPacketFactoryManager();
 
     private Map<String, Beacon> beaconMap = new LinkedHashMap<>();
 
@@ -41,7 +46,18 @@ public class BeaconManager {
         return instance;
     }
 
-    public static void processAdvertisingPacket(String macAddress, AdvertisingPacket advertisingPacket) {
+    public static AdvertisingPacket processAdvertisingData(String macAddress, byte[] advertisingData, int rssi) {
+        AdvertisingPacket advertisingPacket = getInstance().advertisingPacketFactoryManager.createAdvertisingPacket(advertisingData);
+        if (advertisingPacket != null) {
+            advertisingPacket.setRssi(rssi);
+        }
+        return processAdvertisingPacket(macAddress, advertisingPacket);
+    }
+
+    public static AdvertisingPacket processAdvertisingPacket(String macAddress, AdvertisingPacket advertisingPacket) {
+        if (advertisingPacket == null) {
+            return null;
+        }
         BeaconManager instance = getInstance();
         String key = getBeaconKey(macAddress, advertisingPacket);
         Beacon beacon;
@@ -49,9 +65,9 @@ public class BeaconManager {
             beacon = instance.beaconMap.get(key);
         } else {
             removeInactiveBeacons();
-            beacon = Beacon.from(advertisingPacket);
+            beacon = instance.beaconFactory.createBeacon(advertisingPacket);
             if (beacon == null) {
-                return;
+                return advertisingPacket;
             }
             beacon.setMacAddress(macAddress);
             instance.beaconMap.put(key, beacon);
@@ -60,6 +76,7 @@ public class BeaconManager {
         //TODO move outside method
         processClosestBeacon(beacon);
         instance.notifyBeaconUpdateListeners(beacon);
+        return advertisingPacket;
     }
 
     public static void processClosestBeacon(Beacon beacon) {
@@ -145,6 +162,22 @@ public class BeaconManager {
 
     public void setClosestBeacon(Beacon closestBeacon) {
         this.closestBeacon = closestBeacon;
+    }
+
+    public BeaconFactory getBeaconFactory() {
+        return beaconFactory;
+    }
+
+    public void setBeaconFactory(BeaconFactory beaconFactory) {
+        this.beaconFactory = beaconFactory;
+    }
+
+    public AdvertisingPacketFactoryManager getAdvertisingPacketFactoryManager() {
+        return advertisingPacketFactoryManager;
+    }
+
+    public void setAdvertisingPacketFactoryManager(AdvertisingPacketFactoryManager advertisingPacketFactoryManager) {
+        this.advertisingPacketFactoryManager = advertisingPacketFactoryManager;
     }
 
     public Map<String, Beacon> getBeaconMap() {
