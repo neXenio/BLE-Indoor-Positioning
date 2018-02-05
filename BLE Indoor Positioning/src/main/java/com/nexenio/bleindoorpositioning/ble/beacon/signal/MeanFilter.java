@@ -20,10 +20,19 @@ public class MeanFilter extends WindowFilter {
         super(duration, timeUnit);
     }
 
+    public MeanFilter(long maximumTimestamp) {
+        super(maximumTimestamp);
+    }
+
+    public MeanFilter(long duration, TimeUnit timeUnit, long maximumTimestamp) {
+        super(duration, timeUnit, maximumTimestamp);
+    }
+
     @Override
     public float filter(Beacon beacon) {
         List<AdvertisingPacket> advertisingPackets = getRecentAdvertisingPackets(beacon);
         int[] rssiArray = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(advertisingPackets);
         return AdvertisingPacketUtil.calculateMean(rssiArray);
     }
+
 }

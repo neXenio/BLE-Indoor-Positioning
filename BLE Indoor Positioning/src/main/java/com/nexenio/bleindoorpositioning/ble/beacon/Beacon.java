@@ -3,9 +3,9 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
-import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
-import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -143,24 +143,17 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return filter.filter(this);
     }
 
+    public float getFilteredRssi() {
+        return getRssi(createSuggestedWindowFilter());
+    }
+
     public float getDistance() {
-        RssiFilter filter = new ArmaFilter(getLatestTimestamp());
-        return getDistance(filter);
+        return getDistance(createSuggestedWindowFilter());
     }
 
     public float getDistance(RssiFilter filter) {
         float filteredRssi = getRssi(filter);
         return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
-    }
-
-    public float getFilteredRssi() {
-        RssiFilter armaFilter = new ArmaFilter(getLatestTimestamp());
-        return getRssi(armaFilter);
-    }
-
-    public float getMeanRssi() {
-        RssiFilter meanFilter = new MeanFilter();
-        return getRssi(meanFilter);
     }
 
     public float getEstimatedAdvertisingRange() {
@@ -169,6 +162,10 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public long getLatestTimestamp() {
         return getLatestAdvertisingPacket().getTimestamp();
+    }
+
+    public WindowFilter createSuggestedWindowFilter() {
+        return new KalmanFilter(getLatestTimestamp());
     }
 
     public static Comparator<Beacon> RssiComparator = new Comparator<Beacon>() {
