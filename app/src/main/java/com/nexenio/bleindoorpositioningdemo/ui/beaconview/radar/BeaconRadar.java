@@ -118,7 +118,7 @@ public class BeaconRadar extends BeaconView {
         Map<Beacon, PointF> beaconCenterMap = new HashMap<>();
         // draw all backgrounds
         for (Beacon beacon : beacons) {
-            PointF beaconCenter = getPointFromLocation(beacon.getLocation());
+            PointF beaconCenter = getPointFromLocation(beacon.getLocation(), beacon);
             beaconCenterMap.put(beacon, beaconCenter);
             drawBeaconBackground(canvas, beacon, beaconCenter);
         }
@@ -134,7 +134,7 @@ public class BeaconRadar extends BeaconView {
      */
     @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
-        PointF beaconCenter = getPointFromLocation(beacon.getLocation());
+        PointF beaconCenter = getPointFromLocation(beacon.getLocation(), beacon);
         drawBeaconBackground(canvas, beacon, beaconCenter);
         drawBeaconForeground(canvas, beacon, beaconCenter);
     }
@@ -187,10 +187,14 @@ public class BeaconRadar extends BeaconView {
     }
 
     protected PointF getPointFromLocation(Location location) {
+        return getPointFromLocation(location, null);
+    }
+
+    protected PointF getPointFromLocation(Location location, @Nullable Beacon beacon) {
         if (deviceLocationAnimator == null) {
             return new PointF(canvasCenter.x, canvasCenter.y);
         }
-        locationDistance = location.getDistanceTo(deviceLocationAnimator.getLocation());
+        locationDistance = beacon != null ? beacon.getDistance() : location.getDistanceTo(deviceLocationAnimator.getLocation());
         locationRadius = getCanvasUnitsFromMeters(locationDistance);
         locationRotationAngle = deviceLocationAnimator.getLocation().getAngleTo(location);
         locationRotationAngle = (locationRotationAngle - (float) deviceAngleAnimator.getAnimatedValue()) % 360;
