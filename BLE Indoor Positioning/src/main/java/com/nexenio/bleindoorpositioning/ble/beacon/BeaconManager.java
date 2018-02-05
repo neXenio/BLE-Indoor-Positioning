@@ -2,6 +2,8 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketFactoryManager;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,6 +30,10 @@ public class BeaconManager {
     private Set<BeaconUpdateListener> beaconUpdateListeners = new HashSet<>();
 
     private long inactivityDuration = TimeUnit.MINUTES.toMillis(3);
+
+    private Beacon closestBeacon;
+
+    private static final RssiFilter meanFilter = new MeanFilter(15, TimeUnit.SECONDS);
 
     private BeaconManager() {
 
@@ -67,8 +73,27 @@ public class BeaconManager {
             instance.beaconMap.put(key, beacon);
         }
         beacon.addAdvertisingPacket(advertisingPacket);
+        //TODO move outside method
+        processClosestBeacon(beacon);
         instance.notifyBeaconUpdateListeners(beacon);
         return advertisingPacket;
+    }
+
+    public static void processClosestBeacon(Beacon beacon) {
+        BeaconManager instance = getInstance();
+
+        meanFilter.setMaximumTimestamp(beacon.getLatestAdvertisingPacket().getTimestamp());
+        meanFilter.setMinimumTimestamp(beacon.getLatestAdvertisingPacket().getTimestamp() - meanFilter.getDuration());
+
+        if (instance.closestBeacon == null) {
+            instance.closestBeacon = beacon;
+        } else {
+            if (instance.closestBeacon != beacon) {
+                if (beacon.getDistance(meanFilter) + 1 < instance.closestBeacon.getDistance(meanFilter)) {
+                    instance.setClosestBeacon(beacon);
+                }
+            }
+        }
     }
 
     private void notifyBeaconUpdateListeners(Beacon beacon) {
@@ -130,6 +155,14 @@ public class BeaconManager {
     /*
         Getter & Setter
      */
+
+    public Beacon getClosestBeacon() {
+        return closestBeacon;
+    }
+
+    public void setClosestBeacon(Beacon closestBeacon) {
+        this.closestBeacon = closestBeacon;
+    }
 
     public BeaconFactory getBeaconFactory() {
         return beaconFactory;

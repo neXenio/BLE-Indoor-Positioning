@@ -1,9 +1,11 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
-import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -137,27 +139,36 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return getLatestAdvertisingPacket().getTimestamp() > timestamp;
     }
 
-    public float getMeanRssi() {
-        return getMeanRssi(3, TimeUnit.SECONDS);
-    }
-
-    public float getMeanRssi(long amount, TimeUnit timeUnit) {
-        List<AdvertisingPacket> recentAdvertisingPackets = (List<AdvertisingPacket>) getAdvertisingPacketsFromLast(amount, timeUnit);
-        int[] recentRssis = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(recentAdvertisingPackets);
-        return AdvertisingPacketUtil.getMeanRssi(recentRssis);
+    public float getRssi(RssiFilter filter) {
+        return filter.filter(this);
     }
 
     public float getDistance() {
-        return getDistance(3, TimeUnit.SECONDS);
+        RssiFilter filter = new ArmaFilter(getLatestTimestamp());
+        return getDistance(filter);
     }
 
-    public float getDistance(long amount, TimeUnit timeUnit) {
-        float meanRssi = getMeanRssi(amount, timeUnit);
-        return BeaconDistanceCalculator.calculateDistanceTo(this, meanRssi);
+    public float getDistance(RssiFilter filter) {
+        float filteredRssi = getRssi(filter);
+        return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
+    }
+
+    public float getFilteredRssi() {
+        RssiFilter armaFilter = new ArmaFilter(getLatestTimestamp());
+        return getRssi(armaFilter);
+    }
+
+    public float getMeanRssi() {
+        RssiFilter meanFilter = new MeanFilter();
+        return getRssi(meanFilter);
     }
 
     public float getEstimatedAdvertisingRange() {
         return BeaconUtil.getAdvertisingRange(transmissionPower);
+    }
+
+    public long getLatestTimestamp() {
+        return getLatestAdvertisingPacket().getTimestamp();
     }
 
     public static Comparator<Beacon> RssiComparator = new Comparator<Beacon>() {
