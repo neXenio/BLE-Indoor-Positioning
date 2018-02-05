@@ -1,12 +1,9 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
-<<<<<<< HEAD
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketFactoryManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
-=======
-import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketFactoryManager;
->>>>>>> dev
 
 import java.util.ArrayList;
 import java.util.HashSet;
