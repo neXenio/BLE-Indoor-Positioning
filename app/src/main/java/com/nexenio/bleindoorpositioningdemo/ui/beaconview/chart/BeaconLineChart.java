@@ -374,7 +374,10 @@ public class BeaconLineChart extends BeaconChart {
     }
 
     protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket) {
-        return processReturnValue(beacon, advertisingPacket, beacon.getFilteredRssi());
+        WindowFilter filter = beacon.createSuggestedWindowFilter();
+        filter.setMaximumTimestamp(advertisingPacket.getTimestamp());
+        filter.setMinimumTimestamp(advertisingPacket.getTimestamp() - windowLength);
+        return processReturnValue(beacon, advertisingPacket, beacon.getRssi(filter));
     }
 
     protected float processReturnValue(Beacon beacon, AdvertisingPacket advertisingPacket, float rssi) {

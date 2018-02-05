@@ -33,21 +33,23 @@ public class KalmanFilter extends WindowFilter {
      * We use a low value for the process noise (i.e. 0.008).
      * We assume that most of the noise is caused by the measurements.
      **/
-    private static float DEFAULT_PROCESS_NOISE = 0.008f;
+    private static float PROCESS_NOISE_DEFAULT = 0.008f;
 
-    private float processNoise;
+    private float processNoise = PROCESS_NOISE_DEFAULT;
 
     public KalmanFilter() {
-        this(DEFAULT_DURATION, TimeUnit.MILLISECONDS);
     }
 
     public KalmanFilter(long duration, TimeUnit timeUnit) {
-        this(duration, timeUnit, DEFAULT_PROCESS_NOISE);
+        super(duration, timeUnit);
     }
 
-    public KalmanFilter(long duration, TimeUnit timeUnit, float processNoise) {
-        super(duration, timeUnit);
-        this.processNoise = processNoise;
+    public KalmanFilter(long maximumTimestamp) {
+        super(maximumTimestamp);
+    }
+
+    public KalmanFilter(long duration, TimeUnit timeUnit, long maximumTimestamp) {
+        super(duration, timeUnit, maximumTimestamp);
     }
 
     @Override
@@ -74,6 +76,18 @@ public class KalmanFilter extends WindowFilter {
             lastErrorCovarianceRssi = errorCovarianceRssi + processNoise;
         }
         return estimatedRssi;
+    }
+
+    /*
+        Getter & Setter
+     */
+
+    public float getProcessNoise() {
+        return processNoise;
+    }
+
+    public void setProcessNoise(float processNoise) {
+        this.processNoise = processNoise;
     }
 
 }

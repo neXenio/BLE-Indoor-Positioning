@@ -15,4 +15,5 @@ public interface RssiFilter {
     void setMaximumTimestamp(long maximumTimestamp);
 
     long getDuration();
+
 }

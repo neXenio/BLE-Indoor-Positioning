@@ -163,7 +163,8 @@ public class BeaconRadar extends BeaconView {
         referenceDistance = DistanceUtil.getReasonableSmallerEvenDistance((float) maximumDistanceAnimator.getAnimatedValue());
         referenceDistanceStep = Math.round(referenceDistance / (float) referenceLineCount);
 
-        for (int i = referenceLineCount; i > 0; i--) {
+        // include some more (+ 5) lines that are needed to avoid white space
+        for (int i = referenceLineCount + 5; i > 0; i--) {
             currentReferenceDistance = Math.round(i * referenceDistanceStep);
             currentReferenceCanvasUnits = getCanvasUnitsFromMeters(currentReferenceDistance);
 

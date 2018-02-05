@@ -31,11 +31,9 @@ public class ArmaFilter extends WindowFilter {
      **/
     private static float DEFAULT_ARMA_FACTOR = 0.95f;
 
-    private float armaFactor = DEFAULT_ARMA_FACTOR;
     private float armaRssi;
 
     public ArmaFilter() {
-        this(DEFAULT_DURATION, TimeUnit.MILLISECONDS);
     }
 
     public ArmaFilter(long duration, TimeUnit timeUnit) {
@@ -46,6 +44,10 @@ public class ArmaFilter extends WindowFilter {
         super(maximumTimestamp);
     }
 
+    public ArmaFilter(long duration, TimeUnit timeUnit, long maximumTimestamp) {
+        super(duration, timeUnit, maximumTimestamp);
+    }
+
     @Override
     public float filter(Beacon beacon) {
         List<AdvertisingPacket> advertisingPackets = getRecentAdvertisingPackets(beacon);
@@ -53,7 +55,7 @@ public class ArmaFilter extends WindowFilter {
         int[] rssiArray = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(advertisingPackets);
         armaRssi = AdvertisingPacketUtil.calculateMean(rssiArray);
         float frequency = AdvertisingPacketUtil.getPacketFrequency(advertisingPackets.size(), duration, timeUnit);
-        armaFactor = getArmaFactor(frequency);
+        float armaFactor = getArmaFactor(frequency);
         for (AdvertisingPacket advertisingPacket : advertisingPackets) {
             addMeasurement(advertisingPacket.getRssi(), armaFactor);
         }
