@@ -12,7 +12,7 @@ public class AdvertisingPacketFactoryManager implements AdvertisingPacketFactory
     /**
      * A list of factories that may be used for creating {@link AdvertisingPacket}s.
      *
-     * Note that the order of elements in this list is important! The first matching factory will
+     * Note: The order of elements in this list is important! The first matching factory will
      * always be used. See {@link #getAdvertisingPacketFactory(byte[])}.
      */
     private List<AdvertisingPacketFactory> advertisingPacketFactories = new ArrayList<>();
@@ -46,6 +46,16 @@ public class AdvertisingPacketFactoryManager implements AdvertisingPacketFactory
             }
         }
         return null;
+    }
+
+    /**
+     * Inserts the specified factory into {@link #advertisingPacketFactories}.
+     *
+     * Note: The specified factory will be set to the first element in the list and thus may be used
+     * before the already existing factories.
+     */
+    public void addAdvertisingPacketFactory(AdvertisingPacketFactory advertisingPacketFactory) {
+        advertisingPacketFactories.add(0, advertisingPacketFactory);
     }
 
     /*
