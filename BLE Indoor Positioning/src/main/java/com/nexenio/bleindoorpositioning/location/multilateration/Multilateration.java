@@ -11,7 +11,6 @@ import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer
 import org.apache.commons.math3.linear.RealVector;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by steppschuh on 14.12.17.

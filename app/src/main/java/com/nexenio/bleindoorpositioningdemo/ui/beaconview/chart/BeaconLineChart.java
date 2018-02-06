@@ -374,8 +374,10 @@ public class BeaconLineChart extends BeaconChart {
     }
 
     protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket) {
-        int rssi = advertisingPacket.getRssi();
-        return processReturnValue(beacon,advertisingPacket, rssi);
+        WindowFilter filter = beacon.createSuggestedWindowFilter();
+        filter.setMaximumTimestamp(advertisingPacket.getTimestamp());
+        filter.setMinimumTimestamp(advertisingPacket.getTimestamp() - windowLength);
+        return processReturnValue(beacon, advertisingPacket, beacon.getRssi(filter));
     }
 
     protected float processReturnValue(Beacon beacon, AdvertisingPacket advertisingPacket, float rssi) {
@@ -388,7 +390,7 @@ public class BeaconLineChart extends BeaconChart {
             }
             case VALUE_TYPE_FREQUENCY: {
                 // make sure that the window size is at least 10 seconds when we're looking for the frequency
-                long windowLength = (valueType != VALUE_TYPE_FREQUENCY) ? this.windowLength : Math.max(this.windowLength, MINIMUM_WINDOW_LENGTH_FREQUENCY);
+                long windowLength = Math.max(this.windowLength, MINIMUM_WINDOW_LENGTH_FREQUENCY);
                 List<AdvertisingPacket> recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
                         advertisingPacket.getTimestamp() - windowLength,
                         advertisingPacket.getTimestamp()

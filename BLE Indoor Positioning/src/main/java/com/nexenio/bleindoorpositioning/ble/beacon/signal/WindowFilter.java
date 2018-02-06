@@ -38,6 +38,10 @@ public abstract class WindowFilter implements RssiFilter {
         this.minimumTimestamp = maximumTimestamp - duration;
     }
 
+    public void updateDuration() {
+        duration = maximumTimestamp - minimumTimestamp;
+    }
+
     public List<AdvertisingPacket> getRecentAdvertisingPackets(Beacon beacon) {
         return beacon.getAdvertisingPacketsBetween(minimumTimestamp, maximumTimestamp);
     }
@@ -75,7 +79,4 @@ public abstract class WindowFilter implements RssiFilter {
         updateDuration();
     }
 
-    public void updateDuration() {
-        duration = maximumTimestamp - minimumTimestamp;
-    }
 }
