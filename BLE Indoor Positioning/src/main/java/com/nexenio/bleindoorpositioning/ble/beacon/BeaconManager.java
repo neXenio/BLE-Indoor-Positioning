@@ -3,7 +3,7 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketFactoryManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
-import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,7 +33,7 @@ public class BeaconManager {
 
     private Beacon closestBeacon;
 
-    private static final RssiFilter meanFilter = new MeanFilter(15, TimeUnit.SECONDS);
+    private static final WindowFilter meanFilter = new MeanFilter(15, TimeUnit.SECONDS);
 
     private BeaconManager() {
 
@@ -83,7 +83,7 @@ public class BeaconManager {
         BeaconManager instance = getInstance();
 
         meanFilter.setMaximumTimestamp(beacon.getLatestAdvertisingPacket().getTimestamp());
-        meanFilter.setMinimumTimestamp(beacon.getLatestAdvertisingPacket().getTimestamp() - meanFilter.getDuration());
+        meanFilter.setMinimumTimestamp(beacon.getLatestAdvertisingPacket().getTimestamp() - meanFilter.getTimeUnit().toMillis(meanFilter.getDuration()));
 
         if (instance.closestBeacon == null) {
             instance.closestBeacon = beacon;
