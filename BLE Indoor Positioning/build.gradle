@@ -15,6 +15,7 @@ apply plugin: 'java-library'
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
+apply plugin: 'jacoco'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
@@ -146,3 +147,12 @@ release {
 
 // deploy artifacts when releasing
 afterReleaseBuild.dependsOn bintrayUpload
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
+}
+
+check.dependsOn jacocoTestReport
