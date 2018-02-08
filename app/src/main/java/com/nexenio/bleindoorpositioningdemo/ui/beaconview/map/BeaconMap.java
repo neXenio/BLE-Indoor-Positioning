@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
@@ -14,11 +15,11 @@ import android.util.AttributeSet;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
-import com.nexenio.bleindoorpositioning.location.provider.DeviceLocationPredictor;
+import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 import com.nexenio.bleindoorpositioning.location.projection.EquirectangularProjection;
+import com.nexenio.bleindoorpositioning.location.provider.DeviceLocationPredictor;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import com.nexenio.bleindoorpositioningdemo.ui.LocationAnimator;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.BeaconView;
@@ -42,8 +43,7 @@ public class BeaconMap extends BeaconView {
     protected LocationAnimator bottomRightLocationAnimator;
 
     protected CanvasProjection canvasProjection;
-
-    DeviceLocationPredictor deviceLocationPredictor = new DeviceLocationPredictor();
+    protected DeviceLocationPredictor deviceLocationPredictor;
 
     public BeaconMap(Context context) {
         super(context);
@@ -65,6 +65,7 @@ public class BeaconMap extends BeaconView {
     public void initialize() {
         super.initialize();
         canvasProjection = new CanvasProjection();
+        deviceLocationPredictor = new DeviceLocationPredictor();
     }
 
     @Override
@@ -96,14 +97,28 @@ public class BeaconMap extends BeaconView {
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, secondaryStrokePaint);
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, pixelsPerDip * 8, secondaryFillPaint);
 
-        drawDeviceLocationPrediction(canvas, deviceCenter);
+
+        if (deviceLocationPredictor.hasPrediction) {
+            drawDeviceLocationPrediction(canvas, getPointFromLocation(deviceLocationAnimator.getLocation()));
+        }
     }
 
-    protected void drawDeviceLocationPrediction(Canvas canvas, PointF deviceCenter ) {
-        if (deviceLocationAnimator != null) {
-            PointF predictionCenter = getPointFromLocation(deviceLocationPredictor.predictNewLocation(deviceLocationAnimator.getLocation()));
-            canvas.drawLine(deviceCenter.x,deviceCenter.y,predictionCenter.x,predictionCenter.y,primaryStrokePaint);
-        }
+    protected void drawDeviceLocationPrediction(Canvas canvas, PointF deviceCenter) {
+        PointF predictionCenter = getPointFromLocation(deviceLocationPredictor.getPredictedLocation());
+        canvas.drawLine(deviceCenter.x, deviceCenter.y, predictionCenter.x, predictionCenter.y, primaryStrokePaint);
+
+        // TODO work in progress (draw relative orthogonal to current direction)
+        /*Path arrowPath = new Path();
+        int arrowSize = 10;
+
+        //draw arrowhead
+        arrowPath.moveTo(predictionCenter.x, predictionCenter.y); //move to the center of first circle
+        arrowPath.lineTo(predictionCenter.x - arrowSize, predictionCenter.y - arrowSize);//draw the first arrowhead line to the left
+        arrowPath.moveTo(predictionCenter.x, predictionCenter.y);//move back to the center
+        arrowPath.lineTo(predictionCenter.x + arrowSize, predictionCenter.y - arrowSize);//draw the next arrowhead line to the right
+
+        //draw the path
+        canvas.drawPath(arrowPath, primaryStrokePaint);*/
     }
 
     @Override
@@ -119,6 +134,15 @@ public class BeaconMap extends BeaconView {
         for (Beacon beacon : beacons) {
             drawBeaconForeground(canvas, beacon, beaconCenterMap.get(beacon));
         }
+        // draw all distances
+        for (Beacon beacon : beacons) {
+            PointF beaconCenter = getPointFromLocation(beacon.getLocation());
+            drawBeaconDistance(canvas, beacon, beaconCenter);
+        }
+    }
+
+    protected void drawBeaconDistance(Canvas canvas, Beacon beacon, PointF beaconCenter) {
+        canvas.drawCircle(beaconCenter.x, beaconCenter.y, (float) canvasProjection.getCanvasUnitsFromMeters(beacon.getDistance()), beaconRangePaint);
     }
 
     /**
@@ -303,9 +327,8 @@ public class BeaconMap extends BeaconView {
     public void onDeviceLocationChanged() {
         startDeviceRadiusAnimation();
         super.onDeviceLocationChanged();
-        //TODO
         if (deviceLocationAnimator != null) {
-            deviceLocationPredictor.saveCurrentLocation(deviceLocationAnimator.getLocation());
+            deviceLocationPredictor.updateCurrentLocation(deviceLocationAnimator.getTargetLocation());
         }
     }
 
