@@ -12,9 +12,11 @@ import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -23,7 +25,7 @@ import java.util.List;
 
 public class RssiFilterLineChart extends BeaconLineChart {
 
-    public static List<RssiFilter> filterList;
+    public static List<WindowFilter> filterList;
 
     public RssiFilterLineChart(Context context) {
         super(context);
@@ -36,16 +38,17 @@ public class RssiFilterLineChart extends BeaconLineChart {
     @Override
     public void initialize() {
         super.initialize();
-        filterList = new ArrayList<>();
-        filterList.add(new MeanFilter());
-        filterList.add(new ArmaFilter());
-        filterList.add(new KalmanFilter());
+        filterList = new ArrayList<>(Arrays.asList(
+                new MeanFilter(),
+                new ArmaFilter(),
+                new KalmanFilter()
+        ));
     }
 
     @Override
     protected void drawBeacon(Canvas canvas, Beacon beacon) {
         int filterIndex = 0;
-        for (RssiFilter filter : filterList) {
+        for (WindowFilter filter : filterList) {
             prepareDraw(beacon);
             linePaint.setShader(createLineShader(ColorUtil.getBeaconColor(filterIndex)));
 
@@ -63,7 +66,7 @@ public class RssiFilterLineChart extends BeaconLineChart {
         }
     }
 
-    protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket, RssiFilter filter) {
+    protected float getValue(Beacon beacon, AdvertisingPacket advertisingPacket, WindowFilter filter) {
         float filteredRssi;
 
         if (windowLength == 0) {
@@ -77,7 +80,7 @@ public class RssiFilterLineChart extends BeaconLineChart {
         return processReturnValue(beacon, advertisingPacket, filteredRssi);
     }
 
-    protected PointF getPointFromAdvertisingPacket(Beacon beacon, AdvertisingPacket advertisingPacket, PointF point, RssiFilter filter) {
+    protected PointF getPointFromAdvertisingPacket(Beacon beacon, AdvertisingPacket advertisingPacket, PointF point, WindowFilter filter) {
         if (point == null) {
             point = new PointF();
         }
