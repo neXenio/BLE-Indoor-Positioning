@@ -10,10 +10,4 @@ public interface RssiFilter {
 
     float filter(Beacon beacon);
 
-    void setMinimumTimestamp(long minimumTimestamp);
-
-    void setMaximumTimestamp(long maximumTimestamp);
-
-    long getDuration();
-
 }

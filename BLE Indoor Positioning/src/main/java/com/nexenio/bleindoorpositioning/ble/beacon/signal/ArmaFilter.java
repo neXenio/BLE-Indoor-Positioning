@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * means the actual value is changed by 10% of the difference between the actual measurement and the
  * actual average) For signals at lower rates (10Hz) a value of 0.25 to 0.5 would be appropriate.
  *
- * @see <a href="https://en.wikipedia.org/wiki/Autoregressive–moving-average_model">Autoregressive
+ * @see <a href="https://en.wikipedia.org/wiki/Autoregressive-moving-average_model">Autoregressive
  * Moving Average Model</a>
  * @see <a href="https://github.com/AltBeacon/android-beacon-library/blob/master/src/main/java/org/altbeacon/beacon/service/ArmaRssiFilter.java">Example
  * Implementation</a>
