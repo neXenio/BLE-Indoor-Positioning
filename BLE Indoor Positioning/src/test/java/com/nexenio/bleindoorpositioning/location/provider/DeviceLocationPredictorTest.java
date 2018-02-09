@@ -9,8 +9,7 @@ import static org.junit.Assert.assertEquals;
 public class DeviceLocationPredictorTest {
 
     @Test
-    //TODO test name convention
-    public void calculateBearing() throws Exception {
+    public void calculateBearing_validLocations_accurateBearing() throws Exception {
         assertEquals((int) DeviceLocationPredictor.calculateBearing(43.682213,-70.450696, 43.682194, -70.450769),250);
         assertEquals((int) DeviceLocationPredictor.calculateBearing(8.46696, -17.03663, 65.35996, -17.03663),0);
         assertEquals((int) DeviceLocationPredictor.calculateBearing(8.46696, -17.03663, 64.1609177685091, -30.044444500000054), 353);

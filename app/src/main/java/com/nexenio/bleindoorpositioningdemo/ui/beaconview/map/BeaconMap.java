@@ -4,7 +4,6 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
@@ -31,6 +30,7 @@ import java.util.Map;
 
 /**
  * Created by steppschuh on 16.11.17.
+ *
  */
 
 public class BeaconMap extends BeaconView {
@@ -106,19 +106,6 @@ public class BeaconMap extends BeaconView {
     protected void drawDeviceLocationPrediction(Canvas canvas, PointF deviceCenter) {
         PointF predictionCenter = getPointFromLocation(deviceLocationPredictor.getPredictedLocation());
         canvas.drawLine(deviceCenter.x, deviceCenter.y, predictionCenter.x, predictionCenter.y, primaryStrokePaint);
-
-        // TODO work in progress (draw relative orthogonal to current direction)
-        /*Path arrowPath = new Path();
-        int arrowSize = 10;
-
-        //draw arrowhead
-        arrowPath.moveTo(predictionCenter.x, predictionCenter.y); //move to the center of first circle
-        arrowPath.lineTo(predictionCenter.x - arrowSize, predictionCenter.y - arrowSize);//draw the first arrowhead line to the left
-        arrowPath.moveTo(predictionCenter.x, predictionCenter.y);//move back to the center
-        arrowPath.lineTo(predictionCenter.x + arrowSize, predictionCenter.y - arrowSize);//draw the next arrowhead line to the right
-
-        //draw the path
-        canvas.drawPath(arrowPath, primaryStrokePaint);*/
     }
 
     @Override
