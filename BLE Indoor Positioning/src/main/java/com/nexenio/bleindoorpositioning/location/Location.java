@@ -101,6 +101,7 @@ public class Location {
      * Calculates the angle between two locations in degrees.
      * The result ranges from [0,360), rotating CLOCKWISE,
      * 0 and 360 degrees represents NORTH, 90 degrees represents EAST.
+     * This is also referred to as bearing.
      *
      * @param centerLocation Location we are rotating around.
      * @param targetLocation Location we want to calculate the angle to.
@@ -113,6 +114,25 @@ public class Location {
         double y = Math.sin(longitudeDelta) * Math.cos(targetLocation.latitude);
         double angle = Math.toDegrees(Math.atan2(y, x));
         return 360 - ((angle + 360) % 360);
+    }
+
+    /**
+     * Calculates new location based on current location, distance and angle.
+     *
+     * @param distance in km
+     * @param angle    in degrees
+     * @return Location
+     */
+    public Location calculateNextLocation(double distance, double angle) {
+        double bearingRadians = Math.toRadians(angle);
+        double latitudeRadians = Math.toRadians(latitude);
+        double longitudeRadians = Math.toRadians(longitude);
+        double distanceFraction = distance / LocationDistanceCalculator.EARTH_RADIUS;
+        double newLatitude = Math.asin(Math.sin(latitudeRadians) * Math.cos(distanceFraction) +
+                Math.cos(latitudeRadians) * Math.sin(distanceFraction) * Math.cos(bearingRadians));
+        double newLongitude = longitudeRadians + Math.atan2(Math.sin(bearingRadians) * Math.sin(distanceFraction) *
+                Math.cos(latitudeRadians), Math.cos(distanceFraction) - Math.sin(latitudeRadians) * Math.sin(newLatitude));
+        return new Location(Math.toDegrees(newLatitude), Math.toDegrees(newLongitude));
     }
 
     /*

@@ -9,6 +9,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
+import com.nexenio.bleindoorpositioning.location.provider.DeviceLocationPredictor;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class IndoorPositioning implements LocationProvider, BeaconUpdateListener {
 
@@ -33,6 +35,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private long maximumLocationUpdateInterval = UPDATE_INTERVAL_MEDIUM;
     private Set<LocationListener> locationListeners = new HashSet<>();
     private BeaconFilter indoorPositioningBeaconFilter = createIndoorPositioningBeaconFilter();
+    private DeviceLocationPredictor deviceLocationPredictor = new DeviceLocationPredictor();
 
     private IndoorPositioning() {
 
@@ -75,13 +78,14 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
         Multilateration multilateration = new Multilateration(usableBeacons);
         onLocationUpdated(multilateration.getLocation());
+        deviceLocationPredictor.updateCurrentLocation(multilateration.getLocation());
         lastLocationUpdateTimestamp = System.currentTimeMillis();
     }
 
     public static List<Beacon> getUsableBeacons(Collection<Beacon> availableBeacons) {
         // TODO: implement as beacon filter
         List<Beacon> usableBeacons = new ArrayList<>();
-        long minimumTimestamp = System.currentTimeMillis() - 1000;
+        long minimumTimestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(1);
         for (Beacon beacon : (List<Beacon>) getInstance().indoorPositioningBeaconFilter.getMatches(availableBeacons)) {
             if (!beacon.hasLocation()) {
                 continue; // beacon has no location assigned, can't use it for multilateration

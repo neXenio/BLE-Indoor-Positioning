@@ -30,7 +30,6 @@ import java.util.Map;
 
 /**
  * Created by steppschuh on 16.11.17.
- *
  */
 
 public class BeaconMap extends BeaconView {
@@ -43,7 +42,6 @@ public class BeaconMap extends BeaconView {
     protected LocationAnimator bottomRightLocationAnimator;
 
     protected CanvasProjection canvasProjection;
-    protected DeviceLocationPredictor deviceLocationPredictor;
 
     public BeaconMap(Context context) {
         super(context);
@@ -65,7 +63,6 @@ public class BeaconMap extends BeaconView {
     public void initialize() {
         super.initialize();
         canvasProjection = new CanvasProjection();
-        deviceLocationPredictor = new DeviceLocationPredictor();
     }
 
     @Override
@@ -97,15 +94,18 @@ public class BeaconMap extends BeaconView {
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, secondaryStrokePaint);
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, pixelsPerDip * 8, secondaryFillPaint);
 
-
-        if (deviceLocationPredictor.hasPrediction) {
-            drawDeviceLocationPrediction(canvas, getPointFromLocation(deviceLocationAnimator.getLocation()));
+        if (DeviceLocationPredictor.hasPrediction()) {
+            drawDeviceLocationPrediction(canvas);
         }
     }
 
-    protected void drawDeviceLocationPrediction(Canvas canvas, PointF deviceCenter) {
-        PointF predictionCenter = getPointFromLocation(deviceLocationPredictor.getPredictedLocation());
-        canvas.drawLine(deviceCenter.x, deviceCenter.y, predictionCenter.x, predictionCenter.y, primaryStrokePaint);
+    protected void drawDeviceLocationPrediction(Canvas canvas) {
+        PointF predictionCenter = getPointFromLocation(DeviceLocationPredictor.getPredictedLocation());
+        if (deviceLocationAnimator != null) {
+            canvas.drawLine(getPointFromLocation(deviceLocationAnimator.getLocation()).x,
+                    getPointFromLocation(deviceLocationAnimator.getLocation()).y,
+                    predictionCenter.x, predictionCenter.y, primaryStrokePaint);
+        }
     }
 
     @Override
@@ -314,9 +314,6 @@ public class BeaconMap extends BeaconView {
     public void onDeviceLocationChanged() {
         startDeviceRadiusAnimation();
         super.onDeviceLocationChanged();
-        if (deviceLocationAnimator != null) {
-            deviceLocationPredictor.updateCurrentLocation(deviceLocationAnimator.getTargetLocation());
-        }
     }
 
     protected void startDeviceRadiusAnimation() {

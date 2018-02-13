@@ -5,6 +5,7 @@ import com.nexenio.bleindoorpositioning.location.distance.LocationDistanceCalcul
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -15,12 +16,18 @@ import java.util.List;
 
 public class DeviceLocationPredictor {
 
-    private List<Location> pastDeviceLocations;
-    private Location predictedLocation;
-    public boolean hasPrediction;
+    private List<Location> deviceLocations;
+    private List<Long> deviceLocationsTimestamps;
+    private static Location predictedLocation;
+    private static boolean hasPrediction;
 
     public DeviceLocationPredictor() {
-        pastDeviceLocations = new ArrayList<>();
+        deviceLocations = new ArrayList<>();
+        deviceLocationsTimestamps = new ArrayList<>();
+    }
+
+    public static boolean hasPrediction() {
+        return hasPrediction;
     }
 
     public void updateCurrentLocation(Location location) {
@@ -29,104 +36,72 @@ public class DeviceLocationPredictor {
             hasPrediction = true;
         }
         int locationWindow = 20;
-        pastDeviceLocations.add(location);
-        if (pastDeviceLocations.size() >= locationWindow) {
-            pastDeviceLocations.remove(0);
+        deviceLocations.add(location);
+        deviceLocationsTimestamps.add(System.currentTimeMillis());
+        if (deviceLocations.size() > locationWindow) {
+            deviceLocations.remove(0);
+            deviceLocationsTimestamps.remove(0);
         }
         predictNewLocation(location);
     }
 
     private void predictNewLocation(Location deviceCenter) {
-
         Location predictedLocation;
         boolean isMoving;
-
-        // estimate speed of movement
         double sumDistances = 0;
-        if (pastDeviceLocations.size() > 1) {
-            for (int i = 0; i < pastDeviceLocations.size() - 1; i++) {
-                sumDistances += LocationDistanceCalculator.calculateDistanceBetweeen(
-                        pastDeviceLocations.get(i).getLatitude(),
-                        pastDeviceLocations.get(i).getLongitude(),
-                        pastDeviceLocations.get(i + 1).getLatitude(),
-                        pastDeviceLocations.get(i + 1).getLongitude());
+        double sumAngle = 0;
+        float metersPerSecondSum = 0;
+        if (deviceLocations.size() > 1) {
+            for (int i = 0; i < deviceLocations.size() - 1; i++) {
+                double distance = LocationDistanceCalculator.calculateDistanceBetweeen(
+                        deviceLocations.get(i).getLatitude(),
+                        deviceLocations.get(i).getLongitude(),
+                        deviceLocations.get(i + 1).getLatitude(),
+                        deviceLocations.get(i + 1).getLongitude());
+                sumDistances += distance;
+                sumAngle += Location.getRotationAngleInDegrees(
+                        deviceLocations.get(i),
+                        deviceLocations.get(i + 1));
+                float timeDifferenceInSeconds = (deviceLocationsTimestamps.get(i + 1) -
+                        deviceLocationsTimestamps.get(i)) / (float) TimeUnit.SECONDS.toMillis(1);
+                metersPerSecondSum += distance / timeDifferenceInSeconds;
             }
         }
 
-        //in meter
-        double meanDistance = sumDistances / pastDeviceLocations.size();
+        // in meter
+        double meanDistance = sumDistances / deviceLocations.size();
+        double meanAngle = sumAngle / deviceLocations.size();
+
+        System.out.println("meanAngle: " + meanAngle);
+
+        // estimate speed of movement
+        // TODO also use acceleration
+        float metersPerSecond = 0;
+        if (deviceLocations.size() > 1) {
+            metersPerSecond = (metersPerSecondSum / deviceLocations.size());
+        }
 
         // TODO what if no movement --> Stay-point detection
         if (meanDistance > 0.6) {
             isMoving = true;
         }
 
-        // calculate bearing based on last two known locations
-        double bearing = 0;
-        if (pastDeviceLocations.size() > 1) {
-            for (int i = pastDeviceLocations.size() - 1; i >= pastDeviceLocations.size() - 1; i--) {
-                bearing = calculateBearing(
-                        pastDeviceLocations.get(i - 1).getLatitude(),
-                        pastDeviceLocations.get(i - 1).getLongitude(),
-                        pastDeviceLocations.get(i).getLatitude(),
-                        pastDeviceLocations.get(i).getLongitude());
-            }
-        }
-
-        // TODO check  different angle calculations - getRotationAngleInDegrees & calculateBearing
-        // double angle = Location.getRotationAngleInDegrees(pastDeviceLocations.get(i - 1), pastDeviceLocations.get(i));
-        // System.out.println("bearing: " + bearing + " | angle:" + angle + " | diff: " + (bearing - angle));
-
-        // TODO calculate confidence of predicting --> is it reasonable to predict new location
-        // compare large window angle with small window angle
-
         // set initial location
-        if (pastDeviceLocations.size() == 0) {
+        if (deviceLocations.size() == 0) {
             predictedLocation = deviceCenter;
         } else {
-            predictedLocation = calculateNextLocation(pastDeviceLocations.get(pastDeviceLocations.size() - 1).getLatitude(),
-                    pastDeviceLocations.get(pastDeviceLocations.size() - 1).getLongitude(),
-                    meanDistance / 1000, bearing);
+            predictedLocation = deviceCenter.calculateNextLocation(metersPerSecond / 1000, meanAngle);
         }
         setPredictedLocation(predictedLocation);
     }
 
-    // TODO compare prediction with next location
-
-    /**
-     * @return the angle
-     */
-
-    static double calculateBearing(double fromLatitude, double fromLongitude, double toLatitude, double toLongitude) {
-        fromLatitude = Math.toRadians(fromLatitude);
-        toLatitude = Math.toRadians(toLatitude);
-        double longitudeDifference = Math.toRadians(toLongitude - fromLongitude);
-        double y = Math.sin(longitudeDifference) * Math.cos(toLatitude);
-        double x = (Math.cos(fromLatitude) * Math.sin(toLatitude)) - (Math.sin(fromLatitude) * Math.cos(toLatitude) * Math.cos(longitudeDifference));
-        return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
-    }
-
-    /**
-     * @param distance in km
-     * @param bearing  in degrees
-     * @return Location
-     */
-    private static Location calculateNextLocation(double fromLatitude, double fromLongitude, double distance, double bearing) {
-        double bearingRadians = Math.toRadians(bearing);
-        double latitudeRadians = Math.toRadians(fromLatitude);
-        double longitudeRadians = Math.toRadians(fromLongitude);
-        double newLatitude = Math.asin(Math.sin(latitudeRadians) * Math.cos(distance / LocationDistanceCalculator.EARTH_RADIUS) +
-                Math.cos(latitudeRadians) * Math.sin(distance / LocationDistanceCalculator.EARTH_RADIUS) * Math.cos(bearingRadians));
-        double newLongitude = longitudeRadians + Math.atan2(Math.sin(bearingRadians) * Math.sin(distance / LocationDistanceCalculator.EARTH_RADIUS) *
-                Math.cos(latitudeRadians), Math.cos(distance / LocationDistanceCalculator.EARTH_RADIUS) - Math.sin(latitudeRadians) * Math.sin(newLatitude));
-        return new Location(Math.toDegrees(newLatitude), Math.toDegrees(newLongitude));
-    }
+    // TODO compare prediction with next location (confidence of prediction) --> is it reasonable to predict new location
 
     /*
      Getter & Setter
      */
 
-    public Location getPredictedLocation() {
+    public static Location getPredictedLocation() {
         return predictedLocation;
     }
 
