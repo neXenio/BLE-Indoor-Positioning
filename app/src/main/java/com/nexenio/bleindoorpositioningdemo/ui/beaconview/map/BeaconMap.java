@@ -100,8 +100,8 @@ public class BeaconMap extends BeaconView {
     }
 
     protected void drawDeviceLocationPrediction(Canvas canvas) {
-        PointF predictionCenter = getPointFromLocation(DeviceLocationPredictor.getPredictedLocation());
         if (deviceLocationAnimator != null) {
+            PointF predictionCenter = getPointFromLocation(DeviceLocationPredictor.getPredictedLocation());
             canvas.drawLine(getPointFromLocation(deviceLocationAnimator.getLocation()).x,
                     getPointFromLocation(deviceLocationAnimator.getLocation()).y,
                     predictionCenter.x, predictionCenter.y, primaryStrokePaint);
@@ -123,7 +123,7 @@ public class BeaconMap extends BeaconView {
         }
         // draw all distances
         for (Beacon beacon : beacons) {
-            PointF beaconCenter = getPointFromLocation(beacon.getLocation());
+            PointF beaconCenter = beaconCenterMap.get(beacon);
             drawBeaconDistance(canvas, beacon, beaconCenter);
         }
     }

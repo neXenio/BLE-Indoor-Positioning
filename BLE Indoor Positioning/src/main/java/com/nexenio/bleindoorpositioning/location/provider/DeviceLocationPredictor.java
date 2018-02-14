@@ -1,11 +1,10 @@
 package com.nexenio.bleindoorpositioning.location.provider;
 
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.distance.LocationDistanceCalculator;
+import com.nexenio.bleindoorpositioning.location.angle.AngleUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -17,13 +16,11 @@ import java.util.concurrent.TimeUnit;
 public class DeviceLocationPredictor {
 
     private List<Location> deviceLocations;
-    private List<Long> deviceLocationsTimestamps;
     private static Location predictedLocation;
     private static boolean hasPrediction;
 
     public DeviceLocationPredictor() {
         deviceLocations = new ArrayList<>();
-        deviceLocationsTimestamps = new ArrayList<>();
     }
 
     public static boolean hasPrediction() {
@@ -37,10 +34,9 @@ public class DeviceLocationPredictor {
         }
         int locationWindow = 20;
         deviceLocations.add(location);
-        deviceLocationsTimestamps.add(System.currentTimeMillis());
+
         if (deviceLocations.size() > locationWindow) {
             deviceLocations.remove(0);
-            deviceLocationsTimestamps.remove(0);
         }
         predictNewLocation(location);
     }
@@ -49,30 +45,23 @@ public class DeviceLocationPredictor {
         Location predictedLocation;
         boolean isMoving;
         double sumDistances = 0;
-        double sumAngle = 0;
+        double[] angles = new double[deviceLocations.size()];
         float metersPerSecondSum = 0;
         if (deviceLocations.size() > 1) {
             for (int i = 0; i < deviceLocations.size() - 1; i++) {
-                double distance = LocationDistanceCalculator.calculateDistanceBetweeen(
-                        deviceLocations.get(i).getLatitude(),
-                        deviceLocations.get(i).getLongitude(),
-                        deviceLocations.get(i + 1).getLatitude(),
-                        deviceLocations.get(i + 1).getLongitude());
+                double distance = deviceLocations.get(i).getDistanceTo(deviceLocations.get(i + 1));
                 sumDistances += distance;
-                sumAngle += Location.getRotationAngleInDegrees(
-                        deviceLocations.get(i),
-                        deviceLocations.get(i + 1));
-                float timeDifferenceInSeconds = (deviceLocationsTimestamps.get(i + 1) -
-                        deviceLocationsTimestamps.get(i)) / (float) TimeUnit.SECONDS.toMillis(1);
+                angles[i] = deviceLocations.get(i).getAngleTo(deviceLocations.get(i + 1));
+                // can't use TimeUnit.MILLISECONDS.toSeconds because float is required for fractions of a second
+                float timeDifferenceInSeconds = (deviceLocations.get(i + 1).getLastChangeTimestamp() -
+                        deviceLocations.get(i).getLastChangeTimestamp()) / (float) 1000;
                 metersPerSecondSum += distance / timeDifferenceInSeconds;
             }
         }
 
         // in meter
         double meanDistance = sumDistances / deviceLocations.size();
-        double meanAngle = sumAngle / deviceLocations.size();
-
-        System.out.println("meanAngle: " + meanAngle);
+        double meanAngle = AngleUtil.calculateAngleMean(angles);
 
         // estimate speed of movement
         // TODO also use acceleration
@@ -90,7 +79,7 @@ public class DeviceLocationPredictor {
         if (deviceLocations.size() == 0) {
             predictedLocation = deviceCenter;
         } else {
-            predictedLocation = deviceCenter.calculateNextLocation(metersPerSecond / 1000, meanAngle);
+            predictedLocation = deviceCenter.getShiftedLocation(metersPerSecond, meanAngle);
         }
         setPredictedLocation(predictedLocation);
     }

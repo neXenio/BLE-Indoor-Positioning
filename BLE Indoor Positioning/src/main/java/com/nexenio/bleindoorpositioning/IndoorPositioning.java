@@ -79,6 +79,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         Multilateration multilateration = new Multilateration(usableBeacons);
         onLocationUpdated(multilateration.getLocation());
         deviceLocationPredictor.updateCurrentLocation(multilateration.getLocation());
+        multilateration.getLocation().setLastChangeTimestamp(System.currentTimeMillis());
         lastLocationUpdateTimestamp = System.currentTimeMillis();
     }
 

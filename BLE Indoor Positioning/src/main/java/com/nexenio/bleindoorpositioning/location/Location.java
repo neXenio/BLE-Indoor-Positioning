@@ -31,8 +31,10 @@ public class Location {
     private double latitude = VALUE_NOT_SET;
     private double longitude = VALUE_NOT_SET;
     private double altitude = VALUE_NOT_SET;
+    private long lastChangeTimestamp;
 
     public Location() {
+        this.lastChangeTimestamp = System.currentTimeMillis();
     }
 
     public Location(double latitude, double longitude) {
@@ -60,6 +62,10 @@ public class Location {
 
     public double getAngleTo(Location location) {
         return getRotationAngleInDegrees(this, location);
+    }
+
+    public Location getShiftedLocation(double distance, double angle) {
+        return calculateNextLocation(this, distance, angle);
     }
 
     public boolean latitudeAndLongitudeEquals(Location location) {
@@ -119,19 +125,20 @@ public class Location {
     /**
      * Calculates new location based on current location, distance and angle.
      *
-     * @param distance in km
+     * @param distance in m
      * @param angle    in degrees
      * @return Location
      */
-    public Location calculateNextLocation(double distance, double angle) {
+    public static Location calculateNextLocation(Location location, double distance, double angle) {
         double bearingRadians = Math.toRadians(angle);
-        double latitudeRadians = Math.toRadians(latitude);
-        double longitudeRadians = Math.toRadians(longitude);
-        double distanceFraction = distance / LocationDistanceCalculator.EARTH_RADIUS;
+        double latitudeRadians = Math.toRadians(location.latitude);
+        double longitudeRadians = Math.toRadians(location.longitude);
+        double distanceFraction = (distance / 1000) / LocationDistanceCalculator.EARTH_RADIUS;
         double newLatitude = Math.asin(Math.sin(latitudeRadians) * Math.cos(distanceFraction) +
                 Math.cos(latitudeRadians) * Math.sin(distanceFraction) * Math.cos(bearingRadians));
         double newLongitude = longitudeRadians + Math.atan2(Math.sin(bearingRadians) * Math.sin(distanceFraction) *
                 Math.cos(latitudeRadians), Math.cos(distanceFraction) - Math.sin(latitudeRadians) * Math.sin(newLatitude));
+        //TODO missing altitude
         return new Location(Math.toDegrees(newLatitude), Math.toDegrees(newLongitude));
     }
 
@@ -145,6 +152,7 @@ public class Location {
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
+        this.lastChangeTimestamp = System.currentTimeMillis();
     }
 
     public double getLongitude() {
@@ -153,6 +161,7 @@ public class Location {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+        this.lastChangeTimestamp = System.currentTimeMillis();
     }
 
     public double getAltitude() {
@@ -161,5 +170,13 @@ public class Location {
 
     public void setAltitude(double altitude) {
         this.altitude = altitude;
+    }
+
+    public long getLastChangeTimestamp() {
+        return lastChangeTimestamp;
+    }
+
+    public void setLastChangeTimestamp(long lastChangeTimestamp) {
+        this.lastChangeTimestamp = lastChangeTimestamp;
     }
 }
