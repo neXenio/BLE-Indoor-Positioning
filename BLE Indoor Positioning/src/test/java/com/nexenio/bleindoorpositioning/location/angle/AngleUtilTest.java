@@ -17,5 +17,4 @@ public class AngleUtilTest {
         double actualAngle = calculateAngleMean(angles);
         assertEquals(expectedAngle, actualAngle, 0.1);
     }
-
 }
