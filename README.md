@@ -1,4 +1,4 @@
-[![Travis](https://img.shields.io/travis/neXenio/BLE-Indoor-Positioning/master.svg)](https://travis-ci.org/neXenio/BLE-Indoor-Positioning/builds) [![GitHub release](https://img.shields.io/github/release/neXenio/BLE-Indoor-Positioning.svg)](https://github.com/neXenio/BLE-Indoor-Positioning/releases) [![JitPack](https://img.shields.io/jitpack/v/neXenio/BLE-Indoor-Positioning.svg)](https://jitpack.io/#neXenio/BLE-Indoor-Positioning/) [![license](https://img.shields.io/github/license/neXenio/BLE-Indoor-Positioning.svg)](https://github.com/neXenio/BLE-Indoor-Positioning/blob/master/LICENSE)
+[![Travis](https://img.shields.io/travis/neXenio/BLE-Indoor-Positioning/master.svg)](https://travis-ci.org/neXenio/BLE-Indoor-Positioning/builds) [![GitHub release](https://img.shields.io/github/release/neXenio/BLE-Indoor-Positioning.svg)](https://github.com/neXenio/BLE-Indoor-Positioning/releases) [![JitPack](https://img.shields.io/jitpack/v/neXenio/BLE-Indoor-Positioning.svg)](https://jitpack.io/#neXenio/BLE-Indoor-Positioning/) [![Codecov](https://img.shields.io/codecov/c/github/nexenio/BLE-Indoor-Positioning.svg)](https://codecov.io/gh/neXenio/BLE-Indoor-Positioning) [![license](https://img.shields.io/github/license/neXenio/BLE-Indoor-Positioning.svg)](https://github.com/neXenio/BLE-Indoor-Positioning/blob/master/LICENSE)
 
 # BLE Indoor Positioning
 
@@ -14,7 +14,7 @@ Release artefacts are available through [Bintray][bintray].
 
 ```groovy
 dependencies {
-    compile 'com.nexenio.bleindoorpositioning:core:0.1.1'
+    compile 'com.nexenio.bleindoorpositioning:core:0.2.0'
 }
 ```
 
@@ -37,7 +37,7 @@ dependencies {
 <dependency>
   <groupId>com.nexenio.bleindoorpositioning</groupId>
   <artifactId>core</artifactId>
-  <version>0.1.1</version>
+  <version>0.2.0</version>
 </dependency>
 ```
 
@@ -53,8 +53,9 @@ You'll get a scan result, which you can extract the beacon mac address and raw a
 ```Java
 private void processScanResult(ScanResult scanResult) {
     String macAddress = scanResult.getBleDevice().getMacAddress();
-    byte[] data = scanResult.getScanRecord().getBytes();
-    BeaconManager.processAdvertisingPacket(macAddress, AdvertisingPacket.from(data));
+    byte[] advertisingData = scanResult.getScanRecord().getBytes();
+    int rssi = scanResult.getRssi();
+    BeaconManager.processAdvertisingData(macAddress, advertisingData, rssi);
 }
 ```
 
@@ -70,6 +71,8 @@ BeaconManager.registerBeaconUpdateListener(new BeaconUpdateListener() {
     }
 });
 ```
+
+For some more fine-tuned callbacks, you may want to use a `FilteredBeaconUpdateListener`, which will only emit updates when beacons match a `BeaconFilter` of your choice.
 
 ## Distance Estimation
 
