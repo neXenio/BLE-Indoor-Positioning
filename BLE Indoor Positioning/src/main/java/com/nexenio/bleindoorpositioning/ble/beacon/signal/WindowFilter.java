@@ -3,7 +3,6 @@ package com.nexenio.bleindoorpositioning.ble.beacon.signal;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -44,7 +43,7 @@ public abstract class WindowFilter implements RssiFilter {
     }
 
     public List<AdvertisingPacket> getRecentAdvertisingPackets(Beacon beacon) {
-        return new ArrayList<>(beacon.getAdvertisingPacketsBetween(minimumTimestamp, maximumTimestamp));
+        return beacon.getAdvertisingPacketsBetween(minimumTimestamp, maximumTimestamp);
     }
 
     /*
