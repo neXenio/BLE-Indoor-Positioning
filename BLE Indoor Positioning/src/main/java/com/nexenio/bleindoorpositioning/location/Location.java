@@ -43,6 +43,11 @@ public class Location {
         this.longitude = longitude;
     }
 
+    public Location(double latitude, double longitude, double altitude) {
+        this(latitude, longitude);
+        this.altitude = altitude;
+    }
+
     public Location(Location location) {
         this();
         this.latitude = location.latitude;
@@ -65,7 +70,11 @@ public class Location {
     }
 
     public Location getShiftedLocation(double distance, double angle) {
-        return calculateNextLocation(this, distance, angle);
+        return calculateNextLocation(this, distance, angle, 0);
+    }
+
+    public Location getShiftedLocation(double distance, double angle, double altitude) {
+        return calculateNextLocation(this, distance, angle, altitude);
     }
 
     public boolean latitudeAndLongitudeEquals(Location location) {
@@ -122,14 +131,17 @@ public class Location {
         return 360 - ((angle + 360) % 360);
     }
 
+    // TODO calculate angle with altitudes https://stackoverflow.com/questions/41542465/calculate-vertical-bearing-between-two-gps-coordinates-with-altitudes
+
     /**
      * Calculates new location based on current location, distance and angle.
      *
      * @param distance in m
      * @param angle    in degrees
+     * @param altitude in m
      * @return Location
      */
-    public static Location calculateNextLocation(Location location, double distance, double angle) {
+    public static Location calculateNextLocation(Location location, double distance, double angle, double altitude) {
         double bearingRadians = Math.toRadians(angle);
         double latitudeRadians = Math.toRadians(location.latitude);
         double longitudeRadians = Math.toRadians(location.longitude);
@@ -138,8 +150,12 @@ public class Location {
                 Math.cos(latitudeRadians) * Math.sin(distanceFraction) * Math.cos(bearingRadians));
         double newLongitude = longitudeRadians + Math.atan2(Math.sin(bearingRadians) * Math.sin(distanceFraction) *
                 Math.cos(latitudeRadians), Math.cos(distanceFraction) - Math.sin(latitudeRadians) * Math.sin(newLatitude));
-        //TODO missing altitude
-        return new Location(Math.toDegrees(newLatitude), Math.toDegrees(newLongitude));
+        // TODO missing altitude calculation
+        if (altitude == 0) {
+            return new Location(Math.toDegrees(newLatitude), Math.toDegrees(newLongitude));
+        } else {
+            return new Location(Math.toDegrees(newLatitude), Math.toDegrees(newLongitude), altitude);
+        }
     }
 
     /*
