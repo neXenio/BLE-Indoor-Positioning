@@ -1,23 +1,43 @@
 package com.nexenio.bleindoorpositioning.location.angle;
 
+import com.nexenio.bleindoorpositioning.location.Location;
+
+import java.util.List;
+
 /**
  * Created by leon on 14.02.18.
  */
 
-public class AngleUtil {
+public final class AngleUtil {
 
     /**
-     * A simple arithmetic mean is not appropriate for angles. Calculates mean by converting all
-     * angles to corresponding point on the unit circle i.e. alpha to (cos(alpha),sin(alpha))
-     * <a href="https://en.wikipedia.org/wiki/Mean_of_circular_quantities">Circle Mean</a>
+     * Calculates the mean by converting all angles to corresponding points on the
+     * unit circle (i.e. alpha to (cos(alpha), sin(alpha))).
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/Mean_of_circular_quantities">Circle Mean</a>
      */
-    public static double calculateAngleMean(double[] angles) {
+    public static double calculateMeanAngle(double[] angles) {
         float sumSin = 0;
         float sumCos = 0;
-        for (int i = 0; i < angles.length; i++) {
-            sumSin += Math.sin(angles[i]);
-            sumCos += Math.cos(angles[i]);
+        for (double angle : angles) {
+            sumSin += Math.sin(angle);
+            sumCos += Math.cos(angle);
         }
         return Math.atan2(sumSin, sumCos);
     }
+
+    /**
+     * Calculates the mean by converting all angles to corresponding points on the
+     * unit circle (i.e. alpha to (cos(alpha), sin(alpha))).
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/Mean_of_circular_quantities">Circle Mean</a>
+     */
+    public static double calculateMeanAngle(List<Location> deviceLocations) {
+        double[] angles = new double[deviceLocations.size()];
+        for (int i = 0; i < deviceLocations.size() - 1; i++) {
+            angles[i] = deviceLocations.get(i).getAngleTo(deviceLocations.get(i + 1));
+        }
+        return calculateMeanAngle(angles);
+    }
+
 }

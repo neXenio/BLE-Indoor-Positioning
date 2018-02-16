@@ -8,13 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.nexenio.bleindoorpositioning.location.provider.DeviceLocationPredictor.predictLocationFromLocations;
+import static com.nexenio.bleindoorpositioning.location.LocationPredictor.predict;
 import static org.junit.Assert.assertEquals;
 
 /**
  * Created by leon on 14.02.18.
  */
-public class DeviceLocationPredictorTest {
+public class LocationPredictorTest {
 
     public static final double HUMAN_WALKING_SPEED = 1.388889; // meters per second
 
@@ -34,13 +34,13 @@ public class DeviceLocationPredictorTest {
 
         // set timestamps based on timestamp of previous square and human walking speed
         long walkingTimeEstimation = TimeUnit.SECONDS.toMillis((long) (SQUARE_ONE_GENDARMENMARKT.getDistanceTo(SQUARE_TWO_GENDARMENMARKT) / HUMAN_WALKING_SPEED));
-        SQUARE_TWO_GENDARMENMARKT.setLastChangeTimestamp(SQUARE_TWO_GENDARMENMARKT.getLastChangeTimestamp() + walkingTimeEstimation);
+        SQUARE_TWO_GENDARMENMARKT.setTimestamp(SQUARE_TWO_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
         walkingTimeEstimation = TimeUnit.SECONDS.toMillis((long) (SQUARE_TWO_GENDARMENMARKT.getDistanceTo(SQUARE_THREE_GENDARMENMARKT) / HUMAN_WALKING_SPEED));
-        SQUARE_THREE_GENDARMENMARKT.setLastChangeTimestamp(SQUARE_TWO_GENDARMENMARKT.getLastChangeTimestamp() + walkingTimeEstimation);
+        SQUARE_THREE_GENDARMENMARKT.setTimestamp(SQUARE_TWO_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
         walkingTimeEstimation = TimeUnit.SECONDS.toMillis((long) (SQUARE_THREE_GENDARMENMARKT.getDistanceTo(SQUARE_FOUR_GENDARMENMARKT) / HUMAN_WALKING_SPEED));
-        SQUARE_FOUR_GENDARMENMARKT.setLastChangeTimestamp(SQUARE_THREE_GENDARMENMARKT.getLastChangeTimestamp() + walkingTimeEstimation);
+        SQUARE_FOUR_GENDARMENMARKT.setTimestamp(SQUARE_THREE_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
 
-        Location predictedLocation = predictLocationFromLocations(strollOnGendarmenmarkt);
+        Location predictedLocation = predict(strollOnGendarmenmarkt);
         double distance = predictedLocation.getDistanceTo(SQUARE_EXPECTED_GENDARMENMARKT);
         assertEquals(0, distance, 5);
     }

@@ -58,6 +58,7 @@ public class BeaconMapFragment extends BeaconViewFragment {
             public void onLocationUpdated(LocationProvider locationProvider, Location location) {
                 if (locationProvider == IndoorPositioning.getInstance()) {
                     beaconMap.setDeviceLocation(location);
+                    beaconMap.setPredictedDeviceLocation(IndoorPositioning.getLocationPredictor().getLocation());
                     beaconMap.fitToCurrentLocations();
                 } else if (locationProvider == AndroidLocationProvider.getInstance()) {
                     // TODO: remove artificial noise
@@ -74,7 +75,6 @@ public class BeaconMapFragment extends BeaconViewFragment {
             @Override
             public void onBeaconUpdated(Beacon beacon) {
                 beaconMap.setBeacons(getBeacons());
-                //Log.d(this.getClass().getSimpleName(), beacon.getLatestAdvertisingPacket().toString() + " distance: " + String.format("%.2f", beacon.getDistance() / 100));
             }
         };
     }

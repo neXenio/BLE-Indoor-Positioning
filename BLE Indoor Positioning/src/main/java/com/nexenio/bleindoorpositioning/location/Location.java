@@ -31,10 +31,11 @@ public class Location {
     private double latitude = VALUE_NOT_SET;
     private double longitude = VALUE_NOT_SET;
     private double altitude = VALUE_NOT_SET;
-    private long lastChangeTimestamp;
+
+    private long timestamp;
 
     public Location() {
-        this.lastChangeTimestamp = System.currentTimeMillis();
+        this.timestamp = System.currentTimeMillis();
     }
 
     public Location(double latitude, double longitude) {
@@ -53,6 +54,7 @@ public class Location {
         this.latitude = location.latitude;
         this.longitude = location.longitude;
         this.altitude = location.altitude;
+        this.timestamp = location.timestamp;
     }
 
     /**
@@ -62,19 +64,45 @@ public class Location {
      * @return distance in meters
      */
     public double getDistanceTo(Location location) {
-        return LocationDistanceCalculator.calculateDistanceBetween(this, location, false);
+        return LocationDistanceCalculator.calculateDistanceBetween(this, location);
     }
 
     public double getAngleTo(Location location) {
         return getRotationAngleInDegrees(this, location);
     }
 
-    public Location getShiftedLocation(double distance, double angle) {
-        return calculateNextLocation(this, distance, angle, 0);
+    /**
+     * Shifts the current {@link #latitude} and {@link #longitude} based on the specified distance
+     * and angle.
+     *
+     * @param distance in meters
+     * @param angle    in degrees (0°-360°)
+     */
+    public void shift(double distance, double angle) {
+        double bearingRadians = Math.toRadians(angle);
+        double latitudeRadians = Math.toRadians(latitude);
+        double longitudeRadians = Math.toRadians(longitude);
+        double distanceFraction = (distance / 1000) / LocationDistanceCalculator.EARTH_RADIUS;
+        double shiftedLatitudeRadians = Math.asin(Math.sin(latitudeRadians) * Math.cos(distanceFraction) +
+                Math.cos(latitudeRadians) * Math.sin(distanceFraction) * Math.cos(bearingRadians));
+        double shiftedLongitudeRadians = longitudeRadians + Math.atan2(Math.sin(bearingRadians) * Math.sin(distanceFraction) *
+                Math.cos(latitudeRadians), Math.cos(distanceFraction) - Math.sin(latitudeRadians) * Math.sin(shiftedLatitudeRadians));
+
+        latitude = Math.toDegrees(shiftedLatitudeRadians);
+        longitude = Math.toDegrees(shiftedLongitudeRadians);
+        timestamp = System.currentTimeMillis();
     }
 
-    public Location getShiftedLocation(double distance, double angle, double altitude) {
-        return calculateNextLocation(this, distance, angle, altitude);
+    /**
+     * Creates a copy of the current instance and calls {@link #shift(double, double)} on that copy.
+     *
+     * @param distance in meters
+     * @param angle    in degrees (0°-360°)
+     */
+    public Location getShiftedLocation(double distance, double angle) {
+        Location shiftedLocation = new Location(this);
+        shiftedLocation.shift(distance, angle);
+        return shiftedLocation;
     }
 
     public boolean latitudeAndLongitudeEquals(Location location) {
@@ -131,33 +159,6 @@ public class Location {
         return 360 - ((angle + 360) % 360);
     }
 
-    // TODO calculate angle with altitudes https://stackoverflow.com/questions/41542465/calculate-vertical-bearing-between-two-gps-coordinates-with-altitudes
-
-    /**
-     * Calculates new location based on current location, distance and angle.
-     *
-     * @param distance in m
-     * @param angle    in degrees
-     * @param altitude in m
-     * @return Location
-     */
-    public static Location calculateNextLocation(Location location, double distance, double angle, double altitude) {
-        double bearingRadians = Math.toRadians(angle);
-        double latitudeRadians = Math.toRadians(location.latitude);
-        double longitudeRadians = Math.toRadians(location.longitude);
-        double distanceFraction = (distance / 1000) / LocationDistanceCalculator.EARTH_RADIUS;
-        double newLatitude = Math.asin(Math.sin(latitudeRadians) * Math.cos(distanceFraction) +
-                Math.cos(latitudeRadians) * Math.sin(distanceFraction) * Math.cos(bearingRadians));
-        double newLongitude = longitudeRadians + Math.atan2(Math.sin(bearingRadians) * Math.sin(distanceFraction) *
-                Math.cos(latitudeRadians), Math.cos(distanceFraction) - Math.sin(latitudeRadians) * Math.sin(newLatitude));
-        // TODO missing altitude calculation
-        if (altitude == 0) {
-            return new Location(Math.toDegrees(newLatitude), Math.toDegrees(newLongitude));
-        } else {
-            return new Location(Math.toDegrees(newLatitude), Math.toDegrees(newLongitude), altitude);
-        }
-    }
-
     /*
         Getter & Setter
      */
@@ -168,7 +169,7 @@ public class Location {
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
-        this.lastChangeTimestamp = System.currentTimeMillis();
+        this.timestamp = System.currentTimeMillis();
     }
 
     public double getLongitude() {
@@ -177,7 +178,7 @@ public class Location {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
-        this.lastChangeTimestamp = System.currentTimeMillis();
+        this.timestamp = System.currentTimeMillis();
     }
 
     public double getAltitude() {
@@ -188,11 +189,11 @@ public class Location {
         this.altitude = altitude;
     }
 
-    public long getLastChangeTimestamp() {
-        return lastChangeTimestamp;
+    public long getTimestamp() {
+        return timestamp;
     }
 
-    public void setLastChangeTimestamp(long lastChangeTimestamp) {
-        this.lastChangeTimestamp = lastChangeTimestamp;
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }
