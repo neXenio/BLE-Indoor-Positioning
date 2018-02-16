@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.location.provider;
 
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.LocationPredictor;
 
 import org.junit.Test;
 
@@ -8,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.nexenio.bleindoorpositioning.location.LocationPredictor.predict;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -40,7 +40,7 @@ public class LocationPredictorTest {
         walkingTimeEstimation = TimeUnit.SECONDS.toMillis((long) (SQUARE_THREE_GENDARMENMARKT.getDistanceTo(SQUARE_FOUR_GENDARMENMARKT) / HUMAN_WALKING_SPEED));
         SQUARE_FOUR_GENDARMENMARKT.setTimestamp(SQUARE_THREE_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
 
-        Location predictedLocation = predict(strollOnGendarmenmarkt);
+        Location predictedLocation = LocationPredictor.predict(strollOnGendarmenmarkt, TimeUnit.SECONDS.toMillis(1));
         double distance = predictedLocation.getDistanceTo(SQUARE_EXPECTED_GENDARMENMARKT);
         assertEquals(0, distance, 5);
     }
