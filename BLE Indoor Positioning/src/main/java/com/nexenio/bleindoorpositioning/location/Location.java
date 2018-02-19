@@ -50,10 +50,7 @@ public class Location {
     }
 
     public Location(Location location) {
-        this();
-        this.latitude = location.latitude;
-        this.longitude = location.longitude;
-        this.altitude = location.altitude;
+        this(location.latitude, location.longitude, location.altitude);
         this.timestamp = location.timestamp;
     }
 
