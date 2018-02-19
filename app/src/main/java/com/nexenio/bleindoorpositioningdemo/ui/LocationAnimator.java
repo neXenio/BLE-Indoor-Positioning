@@ -28,12 +28,17 @@ public class LocationAnimator implements LocationProvider {
     private ValueAnimator.AnimatorUpdateListener animatorUpdateListener;
     private long animationDuration = ANIMATION_DURATION_LONG;
 
+    private double latitudeDelta;
+    private double longitudeDelta;
+
     private LocationListener locationListener;
 
     public LocationAnimator(@NonNull Location originLocation, @NonNull Location targetLocation) {
         this.originLocation = originLocation;
         this.targetLocation = targetLocation;
         this.currentLocation = new Location(originLocation);
+        latitudeDelta = targetLocation.getLatitude() - originLocation.getLatitude();
+        longitudeDelta = targetLocation.getLongitude() - originLocation.getLongitude();
         setupAnimators();
     }
 
@@ -45,12 +50,12 @@ public class LocationAnimator implements LocationProvider {
     private void setupAnimators() {
         animatorListener = createAnimatorListener();
         animatorUpdateListener = createAnimatorUpdateListener();
-        latitudeAnimator = createAnimator((float) originLocation.getLatitude(), (float) targetLocation.getLatitude());
-        longitudeAnimator = createAnimator((float) originLocation.getLongitude(), (float) targetLocation.getLongitude());
+        latitudeAnimator = createAnimator();
+        longitudeAnimator = createAnimator();
     }
 
-    private ValueAnimator createAnimator(float fromValue, float toValue) {
-        ValueAnimator valueAnimator = ValueAnimator.ofFloat(fromValue, toValue);
+    private ValueAnimator createAnimator() {
+        ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
         valueAnimator.setDuration(animationDuration);
         valueAnimator.addUpdateListener(animatorUpdateListener);
         valueAnimator.addListener(animatorListener);
@@ -89,9 +94,9 @@ public class LocationAnimator implements LocationProvider {
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float value = (float) valueAnimator.getAnimatedValue();
                 if (valueAnimator == latitudeAnimator) {
-                    currentLocation.setLatitude(value);
+                    currentLocation.setLatitude(originLocation.getLatitude() + (latitudeDelta * value));
                 } else if (valueAnimator == longitudeAnimator) {
-                    currentLocation.setLongitude(value);
+                    currentLocation.setLongitude(originLocation.getLongitude() + (longitudeDelta * value));
                 }
                 onCurrentLocationUpdated();
             }
