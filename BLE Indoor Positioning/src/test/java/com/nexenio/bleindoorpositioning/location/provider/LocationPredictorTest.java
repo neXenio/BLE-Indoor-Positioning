@@ -40,7 +40,7 @@ public class LocationPredictorTest {
         assertEquals(speed, HUMAN_WALKING_SPEED, 0.1);
     }
 
-    public List<Location> setupLocations() {
+    public static List<Location> setupLocations() {
         List<Location> strollOnGendarmenmarkt = new ArrayList<>();
         strollOnGendarmenmarkt.add(SQUARE_ONE_GENDARMENMARKT);
         strollOnGendarmenmarkt.add(SQUARE_TWO_GENDARMENMARKT);

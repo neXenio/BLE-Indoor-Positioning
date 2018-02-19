@@ -40,8 +40,8 @@ public class LocationTest {
 
     @Test
     public void getDistanceTo_validLocations_correctDistance() throws Exception {
-        int distance = (int) NEW_YORK_CITY.getDistanceTo(BERLIN);
-        assertEquals(distance, DISTANCE_NYC_BERLIN);
+        double distance = NEW_YORK_CITY.getDistanceTo(BERLIN);
+        assertEquals(DISTANCE_NYC_BERLIN, distance, 1);
     }
 
     @Test

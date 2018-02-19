@@ -73,9 +73,10 @@ public class Location {
      * and angle.
      *
      * @param distance in meters
-     * @param angle    in degrees (0°-360°)
-     * @see <a href="http://mathworld.wolfram.com/GreatCircle.html"></a>
-     * @see <a href="https://en.wikipedia.org/wiki/Great-circle_navigation#Finding_way-points"></a>
+     * @param angle    in degrees [0°-360°)
+     * @see <a href="http://mathworld.wolfram.com/GreatCircle.html">Great Circel Wolfram Alpha</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Great-circle_navigation#Finding_way-points">Great
+     * Circle Wikipedia</a>
      */
     public void shift(double distance, double angle) {
         double bearingRadians = Math.toRadians(angle);
@@ -156,7 +157,7 @@ public class Location {
                 - (Math.sin(centerLocation.latitude) * Math.cos(targetLocation.latitude) * Math.cos(longitudeDelta));
         double y = Math.sin(longitudeDelta) * Math.cos(targetLocation.latitude);
         double angle = Math.toDegrees(Math.atan2(y, x));
-        return (360 - angle) % 360;
+        return 359 - ((angle + 360) % 360);
     }
 
     /*
