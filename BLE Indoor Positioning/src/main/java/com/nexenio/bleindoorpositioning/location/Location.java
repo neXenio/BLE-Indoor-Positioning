@@ -74,11 +74,14 @@ public class Location {
      *
      * @param distance in meters
      * @param angle    in degrees (0°-360°)
+     * @see <a href="http://mathworld.wolfram.com/GreatCircle.html"></a>
+     * @see <a href="https://en.wikipedia.org/wiki/Great-circle_navigation#Finding_way-points"></a>
      */
     public void shift(double distance, double angle) {
         double bearingRadians = Math.toRadians(angle);
         double latitudeRadians = Math.toRadians(latitude);
         double longitudeRadians = Math.toRadians(longitude);
+        // convert distance to km and calculate fraction of earth radius
         double distanceFraction = (distance / 1000) / LocationDistanceCalculator.EARTH_RADIUS;
         double shiftedLatitudeRadians = Math.asin(Math.sin(latitudeRadians) * Math.cos(distanceFraction) +
                 Math.cos(latitudeRadians) * Math.sin(distanceFraction) * Math.cos(bearingRadians));
@@ -153,7 +156,7 @@ public class Location {
                 - (Math.sin(centerLocation.latitude) * Math.cos(targetLocation.latitude) * Math.cos(longitudeDelta));
         double y = Math.sin(longitudeDelta) * Math.cos(targetLocation.latitude);
         double angle = Math.toDegrees(Math.atan2(y, x));
-        return 360 - ((angle + 360) % 360);
+        return angle % 360;
     }
 
     /*

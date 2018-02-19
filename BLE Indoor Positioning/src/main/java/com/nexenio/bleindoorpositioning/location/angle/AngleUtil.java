@@ -17,13 +17,19 @@ public final class AngleUtil {
      * @see <a href="https://en.wikipedia.org/wiki/Mean_of_circular_quantities">Circle Mean</a>
      */
     public static double calculateMeanAngle(double[] angles) {
+        if (angles == null) {
+            return 0;
+        }
+        if (angles.length == 1) {
+            return angles[0];
+        }
         float sumSin = 0;
         float sumCos = 0;
         for (double angle : angles) {
-            sumSin += Math.sin(angle);
-            sumCos += Math.cos(angle);
+            sumSin += Math.sin(Math.toRadians(angle));
+            sumCos += Math.cos(Math.toRadians(angle));
         }
-        return Math.atan2(sumSin, sumCos);
+        return Math.toDegrees(Math.atan2(sumSin, sumCos));
     }
 
     /**
@@ -33,6 +39,9 @@ public final class AngleUtil {
      * @see <a href="https://en.wikipedia.org/wiki/Mean_of_circular_quantities">Circle Mean</a>
      */
     public static double calculateMeanAngle(List<Location> deviceLocations) {
+        if (deviceLocations.isEmpty()) {
+            return 0;
+        }
         double[] angles = new double[deviceLocations.size()];
         for (int i = 0; i < deviceLocations.size() - 1; i++) {
             angles[i] = deviceLocations.get(i).getAngleTo(deviceLocations.get(i + 1));
