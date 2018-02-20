@@ -26,7 +26,7 @@ public class AngleUtilTest {
         angles = new double[]{0, 0, 90};
         expectedAngle = 26.565;
         actualAngle = calculateMeanAngle(angles);
-        assertEquals(expectedAngle, actualAngle, 0);
+        assertEquals(expectedAngle, actualAngle, 0.0001);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class AngleUtilTest {
 
     // negative values not supported currently
     @Test
-    public void calculateAngleMean_negativeAngles_correctAngle() throws Exception {
+    public void calculateAngleMean_negativeAngles_unequalAngles() throws Exception {
         double angles[] = new double[]{-90};
         double negativeAngle = calculateMeanAngle(angles);
         angles = new double[]{270};

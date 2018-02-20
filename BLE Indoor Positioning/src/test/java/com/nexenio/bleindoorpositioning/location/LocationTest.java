@@ -36,6 +36,9 @@ public class LocationTest {
 
         angle = SOCCER_FIELD_BOTTOM_LEFT.getAngleTo(SOCCER_FIELD_TOP_LEFT);
         assertEquals(350, angle, 5);
+
+        angle = SOCCER_FIELD_BOTTOM_LEFT.getAngleTo(SOCCER_FIELD_BOTTOM_LEFT);
+        assertEquals(0, angle, 0);
     }
 
     @Test

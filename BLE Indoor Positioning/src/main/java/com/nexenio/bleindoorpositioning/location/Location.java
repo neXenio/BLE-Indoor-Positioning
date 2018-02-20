@@ -157,7 +157,7 @@ public class Location {
                 - (Math.sin(centerLocation.latitude) * Math.cos(targetLocation.latitude) * Math.cos(longitudeDelta));
         double y = Math.sin(longitudeDelta) * Math.cos(targetLocation.latitude);
         double angle = Math.toDegrees(Math.atan2(y, x));
-        return 359 - ((angle + 360) % 360);
+        return (360 - ((angle + 360) % 360)) % 360;
     }
 
     /*
