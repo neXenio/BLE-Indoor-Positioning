@@ -90,7 +90,7 @@ public class LocationPredictorTest {
         timeNeeded = CIRCLE_TWO_GENDARMENMARKT.getDistanceTo(CIRCLE_THREE_GENDARMENMARKT) / HUMAN_WALKING_SPEED;
         walkingTimeEstimation = (long) (timeNeeded * 1000);
         CIRCLE_THREE_GENDARMENMARKT.setTimestamp(CIRCLE_TWO_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
-        timeNeeded = CIRCLE_THREE_GENDARMENMARKT.getDistanceTo(CIRCLE_FOUR_GENDARMENMARKT) /HUMAN_WALKING_SPEED;
+        timeNeeded = CIRCLE_THREE_GENDARMENMARKT.getDistanceTo(CIRCLE_FOUR_GENDARMENMARKT) / HUMAN_WALKING_SPEED;
         walkingTimeEstimation = (long) (timeNeeded * 1000);
         CIRCLE_FOUR_GENDARMENMARKT.setTimestamp(CIRCLE_THREE_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
         return walkInACircle;
