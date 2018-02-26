@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
@@ -27,11 +29,38 @@ import java.util.UUID;
 public class BeaconChartFragment extends BeaconViewFragment {
 
     private BeaconChart beaconChart;
+    private boolean rssiFilterView;
 
     public BeaconChartFragment() {
-        super();
+        this(false);
+    }
 
-        IBeaconFilter uuidFilter = new IBeaconFilter() {
+    @SuppressLint("ValidFragment")
+    public BeaconChartFragment(boolean rssiFilterView) {
+        super();
+        this.rssiFilterView = rssiFilterView;
+        if (this.rssiFilterView) {
+            beaconFilters.add(createClosestBeaconFilter());
+        } else {
+            beaconFilters.add(createUuidFilter());
+        }
+    }
+
+    public IBeaconFilter createClosestBeaconFilter() {
+        return new IBeaconFilter() {
+
+            @Override
+            public boolean matches(IBeacon beacon) {
+                if (BeaconManager.getInstance().getClosestBeacon().equals(beacon)) {
+                    return true;
+                }
+                return false;
+            }
+        };
+    }
+
+    public IBeaconFilter createUuidFilter() {
+        return new IBeaconFilter() {
 
             private UUID legacyUuid = UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01");
             private UUID gateDetectionUuid = UUID.fromString("f175c9a8-d51c-4d25-8449-4d3d340d1067");
@@ -51,12 +80,15 @@ public class BeaconChartFragment extends BeaconViewFragment {
                 return false;
             }
         };
-        beaconFilters.add(uuidFilter);
     }
 
     @Override
     protected int getLayoutResourceId() {
-        return R.layout.fragment_beacon_chart;
+        if (rssiFilterView) {
+            return R.layout.fragment_rssi_filter_chart;
+        } else {
+            return R.layout.fragment_beacon_chart;
+        }
     }
 
     @Override
@@ -87,7 +119,7 @@ public class BeaconChartFragment extends BeaconViewFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View inflatedView = super.onCreateView(inflater, container, savedInstanceState);
         beaconChart = inflatedView.findViewById(R.id.beaconChart);
-        beaconChart.setBeacons(new ArrayList<>(beaconManager.getBeaconMap().values()));
+        beaconChart.setBeacons(new ArrayList<>(BeaconManager.getInstance().getBeaconMap().values()));
         return inflatedView;
     }
 

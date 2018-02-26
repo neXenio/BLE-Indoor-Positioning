@@ -1,6 +1,5 @@
 package com.nexenio.bleindoorpositioning.location.distance;
 
-import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
@@ -21,7 +20,7 @@ public abstract class BeaconDistanceCalculator {
      * path loss model</a>.
      */
     public static float calculateDistanceTo(Beacon beacon) {
-        return calculateDistanceTo(beacon, beacon.getRssi());
+        return calculateDistanceTo(beacon, beacon.getFilteredRssi());
     }
 
     /**

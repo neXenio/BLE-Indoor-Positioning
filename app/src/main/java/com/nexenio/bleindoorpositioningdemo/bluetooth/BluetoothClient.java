@@ -12,15 +12,11 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
-import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.scan.ScanResult;
 import com.polidea.rxandroidble.scan.ScanSettings;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import rx.Observer;
 import rx.Subscription;
@@ -132,19 +128,18 @@ public class BluetoothClient {
         AdvertisingPacket advertisingPacket = AdvertisingPacket.from(data);
 
         if (advertisingPacket != null) {
-            String beaconKey = BeaconManager.getBeaconKey(macAddress, advertisingPacket);
             advertisingPacket.setRssi(scanResult.getRssi());
 
-            Beacon beacon = beaconManager.getBeaconMap().get(beaconKey);
+            Beacon beacon = BeaconManager.getBeacon(macAddress, advertisingPacket.getBeaconClass());
             AdvertisingPacket lastAdvertisingPacket = beacon == null ? null : beacon.getLatestAdvertisingPacket();
 
             boolean isNewBeacon = beacon == null;
             boolean isNewAdvertisingData = lastAdvertisingPacket == null || !advertisingPacket.dataEquals(lastAdvertisingPacket);
 
-            beaconManager.processAdvertisingPacket(macAddress, advertisingPacket);
+            BeaconManager.processAdvertisingPacket(macAddress, advertisingPacket);
 
             if (isNewBeacon) {
-                beacon = beaconManager.getBeaconMap().get(beaconKey);
+                beacon = BeaconManager.getBeacon(macAddress, advertisingPacket.getBeaconClass());
                 if (beacon instanceof IBeacon) {
                     beacon.setLocationProvider(createDebuggingLocationProvider((IBeacon) beacon));
                 }

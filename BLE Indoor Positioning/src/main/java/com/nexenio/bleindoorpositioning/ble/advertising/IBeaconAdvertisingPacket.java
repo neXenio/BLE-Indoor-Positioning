@@ -1,5 +1,8 @@
 package com.nexenio.bleindoorpositioning.ble.advertising;
 
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.UUID;
@@ -48,8 +51,13 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
     }
 
     @Override
+    public Class<? extends Beacon> getBeaconClass() {
+        return IBeacon.class;
+    }
+
+    @Override
     public String toString() {
-        return new StringBuilder("iBeacon Advertising Packet (")
+        return new StringBuilder(getBeaconClass().getSimpleName() + " Advertising Packet (")
                 .append("Proximity UUID: ").append(getProximityUuid(getProximityUuidBytes())).append(" ")
                 .append("Major: ").append(getMajor(getMajorBytes())).append(" ")
                 .append("Minor: ").append(getMinor(getMinorBytes())).append(" ")
