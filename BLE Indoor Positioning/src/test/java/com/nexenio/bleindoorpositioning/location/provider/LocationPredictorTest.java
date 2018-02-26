@@ -19,11 +19,11 @@ public class LocationPredictorTest {
 
     public static final double HUMAN_WALKING_SPEED = 1.388889; // meters per second
 
-    public static final Location LINE_ONE_GENDARMENMARKT = new Location(52.513588, 13.392995);
-    public static final Location LINE_TWO_GENDARMENMARKT = new Location(52.513632, 13.392986);
-    public static final Location LINE_THREE_GENDARMENMARKT = new Location(52.513675, 13.392979);
-    public static final Location LINE_FOUR_GENDARMENMARKT = new Location(52.513720, 13.392971);
-    public static final Location LINE_EXPECTED_GENDARMENMARKT = new Location(52.513764, 13.392962);
+    public static final Location FIRST_POINT_OF_LINE = new Location(52.513588, 13.392995);
+    public static final Location SECOND_POINT_OF_LINE = new Location(52.513632, 13.392986);
+    public static final Location THIRD_POINT_OF_LINE = new Location(52.513675, 13.392979);
+    public static final Location FOURTH_POINT_OF_LINE = new Location(52.513720, 13.392971);
+    public static final Location FIFTH_POINT_OF_LINE = new Location(52.513764, 13.392962);
 
     public static final Location CIRCLE_ONE_GENDARMENMARKT = new Location(52.513709, 13.392752);
     public static final Location CIRCLE_TWO_GENDARMENMARKT = new Location(52.513748, 13.392672);
@@ -34,7 +34,7 @@ public class LocationPredictorTest {
     public void predictLocationFromLocations_locationsInLine_accuratePrediction() throws Exception {
         List<Location> lineOnGendarmenmarkt = setupStraightLineLocations();
         Location predictedLocation = LocationPredictor.predict(lineOnGendarmenmarkt, TimeUnit.SECONDS.toMillis(1));
-        double delta = predictedLocation.getDistanceTo(LINE_EXPECTED_GENDARMENMARKT);
+        double delta = predictedLocation.getDistanceTo(FIFTH_POINT_OF_LINE);
         assertEquals(0, delta, 5);
     }
 
@@ -43,35 +43,38 @@ public class LocationPredictorTest {
         List<Location> circleOnGendarmenmarkt = setupCircleLocations();
         Location predictedLocation = LocationPredictor.predict(circleOnGendarmenmarkt, TimeUnit.SECONDS.toMillis(1));
         double delta = predictedLocation.getDistanceTo(CIRCLE_ONE_GENDARMENMARKT);
+        System.out.println(predictedLocation);
         // TODO decrease delta
         assertEquals(0, delta, 10);
     }
 
+    // TODO fix test on ci
     @Test
     public void calculateSpeed_locations_correctSpeed() throws Exception {
         List<Location> strollOnGendarmenmarkt = setupStraightLineLocations();
         double speed = calculateSpeed(strollOnGendarmenmarkt);
+        Thread.sleep(10000);
         assertEquals(speed, HUMAN_WALKING_SPEED, 0.1);
     }
 
     private static List<Location> setupStraightLineLocations() {
         List<Location> walkTheLine = new ArrayList<>();
-        walkTheLine.add(LINE_ONE_GENDARMENMARKT);
-        walkTheLine.add(LINE_TWO_GENDARMENMARKT);
-        walkTheLine.add(LINE_THREE_GENDARMENMARKT);
-        walkTheLine.add(LINE_FOUR_GENDARMENMARKT);
+        walkTheLine.add(FIRST_POINT_OF_LINE);
+        walkTheLine.add(SECOND_POINT_OF_LINE);
+        walkTheLine.add(THIRD_POINT_OF_LINE);
+        walkTheLine.add(FOURTH_POINT_OF_LINE);
 
         // set timestamps based on timestamp of previous square and human walking speed
-        double timeNeeded = LINE_ONE_GENDARMENMARKT.getDistanceTo(LINE_TWO_GENDARMENMARKT) / HUMAN_WALKING_SPEED;
+        double timeNeeded = FIRST_POINT_OF_LINE.getDistanceTo(SECOND_POINT_OF_LINE) / HUMAN_WALKING_SPEED;
         // TimeUnit.SECONDS.toMillis is less accurate because value is casted to long before multiplication
         long walkingTimeEstimation = (long) (timeNeeded * 1000);
-        LINE_TWO_GENDARMENMARKT.setTimestamp(LINE_TWO_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
-        timeNeeded = LINE_TWO_GENDARMENMARKT.getDistanceTo(LINE_THREE_GENDARMENMARKT) / HUMAN_WALKING_SPEED;
+        SECOND_POINT_OF_LINE.setTimestamp(SECOND_POINT_OF_LINE.getTimestamp() + walkingTimeEstimation);
+        timeNeeded = SECOND_POINT_OF_LINE.getDistanceTo(THIRD_POINT_OF_LINE) / HUMAN_WALKING_SPEED;
         walkingTimeEstimation = (long) (timeNeeded * 1000);
-        LINE_THREE_GENDARMENMARKT.setTimestamp(LINE_TWO_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
-        timeNeeded = LINE_THREE_GENDARMENMARKT.getDistanceTo(LINE_FOUR_GENDARMENMARKT) / HUMAN_WALKING_SPEED;
+        THIRD_POINT_OF_LINE.setTimestamp(SECOND_POINT_OF_LINE.getTimestamp() + walkingTimeEstimation);
+        timeNeeded = THIRD_POINT_OF_LINE.getDistanceTo(FOURTH_POINT_OF_LINE) / HUMAN_WALKING_SPEED;
         walkingTimeEstimation = (long) (timeNeeded * 1000);
-        LINE_FOUR_GENDARMENMARKT.setTimestamp(LINE_THREE_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
+        FOURTH_POINT_OF_LINE.setTimestamp(THIRD_POINT_OF_LINE.getTimestamp() + walkingTimeEstimation);
         return walkTheLine;
     }
 
