@@ -48,12 +48,10 @@ public class LocationPredictorTest {
         assertEquals(0, delta, 10);
     }
 
-    // TODO fix test on ci
     @Test
     public void calculateSpeed_locations_correctSpeed() throws Exception {
         List<Location> strollOnGendarmenmarkt = setupStraightLineLocations();
         double speed = calculateSpeed(strollOnGendarmenmarkt);
-        Thread.sleep(10000);
         assertEquals(speed, HUMAN_WALKING_SPEED, 0.1);
     }
 
