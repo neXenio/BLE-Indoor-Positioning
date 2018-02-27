@@ -6,10 +6,10 @@ import com.nexenio.bleindoorpositioning.location.LocationPredictor;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.nexenio.bleindoorpositioning.location.LocationPredictor.calculateSpeed;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -27,13 +27,10 @@ public class LocationPredictorTest {
 
     @Test
     public void predictLocationFromLocations_locationsInLine_accuratePrediction() throws Exception {
-        List<Location> lineOnGendarmenmarkt = new ArrayList<>();
-        lineOnGendarmenmarkt.add(FIRST_POINT_OF_LINE);
-        lineOnGendarmenmarkt.add(SECOND_POINT_OF_LINE);
-        lineOnGendarmenmarkt.add(THIRD_POINT_OF_LINE);
-        lineOnGendarmenmarkt.add(FOURTH_POINT_OF_LINE);
+        List<Location> lineOnGendarmenmarkt = new ArrayList<>(Arrays.asList(
+                FIRST_POINT_OF_LINE, SECOND_POINT_OF_LINE, THIRD_POINT_OF_LINE, FOURTH_POINT_OF_LINE
+        ));
         lineOnGendarmenmarkt = setupTimestampsForLocations(lineOnGendarmenmarkt);
-
         Location predictedLocation = LocationPredictor.predict(lineOnGendarmenmarkt, TimeUnit.SECONDS.toMillis(1));
         double delta = predictedLocation.getDistanceTo(FIFTH_POINT_OF_LINE);
         assertEquals(0, delta, 5);
@@ -41,16 +38,17 @@ public class LocationPredictorTest {
 
     @Test
     public void predictLocationFromLocations_locationsInCircle_accuratePrediction() throws Exception {
-        double distanceToNextLocation = HUMAN_WALKING_SPEED / 2;
+        long timestampDelta = 500;
+        double distanceToNextLocation = HUMAN_WALKING_SPEED / TimeUnit.MILLISECONDS.toSeconds(timestampDelta);
         List<Location> walkInACircle = new ArrayList<>();
         Location nextLocation;
         Location lastLocation = null;
         for (int angle = 0; angle < 360; angle += 10) {
             if (angle == 0) {
-                nextLocation = FIRST_POINT_OF_LINE.getShiftedLocation(distanceToNextLocation, angle);
+                nextLocation = new Location(FIRST_POINT_OF_LINE).getShiftedLocation(distanceToNextLocation, angle);
             } else {
                 nextLocation = lastLocation.getShiftedLocation(distanceToNextLocation, angle);
-                nextLocation.setTimestamp(lastLocation.getTimestamp() + 500);
+                nextLocation.setTimestamp(lastLocation.getTimestamp() + timestampDelta);
             }
             walkInACircle.add(nextLocation);
             lastLocation = nextLocation;
@@ -82,14 +80,11 @@ public class LocationPredictorTest {
 
     @Test
     public void calculateSpeed_locations_correctSpeed() throws Exception {
-        List<Location> lineOnGendarmenmarkt = new ArrayList<>();
-        lineOnGendarmenmarkt.add(FIRST_POINT_OF_LINE);
-        lineOnGendarmenmarkt.add(SECOND_POINT_OF_LINE);
-        lineOnGendarmenmarkt.add(THIRD_POINT_OF_LINE);
-        lineOnGendarmenmarkt.add(FOURTH_POINT_OF_LINE);
+        List<Location> lineOnGendarmenmarkt = new ArrayList<>(Arrays.asList(
+                FIRST_POINT_OF_LINE, SECOND_POINT_OF_LINE, THIRD_POINT_OF_LINE, FOURTH_POINT_OF_LINE
+        ));
         lineOnGendarmenmarkt = setupTimestampsForLocations(lineOnGendarmenmarkt);
-
-        double speed = calculateSpeed(lineOnGendarmenmarkt);
+        double speed = LocationPredictor.calculateSpeed(lineOnGendarmenmarkt);
         assertEquals(speed, HUMAN_WALKING_SPEED, 0.1);
     }
 
@@ -97,8 +92,7 @@ public class LocationPredictorTest {
         for (int i = 1; i < locations.size(); i++) {
             // set timestamps based on timestamp of previous square and human walking speed
             double timeNeeded = locations.get(i - 1).getDistanceTo(locations.get(i)) / HUMAN_WALKING_SPEED;
-            // TimeUnit.SECONDS.toMillis is less accurate because value is casted to long before multiplication
-            long walkingTimeEstimation = (long) (timeNeeded * 1000);
+            long walkingTimeEstimation = (long) (timeNeeded * TimeUnit.SECONDS.toMillis(1));
             locations.get(i).setTimestamp(locations.get(i - 1).getTimestamp() + walkingTimeEstimation);
         }
         return locations;
