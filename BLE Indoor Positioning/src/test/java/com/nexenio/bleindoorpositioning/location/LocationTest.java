@@ -27,18 +27,25 @@ public class LocationTest {
 
     @Test
     public void getAngleTo_validLocations_correctAngles() throws Exception {
+        // expected values were taken from <a href="http://www.igismap.com/map-tool/bearing-angle">here</a>.
         double angle;
+        angle = BERLIN.getAngleTo(NEW_YORK_CITY);
+        assertEquals(360 - 63.975, angle, 0.001);
+
+        angle = NEW_YORK_CITY.getAngleTo(BERLIN);
+        assertEquals(46.167, angle, 0.001);
+
+        angle = BERLIN.getAngleTo(BERLIN);
+        assertEquals(0, angle, 0);
+
         angle = SOCCER_FIELD_TOP_LEFT.getAngleTo(SOCCER_FIELD_TOP_RIGHT);
-        assertEquals(80, angle, 5);
+        assertEquals(81.426, angle, 0.001);
 
         angle = SOCCER_FIELD_TOP_LEFT.getAngleTo(SOCCER_FIELD_BOTTOM_LEFT);
-        assertEquals(170, angle, 5);
+        assertEquals(172.045, angle, 0.001);
 
         angle = SOCCER_FIELD_BOTTOM_LEFT.getAngleTo(SOCCER_FIELD_TOP_LEFT);
-        assertEquals(350, angle, 5);
-
-        angle = SOCCER_FIELD_BOTTOM_LEFT.getAngleTo(SOCCER_FIELD_BOTTOM_LEFT);
-        assertEquals(0, angle, 0);
+        assertEquals(360 - 7.955, angle, 0.001);
     }
 
     @Test

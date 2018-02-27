@@ -142,22 +142,34 @@ public class Location {
     }
 
     /**
-     * Calculates the angle between two locations in degrees.
-     * The result ranges from [0,360), rotating CLOCKWISE,
-     * 0 and 360 degrees represents NORTH, 90 degrees represents EAST.
-     * This is also referred to as bearing.
+     * Calculates the angle between two locations in degrees. The result ranges from [0,360),
+     * rotating CLOCKWISE, 0 and 360 degrees represents NORTH, 90 degrees represents EAST. This is
+     * also referred to as bearing.
+     *
+     * Calculation was derived from this <a href="http://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/">
+     * Bearing Calculation formula.</a>
      *
      * @param centerLocation Location we are rotating around.
      * @param targetLocation Location we want to calculate the angle to.
      * @return angle in degrees
      */
     public static double getRotationAngleInDegrees(Location centerLocation, Location targetLocation) {
-        double longitudeDelta = targetLocation.longitude - centerLocation.longitude;
-        double x = (Math.cos(centerLocation.latitude) * Math.sin(targetLocation.latitude))
-                - (Math.sin(centerLocation.latitude) * Math.cos(targetLocation.latitude) * Math.cos(longitudeDelta));
-        double y = Math.sin(longitudeDelta) * Math.cos(targetLocation.latitude);
+        double longitudeDelta = Math.toRadians(targetLocation.longitude - centerLocation.longitude);
+        double centerLocationLatitude = Math.toRadians(centerLocation.latitude);
+        double targetLocationLatitude = Math.toRadians(targetLocation.latitude);
+
+        double x = (Math.cos(centerLocationLatitude) * Math.sin(targetLocationLatitude))
+                - (Math.sin(centerLocationLatitude) * Math.cos(targetLocationLatitude) * Math.cos(longitudeDelta));
+        double y = Math.sin(longitudeDelta) * Math.cos(targetLocationLatitude);
+
         double angle = Math.toDegrees(Math.atan2(y, x));
-        return (360 - ((angle + 360) % 360)) % 360;
+
+        // convert the interval (-180, 180] to [0, 360)
+        if (angle < 0) {
+            angle += 360;
+        }
+
+        return angle;   // note that the angle can be '-0.0'
     }
 
     /*
