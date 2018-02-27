@@ -125,7 +125,6 @@ public class BeaconMap extends BeaconView {
         }
     }
 
-
     /**
      * This shouldn't be called, because the created beacon background may overlay existing beacon
      * foregrounds. Use {@link #drawBeacons(Canvas)} instead.
