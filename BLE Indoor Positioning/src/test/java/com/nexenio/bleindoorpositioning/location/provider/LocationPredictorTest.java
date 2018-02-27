@@ -25,14 +25,15 @@ public class LocationPredictorTest {
     public static final Location FOURTH_POINT_OF_LINE = new Location(52.513720, 13.392971);
     public static final Location FIFTH_POINT_OF_LINE = new Location(52.513764, 13.392962);
 
-    public static final Location CIRCLE_ONE_GENDARMENMARKT = new Location(52.513709, 13.392752);
-    public static final Location CIRCLE_TWO_GENDARMENMARKT = new Location(52.513748, 13.392672);
-    public static final Location CIRCLE_THREE_GENDARMENMARKT = new Location(52.513799, 13.392738);
-    public static final Location CIRCLE_FOUR_GENDARMENMARKT = new Location(52.513759, 13.392818);
-
     @Test
     public void predictLocationFromLocations_locationsInLine_accuratePrediction() throws Exception {
-        List<Location> lineOnGendarmenmarkt = setupStraightLineLocations();
+        List<Location> lineOnGendarmenmarkt = new ArrayList<>();
+        lineOnGendarmenmarkt.add(FIRST_POINT_OF_LINE);
+        lineOnGendarmenmarkt.add(SECOND_POINT_OF_LINE);
+        lineOnGendarmenmarkt.add(THIRD_POINT_OF_LINE);
+        lineOnGendarmenmarkt.add(FOURTH_POINT_OF_LINE);
+        lineOnGendarmenmarkt = setupTimestampsForLocations(lineOnGendarmenmarkt);
+
         Location predictedLocation = LocationPredictor.predict(lineOnGendarmenmarkt, TimeUnit.SECONDS.toMillis(1));
         double delta = predictedLocation.getDistanceTo(FIFTH_POINT_OF_LINE);
         assertEquals(0, delta, 5);
@@ -40,60 +41,66 @@ public class LocationPredictorTest {
 
     @Test
     public void predictLocationFromLocations_locationsInCircle_accuratePrediction() throws Exception {
-        List<Location> circleOnGendarmenmarkt = setupCircleLocations();
-        Location predictedLocation = LocationPredictor.predict(circleOnGendarmenmarkt, TimeUnit.SECONDS.toMillis(1));
-        double delta = predictedLocation.getDistanceTo(CIRCLE_ONE_GENDARMENMARKT);
-        System.out.println(predictedLocation);
-        // TODO decrease delta
-        assertEquals(0, delta, 10);
+        double distanceToNextLocation = HUMAN_WALKING_SPEED / 2;
+        List<Location> walkInACircle = new ArrayList<>();
+        Location nextLocation;
+        Location lastLocation = null;
+        for (int angle = 0; angle < 360; angle += 10) {
+            if (angle == 0) {
+                nextLocation = FIRST_POINT_OF_LINE.getShiftedLocation(distanceToNextLocation, angle);
+            } else {
+                nextLocation = lastLocation.getShiftedLocation(distanceToNextLocation, angle);
+                nextLocation.setTimestamp(lastLocation.getTimestamp() + 500);
+            }
+            walkInACircle.add(nextLocation);
+            lastLocation = nextLocation;
+        }
+
+        for (int i = 0; i < walkInACircle.size() - 3; i++) {
+            List<Location> subList = new ArrayList<>();
+            subList.add(walkInACircle.get(i));
+            subList.add(walkInACircle.get(i + 1));
+
+            Location lastKnownLocation = walkInACircle.get(i + 2);
+            subList.add(lastKnownLocation);
+
+            Location expectedLocation = walkInACircle.get(i + 3);
+            Location predictedLocation = LocationPredictor.predict(subList, TimeUnit.SECONDS.toMillis(1));
+
+            // angle
+            double expectedAngle = lastKnownLocation.getAngleTo(expectedLocation);
+            double actualAngle = lastKnownLocation.getAngleTo(predictedLocation);
+            assertEquals(expectedAngle, actualAngle, 50);
+
+            // distance
+            double expectedDistance = lastKnownLocation.getDistanceTo(expectedLocation);
+            double actualDistance = lastKnownLocation.getDistanceTo(predictedLocation);
+            assertEquals(expectedDistance, actualDistance, 1);
+        }
+
     }
 
     @Test
     public void calculateSpeed_locations_correctSpeed() throws Exception {
-        List<Location> strollOnGendarmenmarkt = setupStraightLineLocations();
-        double speed = calculateSpeed(strollOnGendarmenmarkt);
+        List<Location> lineOnGendarmenmarkt = new ArrayList<>();
+        lineOnGendarmenmarkt.add(FIRST_POINT_OF_LINE);
+        lineOnGendarmenmarkt.add(SECOND_POINT_OF_LINE);
+        lineOnGendarmenmarkt.add(THIRD_POINT_OF_LINE);
+        lineOnGendarmenmarkt.add(FOURTH_POINT_OF_LINE);
+        lineOnGendarmenmarkt = setupTimestampsForLocations(lineOnGendarmenmarkt);
+
+        double speed = calculateSpeed(lineOnGendarmenmarkt);
         assertEquals(speed, HUMAN_WALKING_SPEED, 0.1);
     }
 
-    private static List<Location> setupStraightLineLocations() {
-        List<Location> walkTheLine = new ArrayList<>();
-        walkTheLine.add(FIRST_POINT_OF_LINE);
-        walkTheLine.add(SECOND_POINT_OF_LINE);
-        walkTheLine.add(THIRD_POINT_OF_LINE);
-        walkTheLine.add(FOURTH_POINT_OF_LINE);
-
-        // set timestamps based on timestamp of previous square and human walking speed
-        double timeNeeded = FIRST_POINT_OF_LINE.getDistanceTo(SECOND_POINT_OF_LINE) / HUMAN_WALKING_SPEED;
-        // TimeUnit.SECONDS.toMillis is less accurate because value is casted to long before multiplication
-        long walkingTimeEstimation = (long) (timeNeeded * 1000);
-        SECOND_POINT_OF_LINE.setTimestamp(SECOND_POINT_OF_LINE.getTimestamp() + walkingTimeEstimation);
-        timeNeeded = SECOND_POINT_OF_LINE.getDistanceTo(THIRD_POINT_OF_LINE) / HUMAN_WALKING_SPEED;
-        walkingTimeEstimation = (long) (timeNeeded * 1000);
-        THIRD_POINT_OF_LINE.setTimestamp(SECOND_POINT_OF_LINE.getTimestamp() + walkingTimeEstimation);
-        timeNeeded = THIRD_POINT_OF_LINE.getDistanceTo(FOURTH_POINT_OF_LINE) / HUMAN_WALKING_SPEED;
-        walkingTimeEstimation = (long) (timeNeeded * 1000);
-        FOURTH_POINT_OF_LINE.setTimestamp(THIRD_POINT_OF_LINE.getTimestamp() + walkingTimeEstimation);
-        return walkTheLine;
-    }
-
-    private static List<Location> setupCircleLocations() {
-        List<Location> walkInACircle = new ArrayList<>();
-        walkInACircle.add(CIRCLE_ONE_GENDARMENMARKT);
-        walkInACircle.add(CIRCLE_TWO_GENDARMENMARKT);
-        walkInACircle.add(CIRCLE_THREE_GENDARMENMARKT);
-        walkInACircle.add(CIRCLE_FOUR_GENDARMENMARKT);
-
-        // set timestamps based on timestamp of previous square and human walking speed
-        double timeNeeded = CIRCLE_ONE_GENDARMENMARKT.getDistanceTo(CIRCLE_TWO_GENDARMENMARKT) / HUMAN_WALKING_SPEED;
-        // TimeUnit.SECONDS.toMillis is less accurate because value is casted to long before multiplication
-        long walkingTimeEstimation = (long) (timeNeeded * 1000);
-        CIRCLE_TWO_GENDARMENMARKT.setTimestamp(CIRCLE_TWO_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
-        timeNeeded = CIRCLE_TWO_GENDARMENMARKT.getDistanceTo(CIRCLE_THREE_GENDARMENMARKT) / HUMAN_WALKING_SPEED;
-        walkingTimeEstimation = (long) (timeNeeded * 1000);
-        CIRCLE_THREE_GENDARMENMARKT.setTimestamp(CIRCLE_TWO_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
-        timeNeeded = CIRCLE_THREE_GENDARMENMARKT.getDistanceTo(CIRCLE_FOUR_GENDARMENMARKT) / HUMAN_WALKING_SPEED;
-        walkingTimeEstimation = (long) (timeNeeded * 1000);
-        CIRCLE_FOUR_GENDARMENMARKT.setTimestamp(CIRCLE_THREE_GENDARMENMARKT.getTimestamp() + walkingTimeEstimation);
-        return walkInACircle;
+    private static List<Location> setupTimestampsForLocations(List<Location> locations) {
+        for (int i = 1; i < locations.size(); i++) {
+            // set timestamps based on timestamp of previous square and human walking speed
+            double timeNeeded = locations.get(i - 1).getDistanceTo(locations.get(i)) / HUMAN_WALKING_SPEED;
+            // TimeUnit.SECONDS.toMillis is less accurate because value is casted to long before multiplication
+            long walkingTimeEstimation = (long) (timeNeeded * 1000);
+            locations.get(i).setTimestamp(locations.get(i - 1).getTimestamp() + walkingTimeEstimation);
+        }
+        return locations;
     }
 }
