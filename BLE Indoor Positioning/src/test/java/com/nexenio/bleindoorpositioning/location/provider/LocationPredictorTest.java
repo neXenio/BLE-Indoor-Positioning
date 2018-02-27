@@ -28,7 +28,8 @@ public class LocationPredictorTest {
     @Test
     public void predictLocationFromLocations_locationsInLine_accuratePrediction() throws Exception {
         List<Location> lineOnGendarmenmarkt = new ArrayList<>(Arrays.asList(
-                FIRST_POINT_OF_LINE, SECOND_POINT_OF_LINE, THIRD_POINT_OF_LINE, FOURTH_POINT_OF_LINE
+                new Location(FIRST_POINT_OF_LINE), new Location(SECOND_POINT_OF_LINE),
+                new Location(THIRD_POINT_OF_LINE), new Location(FOURTH_POINT_OF_LINE)
         ));
         lineOnGendarmenmarkt = setupTimestampsForLocations(lineOnGendarmenmarkt);
         Location predictedLocation = LocationPredictor.predict(lineOnGendarmenmarkt, TimeUnit.SECONDS.toMillis(1));
@@ -81,7 +82,8 @@ public class LocationPredictorTest {
     @Test
     public void calculateSpeed_locations_correctSpeed() throws Exception {
         List<Location> lineOnGendarmenmarkt = new ArrayList<>(Arrays.asList(
-                FIRST_POINT_OF_LINE, SECOND_POINT_OF_LINE, THIRD_POINT_OF_LINE, FOURTH_POINT_OF_LINE
+                new Location(FIRST_POINT_OF_LINE), new Location(SECOND_POINT_OF_LINE),
+                new Location(THIRD_POINT_OF_LINE), new Location(FOURTH_POINT_OF_LINE)
         ));
         lineOnGendarmenmarkt = setupTimestampsForLocations(lineOnGendarmenmarkt);
         double speed = LocationPredictor.calculateSpeed(lineOnGendarmenmarkt);
