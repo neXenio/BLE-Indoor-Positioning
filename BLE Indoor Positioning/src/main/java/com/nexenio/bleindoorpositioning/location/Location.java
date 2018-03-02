@@ -79,6 +79,7 @@ public class Location {
      * Circle Wikipedia</a>
      */
     public void shift(double distance, double angle) {
+        angle = angle % 360;
         double bearingRadians = Math.toRadians(angle);
         double latitudeRadians = Math.toRadians(latitude);
         double longitudeRadians = Math.toRadians(longitude);

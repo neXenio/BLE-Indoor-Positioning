@@ -28,7 +28,7 @@ public class LocationPredictorTest {
         Location predictedLocation = LocationPredictor.predict(subList, TimeUnit.SECONDS.toMillis(1));
         double expectedDistance = lastKnownLocation.getDistanceTo(expectedLocation);
         double actualDistance = lastKnownLocation.getDistanceTo(predictedLocation);
-        assertEquals(expectedDistance, actualDistance, 0.0001);
+        assertEquals(expectedDistance, actualDistance, 0.1);
     }
 
     @Test
@@ -72,24 +72,26 @@ public class LocationPredictorTest {
     }
 
     public List<Location> createWalkingLine(Location location) {
-        return createWalkingLocations(location, 0, 0, 10);
+        return createWalkingLocations(location, 0, 0, 20);
     }
 
     public List<Location> createWalkingCircle(Location location) {
         return createWalkingLocations(location, 0, 360, 36);
     }
 
-    public List<Location> createWalkingLocations(Location location, int startAngle, int stopAngle, int steps) {
+    public static List<Location> createWalkingLocations(Location startLocation, double startAngle, double stopAngle, int count) {
         long timestampDelta = 500;
         double distanceToNextLocation = HUMAN_WALKING_SPEED * ((float) timestampDelta / TimeUnit.SECONDS.toMillis(1));
-        List<Location> walkInACircle = new ArrayList<>();
-        walkInACircle.add(location);
-        int angle = Math.abs(startAngle - stopAngle) / steps;
-        for (int i = 0; i < steps; i++) {
-            location = location.getShiftedLocation(distanceToNextLocation, angle);
-            location.setTimestamp(walkInACircle.get(walkInACircle.size() - 1).getTimestamp() + timestampDelta);
-            walkInACircle.add(location);
+        List<Location> locations = new ArrayList<>();
+        locations.add(startLocation);
+
+        double angleFraction = Math.abs(startAngle - stopAngle) / count;
+        for (int i = 0; i < count - 1; i++) {
+            double angle = (startAngle + angleFraction * i);
+            startLocation = startLocation.getShiftedLocation(distanceToNextLocation, angle);
+            startLocation.setTimestamp(locations.get(locations.size() - 1).getTimestamp() + timestampDelta);
+            locations.add(startLocation);
         }
-        return walkInACircle;
+        return locations;
     }
 }
