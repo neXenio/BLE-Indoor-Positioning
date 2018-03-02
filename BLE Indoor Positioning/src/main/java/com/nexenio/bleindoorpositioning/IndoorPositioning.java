@@ -28,6 +28,8 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public static final long UPDATE_INTERVAL_MEDIUM = 500;
     public static final long UPDATE_INTERVAL_SLOW = 3000;
 
+    public static final double HUMAN_WALKING_SPEED = 1.388889; // meters per second
+
     private static IndoorPositioning instance;
 
     private Location lastKnownLocation;
@@ -69,7 +71,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
             usableBeacons.sort(Beacon.RssiComparator);
             Collections.reverse(usableBeacons);
             for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
-                if (usableBeacons.get(beaconIndex).getFilteredRssi() < 90) {
+                if (usableBeacons.get(beaconIndex).getFilteredRssi() < -90) {
                     usableBeacons.remove(beaconIndex);
                 }
             }
@@ -77,6 +79,9 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
         Multilateration multilateration = new Multilateration(usableBeacons);
         Location location = multilateration.getLocation();
+        float deviation = multilateration.getAccuracy();
+        System.out.println("std deviation: " + deviation);
+
         locationPredictor.addLocation(location);
         onLocationUpdated(multilateration.getLocation());
     }
@@ -97,7 +102,21 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         return usableBeacons;
     }
 
+    public static Location walkingSpeedFilter(Location oldLocation, Location newLocation) {
+        double distance = oldLocation.getDistanceTo(newLocation);
+        double angle = oldLocation.getAngleTo(newLocation);
+        if (distance > HUMAN_WALKING_SPEED) {
+            return oldLocation.getShiftedLocation(HUMAN_WALKING_SPEED, angle);
+        } else {
+            return newLocation;
+        }
+    }
+
     private void onLocationUpdated(Location location) {
+        if (lastKnownLocation != null) {
+            location = walkingSpeedFilter(lastKnownLocation, location);
+            System.out.println(lastKnownLocation.getDistanceTo(location));
+        }
         lastKnownLocation = location;
         for (LocationListener locationListener : locationListeners) {
             locationListener.onLocationUpdated(this, lastKnownLocation);

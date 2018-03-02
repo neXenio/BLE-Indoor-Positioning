@@ -74,6 +74,7 @@ public class Multilateration {
         return new Location(latitude, longitude);
     }
 
+    // TODO rename to std deviation
     public static float getAccuracy(LeastSquaresOptimizer.Optimum optimum) {
         RealVector standardDeviation = optimum.getSigma(0);
         float maximumDeviation = 0;
@@ -98,6 +99,7 @@ public class Multilateration {
         return location;
     }
 
+    // TODO rename
     public float getAccuracy() {
         if (accuracy == 0) {
             accuracy = getAccuracy(getOptimum());

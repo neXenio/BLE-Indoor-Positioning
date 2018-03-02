@@ -89,6 +89,7 @@ public class BeaconMap extends BeaconView {
         float deviceAdvertisingRange = 20; // in meters TODO: get real value based on tx power
         float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(deviceAdvertisingRange);
 
+        // TODO use this for accuracy visualization
         float animationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
         float strokeRadius = (pixelsPerDip * 10) + (pixelsPerDip * 2 * animationValue);
 
