@@ -21,7 +21,7 @@ public final class AngleUtil {
      * @see <a href="https://en.wikipedia.org/wiki/Mean_of_circular_quantities">Circle Mean</a>
      */
     public static double calculateMeanAngle(double[] angles) {
-        if (angles == null) {
+        if (angles == null || angles.length == 0) {
             return 0;
         }
         if (angles.length == 1) {

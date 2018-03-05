@@ -1,5 +1,7 @@
 package com.nexenio.bleindoorpositioning.location;
 
+import com.nexenio.bleindoorpositioning.location.distance.LocationDistanceCalculator;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -61,5 +63,59 @@ public class LocationTest {
         Location calculatedLocation = SOCCER_FIELD_TOP_LEFT.getShiftedLocation(distance, angle);
         double delta = calculatedLocation.getDistanceTo(SOCCER_FIELD_BOTTOM_RIGHT);
         assertEquals(0, delta, 2);
+    }
+
+    @Test
+    public void shift_initialLocation_correctLocation() throws Exception {
+        double distance = 10;
+        double angle = 180;
+        Location expectedLocation = computeOffset(BERLIN, distance, angle);
+        Location actualLocation = BERLIN.getShiftedLocation(distance, angle);
+        double delta = expectedLocation.getDistanceTo(actualLocation);
+        assertEquals(0, delta, 0);
+
+        expectedLocation = computeOffset(NEW_YORK_CITY, distance, angle);
+        actualLocation = NEW_YORK_CITY.getShiftedLocation(distance, angle);
+        double deltaLatitude = Math.abs(expectedLocation.getLatitude() - actualLocation.getLatitude());
+        double deltaLongitude = Math.abs(expectedLocation.getLongitude() - actualLocation.getLongitude());
+        assertEquals(deltaLatitude, 0, 0);
+        assertEquals(deltaLongitude, 0, 0);
+
+        distance = 30;
+        angle = 80;
+        expectedLocation = computeOffset(NEW_YORK_CITY, distance, angle);
+        actualLocation = NEW_YORK_CITY.getShiftedLocation(distance, angle);
+        deltaLatitude = Math.abs(expectedLocation.getLatitude() - actualLocation.getLatitude());
+        deltaLongitude = Math.abs(expectedLocation.getLongitude() - actualLocation.getLongitude());
+        assertEquals(deltaLatitude, 0, 0);
+        assertEquals(deltaLongitude, 0, 0);
+    }
+
+    /**
+     * Taken from <a href="https://github.com/googlemaps/android-maps-utils/blob/master/library/src/com/google/maps/android/SphericalUtil.java">Android
+     * Maps Util</a>
+     *
+     * Returns the LatLng resulting from moving a distance from an origin in the specified heading
+     * (expressed in degrees clockwise from north).
+     *
+     * @param from     The LatLng from which to start.
+     * @param distance The distance to travel.
+     * @param heading  The heading in degrees clockwise from north.
+     */
+    public static Location computeOffset(Location from, double distance, double heading) {
+        distance /= LocationDistanceCalculator.EARTH_RADIUS * 1000;
+        heading = Math.toRadians(heading);
+        // http://williams.best.vwh.net/avform.htm#LL
+        double fromLat = Math.toRadians(from.getLatitude());
+        double fromLng = Math.toRadians(from.getLongitude());
+        double cosDistance = Math.cos(distance);
+        double sinDistance = Math.sin(distance);
+        double sinFromLat = Math.sin(fromLat);
+        double cosFromLat = Math.cos(fromLat);
+        double sinLat = cosDistance * sinFromLat + sinDistance * cosFromLat * Math.cos(heading);
+        double dLng = Math.atan2(
+                sinDistance * cosFromLat * Math.sin(heading),
+                cosDistance - sinFromLat * sinLat);
+        return new Location(Math.toDegrees(Math.asin(sinLat)), Math.toDegrees(fromLng + dLng));
     }
 }
