@@ -5,7 +5,6 @@ import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 
@@ -96,14 +95,18 @@ public class LocationPredictor implements LocationProvider {
 
         Location lastLocation = locations.get(locations.size() - 1);
         if (locations.size() == 1) {
-            return new Location(lastLocation);
+            Location predictedLocation = new Location(lastLocation);
+            predictedLocation.setTimestamp(lastLocation.getTimestamp() + duration);
+            return predictedLocation;
         }
 
         double angle = AngleUtil.calculateMeanAngle(locations);
         double speed = calculateSpeed(locations);
         double distance = speed * TimeUnit.MILLISECONDS.toSeconds(duration);
 
-        return lastLocation.getShiftedLocation(distance, angle);
+        Location predictedLocation = new Location(lastLocation);
+        predictedLocation.setTimestamp(lastLocation.getTimestamp() + duration);
+        return predictedLocation.getShiftedLocation(distance, angle);
     }
 
     /**

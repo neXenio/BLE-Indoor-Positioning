@@ -74,6 +74,8 @@ public class Location {
      *
      * @param distance in meters
      * @param angle    in degrees [0°-360°)
+     * @see <a href="https://github.com/googlemaps/android-maps-utils/blob/master/library/src/com/google/maps/android/SphericalUtil.java">Java
+     * Example</a>
      * @see <a href="http://mathworld.wolfram.com/GreatCircle.html">Great Circel Wolfram Alpha</a>
      * @see <a href="https://en.wikipedia.org/wiki/Great-circle_navigation#Finding_way-points">Great
      * Circle Wikipedia</a>

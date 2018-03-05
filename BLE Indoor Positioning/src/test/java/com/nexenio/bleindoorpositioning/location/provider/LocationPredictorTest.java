@@ -45,7 +45,8 @@ public class LocationPredictorTest {
             // angle
             double expectedAngle = lastKnownLocation.getAngleTo(expectedLocation);
             double actualAngle = lastKnownLocation.getAngleTo(predictedLocation);
-            assertEquals(expectedAngle, actualAngle, 50);
+            double angleDistance = angleDistance(expectedAngle, actualAngle);
+            assertEquals(0, angleDistance, 50);
 
             // distance
             double expectedDistance = lastKnownLocation.getDistanceTo(expectedLocation);
@@ -71,6 +72,15 @@ public class LocationPredictorTest {
         }
     }
 
+    @Test
+    public void angleDistance_angles_correctDistance() throws Exception {
+        double angleDistance = angleDistance(10, 350);
+        assertEquals(20, angleDistance, 0);
+
+        angleDistance = angleDistance(170, 190);
+        assertEquals(20, angleDistance, 0);
+    }
+
     public List<Location> createWalkingLine(Location location) {
         return createWalkingLocations(location, 0, 0, 20);
     }
@@ -85,13 +95,26 @@ public class LocationPredictorTest {
         List<Location> locations = new ArrayList<>();
         locations.add(startLocation);
 
-        double angleFraction = Math.abs(startAngle - stopAngle) / count;
-        for (int i = 0; i < count - 1; i++) {
+        if (count <= 1) {
+            return locations;
+        }
+
+        double angleFraction = Math.abs(startAngle - stopAngle) / (count - 1);
+        for (int i = 0; i <= count; i++) {
             double angle = (startAngle + angleFraction * i);
             startLocation = startLocation.getShiftedLocation(distanceToNextLocation, angle);
             startLocation.setTimestamp(locations.get(locations.size() - 1).getTimestamp() + timestampDelta);
             locations.add(startLocation);
         }
         return locations;
+    }
+
+    /**
+     * @see <a href="https://stackoverflow.com/questions/7570808/how-do-i-calculate-the-difference-of-two-angle-measures">Stackoverflow</a>
+     * Length (angular) of a shortest way between two angles. It will be in range [0, 180].
+     */
+    private double angleDistance(double alpha, double beta) {
+        double phi = Math.abs(beta - alpha) % 360;       // This is either the distance or 360 - distance
+        return phi > 180 ? 360 - phi : phi;
     }
 }
