@@ -103,9 +103,9 @@ public class LocationTest {
      * @param heading  The heading in degrees clockwise from north.
      */
     public static Location computeOffset(Location from, double distance, double heading) {
+        // convert to meters
         distance /= LocationDistanceCalculator.EARTH_RADIUS * 1000;
         heading = Math.toRadians(heading);
-        // http://williams.best.vwh.net/avform.htm#LL
         double fromLat = Math.toRadians(from.getLatitude());
         double fromLng = Math.toRadians(from.getLongitude());
         double cosDistance = Math.cos(distance);
