@@ -8,6 +8,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
+import com.nexenio.bleindoorpositioning.location.LocationPredictor;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class IndoorPositioning implements LocationProvider, BeaconUpdateListener {
 
@@ -29,10 +31,10 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private static IndoorPositioning instance;
 
     private Location lastKnownLocation;
-    private long lastLocationUpdateTimestamp;
     private long maximumLocationUpdateInterval = UPDATE_INTERVAL_MEDIUM;
     private Set<LocationListener> locationListeners = new HashSet<>();
     private BeaconFilter indoorPositioningBeaconFilter = createIndoorPositioningBeaconFilter();
+    private LocationPredictor locationPredictor = new LocationPredictor();
 
     private IndoorPositioning() {
 
@@ -48,7 +50,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
     @Override
     public Location getLocation() {
-        return null;
+        return lastKnownLocation;
     }
 
     @Override
@@ -74,14 +76,15 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         }
 
         Multilateration multilateration = new Multilateration(usableBeacons);
+        Location location = multilateration.getLocation();
+        locationPredictor.addLocation(location);
         onLocationUpdated(multilateration.getLocation());
-        lastLocationUpdateTimestamp = System.currentTimeMillis();
     }
 
     public static List<Beacon> getUsableBeacons(Collection<Beacon> availableBeacons) {
         // TODO: implement as beacon filter
         List<Beacon> usableBeacons = new ArrayList<>();
-        long minimumTimestamp = System.currentTimeMillis() - 1000;
+        long minimumTimestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(1);
         for (Beacon beacon : (List<Beacon>) getInstance().indoorPositioningBeaconFilter.getMatches(availableBeacons)) {
             if (!beacon.hasLocation()) {
                 continue; // beacon has no location assigned, can't use it for multilateration
@@ -102,7 +105,10 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     }
 
     private boolean shouldUpdateLocation() {
-        return lastLocationUpdateTimestamp < System.currentTimeMillis() - maximumLocationUpdateInterval;
+        if (lastKnownLocation == null) {
+            return true;
+        }
+        return lastKnownLocation.getTimestamp() < System.currentTimeMillis() - maximumLocationUpdateInterval;
     }
 
     public static boolean registerLocationListener(LocationListener locationListener) {
@@ -130,6 +136,26 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
                 return false;
             }
         };
+    }
+
+    /*
+        Getter & Setter
+     */
+
+    public long getMaximumLocationUpdateInterval() {
+        return maximumLocationUpdateInterval;
+    }
+
+    public void setMaximumLocationUpdateInterval(long maximumLocationUpdateInterval) {
+        this.maximumLocationUpdateInterval = maximumLocationUpdateInterval;
+    }
+
+    public static LocationPredictor getLocationPredictor() {
+        return getInstance().locationPredictor;
+    }
+
+    public void setLocationPredictor(LocationPredictor locationPredictor) {
+        this.locationPredictor = locationPredictor;
     }
 
 }
