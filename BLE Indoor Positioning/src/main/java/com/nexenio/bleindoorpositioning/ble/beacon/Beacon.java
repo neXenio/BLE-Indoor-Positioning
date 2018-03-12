@@ -153,7 +153,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public float getDistance(RssiFilter filter) {
         float filteredRssi = getRssi(filter);
-        return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
+        return BeaconDistanceCalculator.calculateDistanceWithHeightTo(this, filteredRssi);
     }
 
     public float getEstimatedAdvertisingRange() {

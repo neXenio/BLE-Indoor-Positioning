@@ -79,9 +79,6 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
         Multilateration multilateration = new Multilateration(usableBeacons);
         Location location = multilateration.getLocation();
-        float deviation = multilateration.getAccuracy();
-        System.out.println("std deviation: " + deviation);
-
         locationPredictor.addLocation(location);
         onLocationUpdated(multilateration.getLocation());
     }
@@ -115,7 +112,6 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private void onLocationUpdated(Location location) {
         if (lastKnownLocation != null) {
             location = walkingSpeedFilter(lastKnownLocation, location);
-            System.out.println(lastKnownLocation.getDistanceTo(location));
         }
         lastKnownLocation = location;
         for (LocationListener locationListener : locationListeners) {

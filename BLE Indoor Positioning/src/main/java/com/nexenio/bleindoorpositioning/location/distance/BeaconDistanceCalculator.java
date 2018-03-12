@@ -24,6 +24,26 @@ public abstract class BeaconDistanceCalculator {
     }
 
     /**
+     * Use Pythagoras with altitude to calculate more accurate distance
+     */
+    public static float calculateDistanceWithHeightTo(Beacon beacon, float rssi) {
+        double altitude = beacon.getLocation().getAltitude();
+        // check for altitude
+        if (altitude > 0) {
+            double distance = calculateDistanceTo(beacon, rssi);
+            double delta = Math.pow(distance, 2) - Math.pow(altitude, 2);
+            // check for negative square root
+            if (delta < 0) {
+                return -((float) Math.sqrt(Math.abs(delta)));
+            } else {
+                return (float) Math.sqrt(delta);
+            }
+        } else {
+            return calculateDistanceTo(beacon, rssi);
+        }
+    }
+
+    /**
      * Calculates the distance to the specified beacon using the <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
      * path loss model</a>.
      */
