@@ -2,6 +2,7 @@ package com.nexenio.bleindoorpositioning.location.provider;
 
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationPredictor;
+import com.nexenio.bleindoorpositioning.location.angle.AngleUtil;
 
 import org.junit.Test;
 
@@ -45,7 +46,7 @@ public class LocationPredictorTest {
             // angle
             double expectedAngle = lastKnownLocation.getAngleTo(expectedLocation);
             double actualAngle = lastKnownLocation.getAngleTo(predictedLocation);
-            double angleDistance = angleDistance(expectedAngle, actualAngle);
+            double angleDistance = AngleUtil.angleDistance(expectedAngle, actualAngle);
             assertEquals(0, angleDistance, 50);
 
             // distance
@@ -74,10 +75,10 @@ public class LocationPredictorTest {
 
     @Test
     public void angleDistance_angles_correctDistance() throws Exception {
-        double angleDistance = angleDistance(10, 350);
+        double angleDistance = AngleUtil.angleDistance(10, 350);
         assertEquals(20, angleDistance, 0);
 
-        angleDistance = angleDistance(170, 190);
+        angleDistance = AngleUtil.angleDistance(170, 190);
         assertEquals(20, angleDistance, 0);
     }
 
@@ -107,14 +108,5 @@ public class LocationPredictorTest {
             locations.add(startLocation);
         }
         return locations;
-    }
-
-    /**
-     * @see <a href="https://stackoverflow.com/questions/7570808/how-do-i-calculate-the-difference-of-two-angle-measures">Stackoverflow</a>
-     * Length (angular) of a shortest way between two angles. It will be in range [0, 180].
-     */
-    private double angleDistance(double alpha, double beta) {
-        double phi = Math.abs(beta - alpha) % 360;       // This is either the distance or 360 - distance
-        return phi > 180 ? 360 - phi : phi;
     }
 }

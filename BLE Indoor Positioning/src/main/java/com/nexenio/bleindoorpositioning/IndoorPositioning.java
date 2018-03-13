@@ -9,6 +9,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.LocationPredictor;
+import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
@@ -28,7 +29,10 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public static final long UPDATE_INTERVAL_MEDIUM = 500;
     public static final long UPDATE_INTERVAL_SLOW = 3000;
 
-    public static final double HUMAN_WALKING_SPEED = 1.388889; // meters per second
+    public static final double NO_SPEED_FILTER = -1;
+    // set maximum distance to new location
+    private double maximumMovementSpeed = NO_SPEED_FILTER;
+    // private double maximumMovementSpeed = DistanceUtil.HUMAN_WALKING_SPEED;
 
     private static IndoorPositioning instance;
 
@@ -99,19 +103,9 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         return usableBeacons;
     }
 
-    public static Location walkingSpeedFilter(Location oldLocation, Location newLocation) {
-        double distance = oldLocation.getDistanceTo(newLocation);
-        double angle = oldLocation.getAngleTo(newLocation);
-        if (distance > HUMAN_WALKING_SPEED) {
-            return oldLocation.getShiftedLocation(HUMAN_WALKING_SPEED, angle);
-        } else {
-            return newLocation;
-        }
-    }
-
     private void onLocationUpdated(Location location) {
-        if (lastKnownLocation != null) {
-            location = walkingSpeedFilter(lastKnownLocation, location);
+        if (maximumMovementSpeed > 0 && lastKnownLocation != null) {
+            location = DistanceUtil.walkingSpeedFilter(lastKnownLocation, location);
         }
         lastKnownLocation = location;
         for (LocationListener locationListener : locationListeners) {
