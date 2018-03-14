@@ -29,10 +29,9 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public static final long UPDATE_INTERVAL_MEDIUM = 500;
     public static final long UPDATE_INTERVAL_SLOW = 3000;
 
-    public static final double NO_SPEED_FILTER = -1;
+    public static final double _NOT_SET = -1;
     // set maximum distance to new location
-    private double maximumMovementSpeed = NO_SPEED_FILTER;
-    // private double maximumMovementSpeed = DistanceUtil.HUMAN_WALKING_SPEED;
+    private double maximumMovementSpeed = _NOT_SET;
 
     private static IndoorPositioning instance;
 
@@ -104,7 +103,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     }
 
     private void onLocationUpdated(Location location) {
-        if (maximumMovementSpeed > 0 && lastKnownLocation != null) {
+        if (maximumMovementSpeed > _NOT_SET && lastKnownLocation != null) {
             location = DistanceUtil.speedFilter(lastKnownLocation, location, maximumMovementSpeed);
         }
         lastKnownLocation = location;
@@ -150,6 +149,10 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     /*
         Getter & Setter
      */
+
+    public void setMaximumMovementSpeed(double maximumMovementSpeed) {
+        this.maximumMovementSpeed = maximumMovementSpeed;
+    }
 
     public long getMaximumLocationUpdateInterval() {
         return maximumLocationUpdateInterval;

@@ -3,6 +3,7 @@ package com.nexenio.bleindoorpositioning.location.provider;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationPredictor;
 import com.nexenio.bleindoorpositioning.location.angle.AngleUtil;
+import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 
 import org.junit.Test;
 
@@ -17,7 +18,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class LocationPredictorTest {
 
-    public static final double HUMAN_WALKING_SPEED = 1.388889; // meters per second
     public static final Location GENDARMENMARKT = new Location(52.513588, 13.392995);
 
     @Test
@@ -60,7 +60,7 @@ public class LocationPredictorTest {
     public void calculateSpeed_locationsLine_correctSpeed() throws Exception {
         List<Location> lineOnGendarmenmarkt = createWalkingLine(GENDARMENMARKT);
         double speed = LocationPredictor.calculateSpeed(lineOnGendarmenmarkt);
-        assertEquals(speed, HUMAN_WALKING_SPEED, 0.1);
+        assertEquals(speed, DistanceUtil.HUMAN_WALKING_SPEED, 0.1);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class LocationPredictorTest {
         for (int i = 0; i < walkInACircle.size() - 3; i++) {
             List<Location> subList = walkInACircle.subList(i, i + 3);
             double speed = LocationPredictor.calculateSpeed(subList);
-            assertEquals(speed, HUMAN_WALKING_SPEED, 0.1);
+            assertEquals(speed, DistanceUtil.HUMAN_WALKING_SPEED, 0.1);
         }
     }
 
@@ -92,7 +92,7 @@ public class LocationPredictorTest {
 
     public static List<Location> createWalkingLocations(Location startLocation, double startAngle, double stopAngle, int count) {
         long timestampDelta = 500;
-        double distanceToNextLocation = HUMAN_WALKING_SPEED * ((float) timestampDelta / TimeUnit.SECONDS.toMillis(1));
+        double distanceToNextLocation = DistanceUtil.HUMAN_WALKING_SPEED * ((float) timestampDelta / TimeUnit.SECONDS.toMillis(1));
         List<Location> locations = new ArrayList<>();
         locations.add(startLocation);
 

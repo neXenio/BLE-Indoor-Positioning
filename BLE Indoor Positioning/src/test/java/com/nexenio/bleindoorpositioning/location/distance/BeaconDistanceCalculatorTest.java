@@ -1,5 +1,10 @@
 package com.nexenio.bleindoorpositioning.location.distance;
 
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.LocationTest;
+import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -8,6 +13,36 @@ import static org.junit.Assert.assertEquals;
  * Created by steppschuh on 22.11.17.
  */
 public class BeaconDistanceCalculatorTest {
+
+    @Test
+    public void calculateDistanceWithAltitudeTo_largeDistance_correctDistance() throws Exception {
+        Beacon dummyBeacon = new Beacon() {
+            @Override
+            public LocationProvider createLocationProvider() {
+                return null;
+            }
+        };
+        dummyBeacon.setLocationProvider(new LocationProvider() {
+            @Override
+            public Location getLocation() {
+                Location location = new Location(LocationTest.BERLIN);
+                location.setAltitude(2);
+                return location;
+            }
+        });
+        // without pythagoras
+        dummyBeacon.setRssi(-50);
+        float expectedDistance = BeaconDistanceCalculator.calculateDistanceTo(dummyBeacon, dummyBeacon.getRssi());
+        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutAltitudeDelta(dummyBeacon, dummyBeacon.getRssi());
+        assertEquals(expectedDistance, actualDistance, 0);
+
+        // with pythagoras
+        dummyBeacon.setRssi(-60);
+        expectedDistance = BeaconDistanceCalculator.calculateDistanceTo(dummyBeacon, dummyBeacon.getRssi());
+        expectedDistance = (float) Math.sqrt(Math.pow(expectedDistance, 2) - Math.pow(dummyBeacon.getLocation().getAltitude(), 2));
+        actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutAltitudeDelta(dummyBeacon, dummyBeacon.getRssi());
+        assertEquals(expectedDistance, actualDistance, 0);
+    }
 
     @Test
     public void calculateDistance() throws Exception {

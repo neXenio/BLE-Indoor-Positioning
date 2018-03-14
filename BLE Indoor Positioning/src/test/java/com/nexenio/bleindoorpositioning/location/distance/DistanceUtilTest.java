@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 public class DistanceUtilTest {
 
     @Test
-    public void speedFilter_locations_accurateLocation() throws Exception {
+    public void speedFilter_largeDistance_accurateLocation() throws Exception {
         // larger distance than speed filter
         Location oldLocation = LocationPredictorTest.GENDARMENMARKT;
         oldLocation.setTimestamp(0);
@@ -23,14 +23,17 @@ public class DistanceUtilTest {
         Location actualLocation = DistanceUtil.speedFilter(oldLocation, newLocation, 2);
         assertEquals(expectedLocation.getLatitude(), actualLocation.getLatitude(), 0);
         assertEquals(expectedLocation.getLongitude(), actualLocation.getLongitude(), 0);
+    }
 
+    @Test
+    public void speedFilter_smallDistance_accurateLocation() throws Exception {
         // smaller distance than speed filter
-        oldLocation = LocationPredictorTest.GENDARMENMARKT;
+        Location oldLocation = LocationPredictorTest.GENDARMENMARKT;
         oldLocation.setTimestamp(0);
-        newLocation = oldLocation.getShiftedLocation(1, 0);
+        Location newLocation = oldLocation.getShiftedLocation(1, 0);
         newLocation.setTimestamp(1000);
-        expectedLocation = oldLocation.getShiftedLocation(1, 0);
-        actualLocation = DistanceUtil.speedFilter(oldLocation, newLocation, 2);
+        Location expectedLocation = oldLocation.getShiftedLocation(1, 0);
+        Location actualLocation = DistanceUtil.speedFilter(oldLocation, newLocation, 2);
         assertEquals(expectedLocation.getLatitude(), actualLocation.getLatitude(), 0);
         assertEquals(expectedLocation.getLongitude(), actualLocation.getLongitude(), 0);
     }

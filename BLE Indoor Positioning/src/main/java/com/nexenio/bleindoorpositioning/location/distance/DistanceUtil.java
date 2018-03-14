@@ -31,13 +31,19 @@ public abstract class DistanceUtil {
         return speedFilter(oldLocation, newLocation, HUMAN_WALKING_SPEED);
     }
 
-    public static Location speedFilter(Location oldLocation, Location newLocation, double metersPerSecond) {
+    /**
+     * Define a maximum movement speed to restrain a new location being further away than the
+     * distance possible in that time window.
+     */
+    public static Location speedFilter(Location oldLocation, Location newLocation, double maximumSpeed) {
         double distance = oldLocation.getDistanceTo(newLocation);
-        double angle = oldLocation.getAngleTo(newLocation);
         long timestampDelta = newLocation.getTimestamp() - oldLocation.getTimestamp();
-        metersPerSecond = metersPerSecond * ((float) timestampDelta / TimeUnit.SECONDS.toMillis(1));
-        if (distance > metersPerSecond) {
-            return oldLocation.getShiftedLocation(metersPerSecond, angle);
+        double currentSpeed = distance * ((float) timestampDelta / TimeUnit.SECONDS.toMillis(1));
+        if (currentSpeed > maximumSpeed) {
+            double angle = oldLocation.getAngleTo(newLocation);
+            Location adjustedLocation = oldLocation.getShiftedLocation(maximumSpeed, angle);
+            adjustedLocation.setTimestamp(newLocation.getTimestamp());
+            return adjustedLocation;
         } else {
             return newLocation;
         }
