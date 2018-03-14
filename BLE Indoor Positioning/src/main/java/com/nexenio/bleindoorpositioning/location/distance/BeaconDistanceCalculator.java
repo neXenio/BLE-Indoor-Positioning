@@ -24,21 +24,22 @@ public abstract class BeaconDistanceCalculator {
     }
 
     /**
-     * Use Pythagoras with altitude to calculate more accurate distance
+     * Use Pythagoras with altitude to calculate more accurate distance to the beacon, if the
+     * distance is larger than the altitude.
      */
     public static float calculateDistanceWithAltitudeTo(Beacon beacon, float rssi) {
         double altitude = beacon.getLocation().getAltitude();
-        // check for altitude
-        if (altitude > 0) {
-            double distance = calculateDistanceTo(beacon, rssi);
+        double distance = calculateDistanceTo(beacon, rssi);
+        // distance should be double of the altitude to make pythagoras meaningful
+        if (altitude > 0 && distance > (altitude * 2)) {
             if (altitude > distance) {
-                return calculateDistanceTo(beacon, rssi);
+                return (float) distance;
             } else {
                 double delta = Math.pow(distance, 2) - Math.pow(altitude, 2);
                 return (float) Math.sqrt(delta);
             }
         } else {
-            return calculateDistanceTo(beacon, rssi);
+            return (float) distance;
         }
     }
 
