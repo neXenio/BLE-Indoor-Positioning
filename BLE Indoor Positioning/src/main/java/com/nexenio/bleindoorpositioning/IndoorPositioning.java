@@ -105,7 +105,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
     private void onLocationUpdated(Location location) {
         if (maximumMovementSpeed > 0 && lastKnownLocation != null) {
-            location = DistanceUtil.walkingSpeedFilter(lastKnownLocation, location);
+            location = DistanceUtil.speedFilter(lastKnownLocation, location, maximumMovementSpeed);
         }
         lastKnownLocation = location;
         for (LocationListener locationListener : locationListeners) {
