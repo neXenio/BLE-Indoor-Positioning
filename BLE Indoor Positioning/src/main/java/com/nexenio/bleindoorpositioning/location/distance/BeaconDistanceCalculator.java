@@ -32,12 +32,8 @@ public abstract class BeaconDistanceCalculator {
         double distance = calculateDistanceTo(beacon, rssi);
         // distance should be double of the altitude to make pythagoras meaningful
         if (altitude > 0 && distance > (altitude * 2)) {
-            if (altitude > distance) {
-                return (float) distance;
-            } else {
-                double delta = Math.pow(distance, 2) - Math.pow(altitude, 2);
-                return (float) Math.sqrt(delta);
-            }
+            double delta = Math.pow(distance, 2) - Math.pow(altitude, 2);
+            return (float) Math.sqrt(delta);
         } else {
             return (float) distance;
         }
