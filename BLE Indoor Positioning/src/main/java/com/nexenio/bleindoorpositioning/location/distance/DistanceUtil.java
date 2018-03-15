@@ -38,7 +38,7 @@ public abstract class DistanceUtil {
     public static Location speedFilter(Location oldLocation, Location newLocation, double maximumSpeed) {
         double distance = oldLocation.getDistanceTo(newLocation);
         long timestampDelta = newLocation.getTimestamp() - oldLocation.getTimestamp();
-        double currentSpeed = distance * ((float) timestampDelta / TimeUnit.SECONDS.toMillis(1));
+        double currentSpeed = distance / ((float) timestampDelta / TimeUnit.SECONDS.toMillis(1));
         if (currentSpeed > maximumSpeed) {
             double angle = oldLocation.getAngleTo(newLocation);
             Location adjustedLocation = oldLocation.getShiftedLocation(maximumSpeed, angle);

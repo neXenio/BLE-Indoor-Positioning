@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.location.distance;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationTest;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -58,12 +59,7 @@ public class BeaconDistanceCalculatorTest {
     }
 
     public Beacon createDummyBeacon() {
-        Beacon dummyBeacon = new Beacon() {
-            @Override
-            public LocationProvider createLocationProvider() {
-                return null;
-            }
-        };
+        Beacon dummyBeacon = new IBeacon();
         dummyBeacon.setLocationProvider(new LocationProvider() {
             @Override
             public Location getLocation() {

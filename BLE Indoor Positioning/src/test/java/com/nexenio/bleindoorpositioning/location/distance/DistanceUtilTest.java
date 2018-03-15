@@ -13,8 +13,7 @@ import static org.junit.Assert.assertEquals;
 public class DistanceUtilTest {
 
     @Test
-    public void speedFilter_largeDistance_accurateLocation() throws Exception {
-        // larger distance than speed filter
+    public void speedFilter_largerDistanceThanMaximumSpeed_correctChange() throws Exception {
         Location oldLocation = LocationPredictorTest.GENDARMENMARKT;
         oldLocation.setTimestamp(0);
         Location newLocation = oldLocation.getShiftedLocation(5, 0);
@@ -26,7 +25,31 @@ public class DistanceUtilTest {
     }
 
     @Test
-    public void speedFilter_smallDistance_accurateLocation() throws Exception {
+    public void speedFilter_exactlyMaximumSpeed_noChange() throws Exception {
+        float maximumSpeed = 2;
+        Location oldLocation = LocationPredictorTest.GENDARMENMARKT;
+        oldLocation.setTimestamp(0);
+        Location newLocation = oldLocation.getShiftedLocation(maximumSpeed, 0);
+        newLocation.setTimestamp(1000);
+        Location expectedLocation = oldLocation.getShiftedLocation(maximumSpeed, 0);
+        Location actualLocation = DistanceUtil.speedFilter(oldLocation, newLocation, maximumSpeed);
+        assertEquals(expectedLocation.getLatitude(), actualLocation.getLatitude(), 0);
+        assertEquals(expectedLocation.getLongitude(), actualLocation.getLongitude(), 0);
+    }
+
+    @Test
+    public void speedFilter_exactLocations_noChange() throws Exception {
+        float maximumSpeed = 2;
+        Location oldLocation = LocationPredictorTest.GENDARMENMARKT;
+        oldLocation.setTimestamp(0);
+        Location expectedLocation = oldLocation;
+        Location actualLocation = DistanceUtil.speedFilter(oldLocation, oldLocation, maximumSpeed);
+        assertEquals(expectedLocation.getLatitude(), actualLocation.getLatitude(), 0);
+        assertEquals(expectedLocation.getLongitude(), actualLocation.getLongitude(), 0);
+    }
+
+    @Test
+    public void speedFilter_smallerDistanceThanMaximumSpeed_noChange() throws Exception {
         // smaller distance than speed filter
         Location oldLocation = LocationPredictorTest.GENDARMENMARKT;
         oldLocation.setTimestamp(0);
