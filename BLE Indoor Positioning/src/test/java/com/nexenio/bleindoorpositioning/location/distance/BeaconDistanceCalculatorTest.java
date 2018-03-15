@@ -19,7 +19,7 @@ public class BeaconDistanceCalculatorTest {
     public void calculateDistanceWithAltitudeTo_smallDistance_correctDistance() throws Exception {
         Beacon dummyBeacon = createDummyBeacon();
         // without pythagoras
-        dummyBeacon.setRssi(-50);
+        dummyBeacon.setRssi(-65);
         float expectedDistance = BeaconDistanceCalculator.calculateDistanceTo(dummyBeacon, dummyBeacon.getRssi());
         float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutAltitudeDelta(dummyBeacon, dummyBeacon.getRssi());
         assertEquals(expectedDistance, actualDistance, 0);
@@ -29,7 +29,7 @@ public class BeaconDistanceCalculatorTest {
     public void calculateDistanceWithAltitudeTo_largeDistance_correctDistance() throws Exception {
         Beacon dummyBeacon = createDummyBeacon();
         // with pythagoras
-        dummyBeacon.setRssi(-60);
+        dummyBeacon.setRssi(-90);
         float absoluteDistance = BeaconDistanceCalculator.calculateDistanceTo(dummyBeacon, dummyBeacon.getRssi());
         float expectedDistance = (float) Math.sqrt(Math.pow(absoluteDistance, 2) - Math.pow(dummyBeacon.getLocation().getAltitude(), 2));
         float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutAltitudeDelta(dummyBeacon, dummyBeacon.getRssi());
@@ -68,6 +68,7 @@ public class BeaconDistanceCalculatorTest {
                 return location;
             }
         });
+        dummyBeacon.setCalibratedRssi(-65);
         return dummyBeacon;
     }
 
