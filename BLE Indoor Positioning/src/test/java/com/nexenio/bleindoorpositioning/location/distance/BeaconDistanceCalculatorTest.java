@@ -16,23 +16,44 @@ import static org.junit.Assert.assertEquals;
 public class BeaconDistanceCalculatorTest {
 
     @Test
-    public void calculateDistanceWithAltitudeTo_smallDistance_correctDistance() throws Exception {
-        Beacon dummyBeacon = createDummyBeacon();
+    public void calculateDistanceWithoutAltitudeDeltaToFloor_smallDistanceLowAltitude_correctDistance() throws Exception {
+        Beacon lowDummyBeacon = createLowAltitudeDummyBeacon();
         // without pythagoras
-        dummyBeacon.setRssi(-65);
-        float expectedDistance = BeaconDistanceCalculator.calculateDistanceTo(dummyBeacon, dummyBeacon.getRssi());
-        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutAltitudeDelta(dummyBeacon, dummyBeacon.getRssi());
+        lowDummyBeacon.setRssi(-65);
+        float expectedDistance = BeaconDistanceCalculator.calculateDistanceTo(lowDummyBeacon, lowDummyBeacon.getRssi());
+        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutAltitudeDeltaToFloor(lowDummyBeacon, lowDummyBeacon.getRssi());
         assertEquals(expectedDistance, actualDistance, 0);
     }
 
     @Test
-    public void calculateDistanceWithAltitudeTo_largeDistance_correctDistance() throws Exception {
-        Beacon dummyBeacon = createDummyBeacon();
+    public void calculateDistanceWithoutAltitudeDeltaToFloor_largeDistanceLowAltitude_correctDistance() throws Exception {
+        Beacon lowDummyBeacon = createLowAltitudeDummyBeacon();
         // with pythagoras
-        dummyBeacon.setRssi(-90);
-        float absoluteDistance = BeaconDistanceCalculator.calculateDistanceTo(dummyBeacon, dummyBeacon.getRssi());
-        float expectedDistance = (float) Math.sqrt(Math.pow(absoluteDistance, 2) - Math.pow(dummyBeacon.getLocation().getAltitude(), 2));
-        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutAltitudeDelta(dummyBeacon, dummyBeacon.getRssi());
+        lowDummyBeacon.setRssi(-90);
+        float absoluteDistance = BeaconDistanceCalculator.calculateDistanceTo(lowDummyBeacon, lowDummyBeacon.getRssi());
+        float expectedDistance = (float) Math.sqrt(Math.pow(absoluteDistance, 2) - Math.pow(lowDummyBeacon.getLocation().getAltitude(), 2));
+        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutAltitudeDeltaToFloor(lowDummyBeacon, lowDummyBeacon.getRssi());
+        assertEquals(expectedDistance, actualDistance, 0);
+    }
+
+    @Test
+    public void calculateDistanceWithoutAltitudeDeltaToFloor_smallDistanceHighAltitude_correctDistance() throws Exception {
+        Beacon highDummyBeacon = createHighAltitudeDummyBeacon();
+        // without pythagoras
+        highDummyBeacon.setRssi(-65);
+        float expectedDistance = BeaconDistanceCalculator.calculateDistanceTo(highDummyBeacon, highDummyBeacon.getRssi());
+        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutAltitudeDeltaToFloor(highDummyBeacon, highDummyBeacon.getRssi());
+        assertEquals(expectedDistance, actualDistance, 0);
+    }
+
+    @Test
+    public void calculateDistanceWithoutAltitudeDeltaToFloor_largeDistanceHighAltitude_correctDistance() throws Exception {
+        Beacon highDummyBeacon = createHighAltitudeDummyBeacon();
+        // with pythagoras
+        highDummyBeacon.setRssi(-90);
+        float absoluteDistance = BeaconDistanceCalculator.calculateDistanceTo(highDummyBeacon, highDummyBeacon.getRssi());
+        float expectedDistance = (float) Math.sqrt(Math.pow(absoluteDistance, 2) - Math.pow(highDummyBeacon.getLocation().getAltitude(), 2));
+        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutAltitudeDeltaToFloor(highDummyBeacon, highDummyBeacon.getRssi());
         assertEquals(expectedDistance, actualDistance, 0);
     }
 
@@ -58,13 +79,27 @@ public class BeaconDistanceCalculatorTest {
         assertEquals(1, calculatedDistance, 0.1);
     }
 
-    public Beacon createDummyBeacon() {
+    public Beacon createLowAltitudeDummyBeacon() {
         Beacon dummyBeacon = new IBeacon();
         dummyBeacon.setLocationProvider(new LocationProvider() {
             @Override
             public Location getLocation() {
                 Location location = new Location(LocationTest.BERLIN);
                 location.setAltitude(2);
+                return location;
+            }
+        });
+        dummyBeacon.setCalibratedRssi(-65);
+        return dummyBeacon;
+    }
+
+    public Beacon createHighAltitudeDummyBeacon() {
+        Beacon dummyBeacon = new IBeacon();
+        dummyBeacon.setLocationProvider(new LocationProvider() {
+            @Override
+            public Location getLocation() {
+                Location location = new Location(LocationTest.BERLIN);
+                location.setAltitude(10);
                 return location;
             }
         });
