@@ -30,6 +30,8 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     protected int calibratedRssi; // in dBm
     protected int calibratedDistance; // in m
     protected int transmissionPower; // in dBm
+    protected float distance; // in m
+    protected boolean shouldUpdateDistance = true;
     protected List<P> advertisingPackets = new ArrayList<>();
     protected LocationProvider locationProvider;
 
@@ -101,6 +103,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         }
         advertisingPackets.add(advertisingPacket);
         trimAdvertisingPackets();
+        invalidateDistance();
     }
 
     public void applyPropertiesFromAdvertisingPacket(P advertisingPacket) {
@@ -147,8 +150,16 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return getRssi(createSuggestedWindowFilter());
     }
 
+    protected void invalidateDistance() {
+        shouldUpdateDistance = true;
+    }
+
     public float getDistance() {
-        return getDistance(createSuggestedWindowFilter());
+        if (shouldUpdateDistance) {
+            distance = getDistance(createSuggestedWindowFilter());
+            shouldUpdateDistance = false;
+        }
+        return distance;
     }
 
     public float getDistance(RssiFilter filter) {
@@ -205,6 +216,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public void setRssi(int rssi) {
         this.rssi = rssi;
+        invalidateDistance();
     }
 
     public int getCalibratedRssi() {
@@ -213,6 +225,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public void setCalibratedRssi(int calibratedRssi) {
         this.calibratedRssi = calibratedRssi;
+        invalidateDistance();
     }
 
     public int getCalibratedDistance() {
@@ -221,6 +234,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public void setCalibratedDistance(int calibratedDistance) {
         this.calibratedDistance = calibratedDistance;
+        invalidateDistance();
     }
 
     public int getTransmissionPower() {
@@ -237,6 +251,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public void setAdvertisingPackets(List<P> advertisingPackets) {
         this.advertisingPackets = advertisingPackets;
+        invalidateDistance();
     }
 
     public LocationProvider getLocationProvider() {
