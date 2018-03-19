@@ -80,30 +80,24 @@ public class BeaconDistanceCalculatorTest {
     }
 
     public Beacon createLowAltitudeDummyBeacon() {
-        Beacon dummyBeacon = new IBeacon();
-        dummyBeacon.setLocationProvider(new LocationProvider() {
-            @Override
-            public Location getLocation() {
-                Location location = new Location(LocationTest.BERLIN);
-                location.setAltitude(2);
-                return location;
-            }
-        });
-        dummyBeacon.setCalibratedRssi(-65);
-        return dummyBeacon;
+        return createDummyBeacon(LocationTest.BERLIN, 2, -65);
     }
 
     public Beacon createHighAltitudeDummyBeacon() {
+        return createDummyBeacon(LocationTest.BERLIN, 10, -65);
+    }
+
+    public Beacon createDummyBeacon(final Location startLocation, final double altitude, int calibratedRssi) {
         Beacon dummyBeacon = new IBeacon();
         dummyBeacon.setLocationProvider(new LocationProvider() {
             @Override
             public Location getLocation() {
-                Location location = new Location(LocationTest.BERLIN);
-                location.setAltitude(10);
+                Location location = new Location(startLocation);
+                location.setAltitude(altitude);
                 return location;
             }
         });
-        dummyBeacon.setCalibratedRssi(-65);
+        dummyBeacon.setCalibratedRssi(calibratedRssi);
         return dummyBeacon;
     }
 
