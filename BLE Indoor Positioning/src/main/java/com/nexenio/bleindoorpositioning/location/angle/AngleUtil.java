@@ -50,4 +50,14 @@ public final class AngleUtil {
         return calculateMeanAngle(angles);
     }
 
+    /**
+     * Length (angular) of a shortest way between two angles. It will be in range [0, 180].
+     *
+     * @see <a href="https://stackoverflow.com/questions/7570808/how-do-i-calculate-the-difference-of-two-angle-measures">Stackoverflow</a>
+     */
+    public static double angleDistance(double alpha, double beta) {
+        double phi = Math.abs(beta - alpha) % 360; // This is either the distance or 360 - distance
+        return phi > 180 ? 360 - phi : phi;
+    }
+
 }

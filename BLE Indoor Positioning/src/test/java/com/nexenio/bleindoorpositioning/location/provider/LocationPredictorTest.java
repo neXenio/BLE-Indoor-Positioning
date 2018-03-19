@@ -2,6 +2,8 @@ package com.nexenio.bleindoorpositioning.location.provider;
 
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationPredictor;
+import com.nexenio.bleindoorpositioning.location.angle.AngleUtil;
+import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 
 import org.junit.Test;
 
@@ -16,7 +18,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class LocationPredictorTest {
 
-    public static final double HUMAN_WALKING_SPEED = 1.388889; // meters per second
     public static final Location GENDARMENMARKT = new Location(52.513588, 13.392995);
 
     @Test
@@ -45,7 +46,7 @@ public class LocationPredictorTest {
             // angle
             double expectedAngle = lastKnownLocation.getAngleTo(expectedLocation);
             double actualAngle = lastKnownLocation.getAngleTo(predictedLocation);
-            double angleDistance = angleDistance(expectedAngle, actualAngle);
+            double angleDistance = AngleUtil.angleDistance(expectedAngle, actualAngle);
             assertEquals(0, angleDistance, 50);
 
             // distance
@@ -59,7 +60,7 @@ public class LocationPredictorTest {
     public void calculateSpeed_locationsLine_correctSpeed() throws Exception {
         List<Location> lineOnGendarmenmarkt = createWalkingLine(GENDARMENMARKT);
         double speed = LocationPredictor.calculateSpeed(lineOnGendarmenmarkt);
-        assertEquals(speed, HUMAN_WALKING_SPEED, 0.1);
+        assertEquals(speed, DistanceUtil.HUMAN_WALKING_SPEED, 0.1);
     }
 
     @Test
@@ -68,16 +69,16 @@ public class LocationPredictorTest {
         for (int i = 0; i < walkInACircle.size() - 3; i++) {
             List<Location> subList = walkInACircle.subList(i, i + 3);
             double speed = LocationPredictor.calculateSpeed(subList);
-            assertEquals(speed, HUMAN_WALKING_SPEED, 0.1);
+            assertEquals(speed, DistanceUtil.HUMAN_WALKING_SPEED, 0.1);
         }
     }
 
     @Test
     public void angleDistance_angles_correctDistance() throws Exception {
-        double angleDistance = angleDistance(10, 350);
+        double angleDistance = AngleUtil.angleDistance(10, 350);
         assertEquals(20, angleDistance, 0);
 
-        angleDistance = angleDistance(170, 190);
+        angleDistance = AngleUtil.angleDistance(170, 190);
         assertEquals(20, angleDistance, 0);
     }
 
@@ -91,7 +92,7 @@ public class LocationPredictorTest {
 
     public static List<Location> createWalkingLocations(Location startLocation, double startAngle, double stopAngle, int count) {
         long timestampDelta = 500;
-        double distanceToNextLocation = HUMAN_WALKING_SPEED * ((float) timestampDelta / TimeUnit.SECONDS.toMillis(1));
+        double distanceToNextLocation = DistanceUtil.HUMAN_WALKING_SPEED * ((float) timestampDelta / TimeUnit.SECONDS.toMillis(1));
         List<Location> locations = new ArrayList<>();
         locations.add(startLocation);
 
@@ -107,14 +108,5 @@ public class LocationPredictorTest {
             locations.add(startLocation);
         }
         return locations;
-    }
-
-    /**
-     * @see <a href="https://stackoverflow.com/questions/7570808/how-do-i-calculate-the-difference-of-two-angle-measures">Stackoverflow</a>
-     * Length (angular) of a shortest way between two angles. It will be in range [0, 180].
-     */
-    private double angleDistance(double alpha, double beta) {
-        double phi = Math.abs(beta - alpha) % 360;       // This is either the distance or 360 - distance
-        return phi > 180 ? 360 - phi : phi;
     }
 }

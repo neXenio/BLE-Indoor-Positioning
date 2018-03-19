@@ -24,7 +24,7 @@ public class Multilateration {
     private List<Beacon> beacons;
 
     private Location location;
-    private float accuracy;
+    private float deviation;
     private LeastSquaresOptimizer.Optimum optimum;
 
     public Multilateration(List<Beacon> beacons) {
@@ -74,7 +74,7 @@ public class Multilateration {
         return new Location(latitude, longitude);
     }
 
-    public static float getAccuracy(LeastSquaresOptimizer.Optimum optimum) {
+    public static float getDeviation(LeastSquaresOptimizer.Optimum optimum) {
         RealVector standardDeviation = optimum.getSigma(0);
         float maximumDeviation = 0;
         for (double deviation : standardDeviation.toArray()) {
@@ -98,11 +98,11 @@ public class Multilateration {
         return location;
     }
 
-    public float getAccuracy() {
-        if (accuracy == 0) {
-            accuracy = getAccuracy(getOptimum());
+    public float getDeviation() {
+        if (deviation == 0) {
+            deviation = getDeviation(getOptimum());
         }
-        return accuracy;
+        return deviation;
     }
 
     public LeastSquaresOptimizer.Optimum getOptimum() {

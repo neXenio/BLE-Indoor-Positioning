@@ -9,6 +9,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.LocationPredictor;
+import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
@@ -27,6 +28,10 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public static final long UPDATE_INTERVAL_FAST = 100;
     public static final long UPDATE_INTERVAL_MEDIUM = 500;
     public static final long UPDATE_INTERVAL_SLOW = 3000;
+
+    public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
+    // set maximum distance to new location
+    private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
 
     private static IndoorPositioning instance;
 
@@ -69,7 +74,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
             usableBeacons.sort(Beacon.RssiComparator);
             Collections.reverse(usableBeacons);
             for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
-                if (usableBeacons.get(beaconIndex).getFilteredRssi() < 90) {
+                if (usableBeacons.get(beaconIndex).getFilteredRssi() < -90) {
                     usableBeacons.remove(beaconIndex);
                 }
             }
@@ -98,6 +103,9 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     }
 
     private void onLocationUpdated(Location location) {
+        if (maximumMovementSpeed != MAXIMUM_MOVEMENT_SPEED_NOT_SET && lastKnownLocation != null) {
+            location = DistanceUtil.speedFilter(lastKnownLocation, location, maximumMovementSpeed);
+        }
         lastKnownLocation = location;
         for (LocationListener locationListener : locationListeners) {
             locationListener.onLocationUpdated(this, lastKnownLocation);
@@ -141,6 +149,10 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     /*
         Getter & Setter
      */
+
+    public void setMaximumMovementSpeed(double maximumMovementSpeed) {
+        this.maximumMovementSpeed = maximumMovementSpeed;
+    }
 
     public long getMaximumLocationUpdateInterval() {
         return maximumLocationUpdateInterval;
