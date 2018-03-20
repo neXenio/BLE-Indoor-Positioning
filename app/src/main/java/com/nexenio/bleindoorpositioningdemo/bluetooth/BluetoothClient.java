@@ -160,26 +160,31 @@ public class BluetoothClient {
             case 1: {
                 location.setLatitude(52.512437);
                 location.setLongitude(13.391124);
+                location.setAltitude(2);
                 break;
             }
             case 2: {
                 location.setLatitude(52.512427);
                 location.setLongitude(13.390934);
+                location.setAltitude(2);
                 break;
             }
             case 3: {
                 location.setLatitude(52.512424);
                 location.setLongitude(13.390829);
+                location.setAltitude(2);
                 break;
             }
             case 4: {
                 location.setLatitude(52.512426);
                 location.setLongitude(13.390887);
+                location.setAltitude(2);
                 break;
             }
             case 5: {
                 location.setLatitude(52.512369);
                 location.setLongitude(13.390838);
+                location.setAltitude(2);
                 break;
             }
         }

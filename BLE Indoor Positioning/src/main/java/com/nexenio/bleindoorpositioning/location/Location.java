@@ -32,7 +32,10 @@ public class Location {
     private double longitude = VALUE_NOT_SET;
     private double altitude = VALUE_NOT_SET;
 
+    private long timestamp;
+
     public Location() {
+        this.timestamp = System.currentTimeMillis();
     }
 
     public Location(double latitude, double longitude) {
@@ -41,11 +44,14 @@ public class Location {
         this.longitude = longitude;
     }
 
+    public Location(double latitude, double longitude, double altitude) {
+        this(latitude, longitude);
+        this.altitude = altitude;
+    }
+
     public Location(Location location) {
-        this();
-        this.latitude = location.latitude;
-        this.longitude = location.longitude;
-        this.altitude = location.altitude;
+        this(location.latitude, location.longitude, location.altitude);
+        this.timestamp = location.timestamp;
     }
 
     /**
@@ -55,11 +61,52 @@ public class Location {
      * @return distance in meters
      */
     public double getDistanceTo(Location location) {
-        return LocationDistanceCalculator.calculateDistanceBetween(this, location, false);
+        return LocationDistanceCalculator.calculateDistanceBetween(this, location);
     }
 
     public double getAngleTo(Location location) {
         return getRotationAngleInDegrees(this, location);
+    }
+
+    /**
+     * Shifts the current {@link #latitude} and {@link #longitude} based on the specified distance
+     * and angle.
+     *
+     * @param distance in meters
+     * @param angle    in degrees [0°-360°)
+     * @see <a href="https://github.com/googlemaps/android-maps-utils/blob/master/library/src/com/google/maps/android/SphericalUtil.java">Java
+     * Example</a>
+     * @see <a href="http://mathworld.wolfram.com/GreatCircle.html">Great Circel Wolfram Alpha</a>
+     * @see <a href="https://en.wikipedia.org/wiki/Great-circle_navigation#Finding_way-points">Great
+     * Circle Wikipedia</a>
+     */
+    public void shift(double distance, double angle) {
+        angle = angle % 360;
+        double bearingRadians = Math.toRadians(angle);
+        double latitudeRadians = Math.toRadians(latitude);
+        double longitudeRadians = Math.toRadians(longitude);
+        // convert distance to km and calculate fraction of earth radius
+        double distanceFraction = (distance / 1000) / LocationDistanceCalculator.EARTH_RADIUS;
+        double shiftedLatitudeRadians = Math.asin(Math.sin(latitudeRadians) * Math.cos(distanceFraction) +
+                Math.cos(latitudeRadians) * Math.sin(distanceFraction) * Math.cos(bearingRadians));
+        double shiftedLongitudeRadians = longitudeRadians + Math.atan2(Math.sin(bearingRadians) * Math.sin(distanceFraction) *
+                Math.cos(latitudeRadians), Math.cos(distanceFraction) - Math.sin(latitudeRadians) * Math.sin(shiftedLatitudeRadians));
+
+        latitude = Math.toDegrees(shiftedLatitudeRadians);
+        longitude = Math.toDegrees(shiftedLongitudeRadians);
+        timestamp = System.currentTimeMillis();
+    }
+
+    /**
+     * Creates a copy of the current instance and calls {@link #shift(double, double)} on that copy.
+     *
+     * @param distance in meters
+     * @param angle    in degrees (0°-360°)
+     */
+    public Location getShiftedLocation(double distance, double angle) {
+        Location shiftedLocation = new Location(this);
+        shiftedLocation.shift(distance, angle);
+        return shiftedLocation;
     }
 
     public boolean latitudeAndLongitudeEquals(Location location) {
@@ -98,21 +145,34 @@ public class Location {
     }
 
     /**
-     * Calculates the angle between two locations in degrees.
-     * The result ranges from [0,360), rotating CLOCKWISE,
-     * 0 and 360 degrees represents NORTH, 90 degrees represents EAST.
+     * Calculates the angle between two locations in degrees. The result ranges from [0,360),
+     * rotating CLOCKWISE, 0 and 360 degrees represents NORTH, 90 degrees represents EAST. This is
+     * also referred to as bearing.
+     *
+     * Calculation was derived from this <a href="http://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/">
+     * Bearing Calculation formula.</a>
      *
      * @param centerLocation Location we are rotating around.
      * @param targetLocation Location we want to calculate the angle to.
      * @return angle in degrees
      */
     public static double getRotationAngleInDegrees(Location centerLocation, Location targetLocation) {
-        double longitudeDelta = targetLocation.longitude - centerLocation.longitude;
-        double x = (Math.cos(centerLocation.latitude) * Math.sin(targetLocation.latitude))
-                - (Math.sin(centerLocation.latitude) * Math.cos(targetLocation.latitude) * Math.cos(longitudeDelta));
-        double y = Math.sin(longitudeDelta) * Math.cos(targetLocation.latitude);
+        double longitudeDelta = Math.toRadians(targetLocation.longitude - centerLocation.longitude);
+        double centerLocationLatitude = Math.toRadians(centerLocation.latitude);
+        double targetLocationLatitude = Math.toRadians(targetLocation.latitude);
+
+        double x = (Math.cos(centerLocationLatitude) * Math.sin(targetLocationLatitude))
+                - (Math.sin(centerLocationLatitude) * Math.cos(targetLocationLatitude) * Math.cos(longitudeDelta));
+        double y = Math.sin(longitudeDelta) * Math.cos(targetLocationLatitude);
+
         double angle = Math.toDegrees(Math.atan2(y, x));
-        return 360 - ((angle + 360) % 360);
+
+        // convert the interval (-180, 180] to [0, 360)
+        if (angle < 0) {
+            angle += 360;
+        }
+
+        return angle;   // note that the angle can be '-0.0'
     }
 
     /*
@@ -125,6 +185,7 @@ public class Location {
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
+        this.timestamp = System.currentTimeMillis();
     }
 
     public double getLongitude() {
@@ -133,6 +194,7 @@ public class Location {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+        this.timestamp = System.currentTimeMillis();
     }
 
     public double getAltitude() {
@@ -141,5 +203,13 @@ public class Location {
 
     public void setAltitude(double altitude) {
         this.altitude = altitude;
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

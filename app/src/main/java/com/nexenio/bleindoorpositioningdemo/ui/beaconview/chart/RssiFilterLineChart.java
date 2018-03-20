@@ -11,7 +11,6 @@ import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.ArmaFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
-import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 

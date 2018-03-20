@@ -14,8 +14,8 @@ import android.util.AttributeSet;
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
+import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 import com.nexenio.bleindoorpositioning.location.projection.EquirectangularProjection;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -41,6 +41,9 @@ public class BeaconMap extends BeaconView {
     protected LocationAnimator bottomRightLocationAnimator;
 
     protected CanvasProjection canvasProjection;
+
+    protected Location predictedDeviceLocation;
+    protected LocationAnimator predictedDeviceLocationAnimator;
 
     public BeaconMap(Context context) {
         super(context);
@@ -79,11 +82,14 @@ public class BeaconMap extends BeaconView {
 
     @Override
     protected void drawDevice(Canvas canvas) {
+        drawDevicePrediction(canvas);
+
         PointF deviceCenter = (deviceLocationAnimator == null) ? canvasCenter : getPointFromLocation(deviceLocationAnimator.getLocation());
 
         float deviceAdvertisingRange = 20; // in meters TODO: get real value based on tx power
         float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(deviceAdvertisingRange);
 
+        // TODO use this for accuracy visualization
         float animationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
         float strokeRadius = (pixelsPerDip * 10) + (pixelsPerDip * 2 * animationValue);
 
@@ -92,6 +98,17 @@ public class BeaconMap extends BeaconView {
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, whiteFillPaint);
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, secondaryStrokePaint);
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, pixelsPerDip * 8, secondaryFillPaint);
+    }
+
+    protected void drawDevicePrediction(Canvas canvas) {
+        if (deviceLocationAnimator == null || predictedDeviceLocationAnimator == null) {
+            return;
+        }
+
+        PointF predictionCenter = getPointFromLocation(predictedDeviceLocationAnimator.getLocation());
+        canvas.drawLine(getPointFromLocation(deviceLocationAnimator.getLocation()).x,
+                getPointFromLocation(deviceLocationAnimator.getLocation()).y,
+                predictionCenter.x, predictionCenter.y, primaryStrokePaint);
     }
 
     @Override
@@ -121,6 +138,9 @@ public class BeaconMap extends BeaconView {
     }
 
     protected void drawBeaconBackground(Canvas canvas, Beacon beacon, PointF beaconCenter) {
+        float distance = (float) canvasProjection.getCanvasUnitsFromMeters(beacon.getDistance());
+        canvas.drawCircle(beaconCenter.x, beaconCenter.y, distance, beaconRangePaint);
+
         float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(beacon.getEstimatedAdvertisingRange());
 
         Paint innerBeaconRangePaint = new Paint(beaconRangePaint);
@@ -293,6 +313,15 @@ public class BeaconMap extends BeaconView {
         super.onDeviceLocationChanged();
     }
 
+    public void onPredictedDeviceLocationChanged() {
+        predictedDeviceLocationAnimator = startLocationAnimation(predictedDeviceLocationAnimator, predictedDeviceLocation, new LocationListener() {
+            @Override
+            public void onLocationUpdated(LocationProvider locationProvider, Location location) {
+                invalidate();
+            }
+        });
+    }
+
     protected void startDeviceRadiusAnimation() {
         if (deviceAccuracyAnimator != null && deviceAccuracyAnimator.isRunning()) {
             return;
@@ -310,4 +339,16 @@ public class BeaconMap extends BeaconView {
         deviceAccuracyAnimator.start();
     }
 
+    /*
+        Getter & Setter
+     */
+
+    public Location getPredictedDeviceLocation() {
+        return predictedDeviceLocation;
+    }
+
+    public void setPredictedDeviceLocation(Location predictedDeviceLocation) {
+        this.predictedDeviceLocation = predictedDeviceLocation;
+        onPredictedDeviceLocationChanged();
+    }
 }

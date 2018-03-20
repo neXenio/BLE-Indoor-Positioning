@@ -11,21 +11,10 @@ public abstract class LocationDistanceCalculator {
     public static final int EARTH_RADIUS = 6371; // in km
 
     public static double calculateDistanceBetween(Location fromLocation, Location toLocation) {
-        return calculateDistanceBetween(fromLocation, toLocation, false);
-    }
-
-    public static double calculateDistanceBetween(Location fromLocation, Location toLocation, boolean includeElevation) {
-        if (includeElevation) {
-            return calculateDistanceBetween(
-                    fromLocation.getLatitude(), fromLocation.getLongitude(), fromLocation.getAltitude(),
-                    toLocation.getLatitude(), toLocation.getLongitude(), toLocation.getAltitude()
-            );
-        } else {
-            return calculateDistanceBetween(
-                    fromLocation.getLatitude(), fromLocation.getLongitude(), 0,
-                    toLocation.getLatitude(), toLocation.getLongitude(), 0
-            );
-        }
+        return calculateDistanceBetween(
+                fromLocation.getLatitude(), fromLocation.getLongitude(), fromLocation.getAltitude(),
+                toLocation.getLatitude(), toLocation.getLongitude(), toLocation.getAltitude()
+        );
     }
 
     /**

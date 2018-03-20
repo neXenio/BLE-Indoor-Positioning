@@ -11,7 +11,7 @@ import java.util.Map;
  * A factory that can create instances of {@link Beacon}s based on a
  * specified {@link AdvertisingPacket}.
  *
- * You may extend this factory be using the {@link #addBeaconClass(Class, Class)} method.
+ * You may extend this factory by using the {@link #addBeaconClass(Class, Class)} method.
  */
 
 public class BeaconFactory {
