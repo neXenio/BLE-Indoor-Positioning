@@ -72,14 +72,14 @@ public class LocationTest {
         Location expectedLocation = computeOffset(BERLIN, distance, angle);
         Location actualLocation = BERLIN.getShiftedLocation(distance, angle);
         double delta = expectedLocation.getDistanceTo(actualLocation);
-        assertEquals(0, delta, 0);
+        assertEquals(0, delta, 2);
 
         expectedLocation = computeOffset(NEW_YORK_CITY, distance, angle);
         actualLocation = NEW_YORK_CITY.getShiftedLocation(distance, angle);
         double deltaLatitude = Math.abs(expectedLocation.getLatitude() - actualLocation.getLatitude());
         double deltaLongitude = Math.abs(expectedLocation.getLongitude() - actualLocation.getLongitude());
-        assertEquals(deltaLatitude, 0, 0);
-        assertEquals(deltaLongitude, 0, 0);
+        assertEquals(deltaLatitude, 0, 2);
+        assertEquals(deltaLongitude, 0, 2);
 
         distance = 30;
         angle = 80;
@@ -87,8 +87,8 @@ public class LocationTest {
         actualLocation = NEW_YORK_CITY.getShiftedLocation(distance, angle);
         deltaLatitude = Math.abs(expectedLocation.getLatitude() - actualLocation.getLatitude());
         deltaLongitude = Math.abs(expectedLocation.getLongitude() - actualLocation.getLongitude());
-        assertEquals(deltaLatitude, 0, 0);
-        assertEquals(deltaLongitude, 0, 0);
+        assertEquals(deltaLatitude, 0, 2);
+        assertEquals(deltaLongitude, 0, 2);
     }
 
     /**
