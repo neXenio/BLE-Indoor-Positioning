@@ -22,8 +22,10 @@
     <string name="title_chart">Chart</string>
     <string name="axis_label_time">Time in seconds</string>
     <string name="axis_label_rssi">RSSI in dBm</string>
+    <string name="axis_label_rssi_filtered">Filtered RSSI in dBm</string>
     <string name="axis_label_distance">Distance in meters</string>
     <string name="axis_label_frequency">Frequency in Hz</string>
+    <string name="axis_label_variance">Variance in dBm</string>
 
     <!-- Filter -->
     <string name="title_filter">Filter</string>
@@ -44,8 +46,10 @@
     <string name="menu_color_by_property">Properties</string>
     <string name="menu_value">Value</string>
     <string name="menu_value_rssi">RSSI</string>
+    <string name="menu_value_rssi_filtered">RSSI (Filtered)</string>
     <string name="menu_value_distance">Distance</string>
     <string name="menu_value_frequency">Frequency</string>
+    <string name="menu_value_variance">Variance</string>
 
     <!-- Errors -->
     <string name="error_location_disabled">Location services disabled</string>
