@@ -69,13 +69,6 @@ public class BeaconChartFragment extends BeaconViewFragment {
             @Override
             public boolean matches(IBeacon beacon) {
                 if (legacyUuid.equals(beacon.getProximityUuid())) {
-                    if (beacon.getMajor() == 1 && beacon.getMinor() == 1) {
-                        return true;
-                    }
-                }
-                return false;
-                /*
-                if (legacyUuid.equals(beacon.getProximityUuid())) {
                     return true;
                 }
                 if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
@@ -85,7 +78,6 @@ public class BeaconChartFragment extends BeaconViewFragment {
                     return true;
                 }
                 return false;
-                */
             }
         };
     }

@@ -179,6 +179,12 @@ public class BeaconLineChart extends BeaconChart {
                 yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, -100);
                 break;
             }
+            case VALUE_TYPE_RSSI_FILTERED: {
+                yAxisLabel = getContext().getString(R.string.axis_label_rssi_filtered);
+                yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 0);
+                yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, -100);
+                break;
+            }
             case VALUE_TYPE_DISTANCE: {
                 yAxisLabel = getContext().getString(R.string.axis_label_distance);
                 yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 25);
@@ -193,7 +199,7 @@ public class BeaconLineChart extends BeaconChart {
             }
             case VALUE_TYPE_VARIANCE: {
                 yAxisLabel = getContext().getString(R.string.axis_label_variance);
-                yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 50);
+                yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 100);
                 yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, 0);
                 break;
             }
