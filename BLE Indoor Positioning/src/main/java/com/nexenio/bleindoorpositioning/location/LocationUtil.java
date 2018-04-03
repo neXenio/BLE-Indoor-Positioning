@@ -12,11 +12,13 @@ public class LocationUtil {
 
     public static Location meanLocationFromLast(List<Location> locationList, long amount, TimeUnit timeUnit) {
         List<Location> matchingLocations = getLocationsFromLast(locationList, amount, timeUnit);
-        return meanLocation(matchingLocations);
+        return calculateMeanLocation(matchingLocations);
     }
 
-    public static Location meanLocation(List<Location> locationList) {
-        if (locationList.size() > 1) {
+    public static Location calculateMeanLocation(List<Location> locationList) {
+        if (locationList.size() < 1) {
+            return null;
+        } else {
             Location meanLocation = new Location();
             double latitudeSum = 0;
             double longitudeSum = 0;
@@ -27,23 +29,16 @@ public class LocationUtil {
             meanLocation.setLatitude(latitudeSum / locationList.size());
             meanLocation.setLongitude(longitudeSum / locationList.size());
             return meanLocation;
-        } else if (locationList.size() == 1) {
-            return locationList.get(0);
-        } else {
-            return null;
         }
     }
 
-    public static List<Location> getLocationsBetween(List<Location> locationList, long startTimestamp, long stopTimestamp) {
+    public static List<Location> getLocationsBetween(List<Location> locationList, long minimumTimestamp, long maximumTimestamp) {
         List<Location> matchingLocations = new ArrayList<>();
-        for (int i = 0; i < locationList.size(); i++) {
-            if (locationList.get(i).getTimestamp() <= startTimestamp) {
+        for (Location location : locationList) {
+            if (location.getTimestamp() <= minimumTimestamp || location.getTimestamp() > maximumTimestamp) {
                 continue;
             }
-            if (locationList.get(i).getTimestamp() > stopTimestamp) {
-                continue;
-            }
-            matchingLocations.add(locationList.get(i));
+            matchingLocations.add(location);
         }
         return matchingLocations;
     }
