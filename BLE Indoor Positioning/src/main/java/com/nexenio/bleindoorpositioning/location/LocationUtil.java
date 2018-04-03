@@ -22,9 +22,9 @@ public class LocationUtil {
             Location meanLocation = new Location();
             double latitudeSum = 0;
             double longitudeSum = 0;
-            for (int i = 0; i < locationList.size(); i++) {
-                latitudeSum += locationList.get(i).getLatitude();
-                longitudeSum += locationList.get(i).getLongitude();
+            for (Location location : locationList) {
+                latitudeSum += location.getLatitude();
+                longitudeSum += location.getLongitude();
             }
             meanLocation.setLatitude(latitudeSum / locationList.size());
             meanLocation.setLongitude(longitudeSum / locationList.size());
