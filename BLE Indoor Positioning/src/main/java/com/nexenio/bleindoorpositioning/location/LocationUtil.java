@@ -35,7 +35,7 @@ public class LocationUtil {
     public static List<Location> getLocationsBetween(List<Location> locationList, long minimumTimestamp, long maximumTimestamp) {
         List<Location> matchingLocations = new ArrayList<>();
         for (Location location : locationList) {
-            if (location.getTimestamp() <= minimumTimestamp || location.getTimestamp() > maximumTimestamp) {
+            if (location.getTimestamp() < minimumTimestamp || location.getTimestamp() >= maximumTimestamp) {
                 continue;
             }
             matchingLocations.add(location);

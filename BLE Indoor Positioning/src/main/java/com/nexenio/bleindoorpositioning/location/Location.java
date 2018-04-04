@@ -113,6 +113,10 @@ public class Location {
         return latitude == location.latitude && longitude == location.longitude;
     }
 
+    public boolean latitudeAndLongitudeEqualsWithDelta(Location location, double delta) {
+        return (latitude - location.latitude < delta) && (longitude - location.longitude < delta);
+    }
+
     public boolean hasLatitudeAndLongitude() {
         return latitude != VALUE_NOT_SET && !Double.isNaN(latitude) && longitude != VALUE_NOT_SET && !Double.isNaN(longitude);
     }

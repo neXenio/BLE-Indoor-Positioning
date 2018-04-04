@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by leon on 29.03.18.
@@ -21,8 +22,7 @@ public class LocationUtilTest {
         ));
         Location expectedLocation = new Location(46.61639095, -30.3005094);
         Location actualLocation = LocationUtil.calculateMeanLocation(locationList);
-        assertEquals(expectedLocation.getLatitude(), actualLocation.getLatitude(), 0.00000001);
-        assertEquals(expectedLocation.getLongitude(), actualLocation.getLongitude(), 0.00000001);
+        assertTrue(actualLocation.latitudeAndLongitudeEqualsWithDelta(expectedLocation, 0.00000001));
     }
 
     @Test
@@ -36,8 +36,7 @@ public class LocationUtilTest {
         ));
         Location expectedLocation = new Location(52.5146588, 13.239528);
         Location actualLocation = LocationUtil.calculateMeanLocation(locationList);
-        assertEquals(expectedLocation.getLatitude(), actualLocation.getLatitude(), 0.00000001);
-        assertEquals(expectedLocation.getLongitude(), actualLocation.getLongitude(), 0.00000001);
+        assertTrue(actualLocation.latitudeAndLongitudeEqualsWithDelta(expectedLocation, 0.00000001));
     }
 
     @Test
@@ -47,8 +46,7 @@ public class LocationUtilTest {
         ));
         Location expectedLocation = new Location(LocationTest.BERLIN);
         Location actualLocation = LocationUtil.calculateMeanLocation(singleLocationList);
-        assertEquals(expectedLocation.getLatitude(), actualLocation.getLatitude(), 0);
-        assertEquals(expectedLocation.getLongitude(), actualLocation.getLongitude(), 0);
+        assertTrue(actualLocation.latitudeAndLongitudeEquals(expectedLocation));
     }
 
     @Test
@@ -70,7 +68,7 @@ public class LocationUtilTest {
         List<Location> timestampLocationList = new ArrayList<>(Arrays.asList(
                 firstLocation, secondLocation, thirdLocation
         ));
-        List<Location> actualLocations = LocationUtil.getLocationsBetween(timestampLocationList, 0, 1);
+        List<Location> actualLocations = LocationUtil.getLocationsBetween(timestampLocationList, 1, 2);
         List<Location> expectedLocations = new ArrayList<>(Arrays.asList(
                 secondLocation
         ));

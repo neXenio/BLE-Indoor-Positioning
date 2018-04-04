@@ -73,10 +73,10 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     public List<P> getAdvertisingPacketsBetween(long startTimestamp, long endTimestamp) {
         List<P> matchingAdvertisingPackets = new ArrayList<>();
         for (P advertisingPacket : new ArrayList<>(advertisingPackets)) {
-            if (advertisingPacket.getTimestamp() <= startTimestamp) {
+            if (advertisingPacket.getTimestamp() < startTimestamp) {
                 continue;
             }
-            if (advertisingPacket.getTimestamp() > endTimestamp) {
+            if (advertisingPacket.getTimestamp() >= endTimestamp) {
                 continue;
             }
             matchingAdvertisingPackets.add(advertisingPacket);
