@@ -22,7 +22,7 @@ public class LocationUtilTest {
         ));
         Location expectedLocation = new Location(46.61639095, -30.3005094);
         Location actualLocation = LocationUtil.calculateMeanLocation(locationList);
-        assertTrue(actualLocation.latitudeAndLongitudeEqualsWithDelta(expectedLocation, 0.00000001));
+        assertTrue(actualLocation.latitudeAndLongitudeEquals(expectedLocation, 0.00000001));
     }
 
     @Test
@@ -36,7 +36,7 @@ public class LocationUtilTest {
         ));
         Location expectedLocation = new Location(52.5146588, 13.239528);
         Location actualLocation = LocationUtil.calculateMeanLocation(locationList);
-        assertTrue(actualLocation.latitudeAndLongitudeEqualsWithDelta(expectedLocation, 0.00000001));
+        assertTrue(actualLocation.latitudeAndLongitudeEquals(expectedLocation, 0.00000001));
     }
 
     @Test
