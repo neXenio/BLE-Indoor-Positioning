@@ -75,13 +75,4 @@ public class LocationUtilTest {
         assertEquals(expectedLocations, actualLocations);
     }
 
-
-    @Test
-    public void test() throws Exception {
-        Location measuredLocation = new Location(52.512292, 13.3909021);
-        Location beacon = measuredLocation.getShiftedLocation(13.435, 353.84);
-        beacon.shift(0.35, 263.84);
-        System.out.println(beacon);
-    }
-
 }
