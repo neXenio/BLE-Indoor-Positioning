@@ -34,9 +34,9 @@ public class LocationUtilTest {
                 LocationTest.SOCCER_FIELD_TOP_RIGHT,
                 LocationTest.SOCCER_FIELD_CENTER
         ));
-        Location expectedLocation = new Location(52.5146588, 13.239528);
+        Location expectedLocation = LocationTest.SOCCER_FIELD_CENTER;
         Location actualLocation = LocationUtil.calculateMeanLocation(locationList);
-        assertTrue(actualLocation.latitudeAndLongitudeEquals(expectedLocation, 0.00000001));
+        assertTrue(actualLocation.latitudeAndLongitudeEquals(expectedLocation, 0.00001));
     }
 
     @Test
@@ -73,6 +73,15 @@ public class LocationUtilTest {
                 secondLocation
         ));
         assertEquals(expectedLocations, actualLocations);
+    }
+
+
+    @Test
+    public void test() throws Exception {
+        Location measuredLocation = new Location(52.512292, 13.3909021);
+        Location beacon = measuredLocation.getShiftedLocation(13.435, 353.84);
+        beacon.shift(0.35, 263.84);
+        System.out.println(beacon);
     }
 
 }
