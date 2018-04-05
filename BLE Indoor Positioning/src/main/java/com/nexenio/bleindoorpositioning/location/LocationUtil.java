@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 public class LocationUtil {
 
-    public static Location meanLocationFromLast(List<Location> locationList, long amount, TimeUnit timeUnit) {
+    public static Location calculateMeanLocationFromLast(List<Location> locationList, long amount, TimeUnit timeUnit) {
         List<Location> matchingLocations = getLocationsFromLast(locationList, amount, timeUnit);
         return calculateMeanLocation(matchingLocations);
     }

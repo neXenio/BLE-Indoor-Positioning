@@ -110,7 +110,7 @@ public class Location {
     }
 
     public boolean latitudeAndLongitudeEquals(Location location) {
-        return latitude == location.latitude && longitude == location.longitude;
+        return latitudeAndLongitudeEquals(location, 0);
     }
 
     public boolean latitudeAndLongitudeEquals(Location location, double delta) {
