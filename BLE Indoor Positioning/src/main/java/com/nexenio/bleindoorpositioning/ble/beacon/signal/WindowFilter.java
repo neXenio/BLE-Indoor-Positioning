@@ -43,7 +43,7 @@ public abstract class WindowFilter implements RssiFilter {
     }
 
     public List<AdvertisingPacket> getRecentAdvertisingPackets(Beacon beacon) {
-        return beacon.getAdvertisingPacketsBetween(minimumTimestamp, maximumTimestamp);
+        return beacon.getAdvertisingPacketsBetween(minimumTimestamp, maximumTimestamp + 1);
     }
 
     /*
