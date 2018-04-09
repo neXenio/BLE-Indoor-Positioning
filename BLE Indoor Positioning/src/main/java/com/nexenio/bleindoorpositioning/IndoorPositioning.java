@@ -9,6 +9,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.LocationPredictor;
+import com.nexenio.bleindoorpositioning.location.LocationUtil;
 import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
@@ -74,7 +75,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
             usableBeacons.sort(Beacon.RssiComparator);
             Collections.reverse(usableBeacons);
             for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
-                if (usableBeacons.get(beaconIndex).getFilteredRssi() < -90) {
+                if (usableBeacons.get(beaconIndex).getFilteredRssi() < -70) {
                     usableBeacons.remove(beaconIndex);
                 }
             }
@@ -83,7 +84,9 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         Multilateration multilateration = new Multilateration(usableBeacons);
         Location location = multilateration.getLocation();
         locationPredictor.addLocation(location);
-        onLocationUpdated(multilateration.getLocation());
+
+        Location meanLocation = LocationUtil.calculateMeanLocationFromLast(locationPredictor.getRecentLocations(), 2, TimeUnit.SECONDS);
+        onLocationUpdated(meanLocation);
     }
 
     public static List<Beacon> getUsableBeacons(Collection<Beacon> availableBeacons) {
