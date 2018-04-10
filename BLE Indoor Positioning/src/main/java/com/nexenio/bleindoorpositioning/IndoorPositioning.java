@@ -83,10 +83,13 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
         Multilateration multilateration = new Multilateration(usableBeacons);
         Location location = multilateration.getLocation();
-        locationPredictor.addLocation(location);
 
-        Location meanLocation = LocationUtil.calculateMeanLocationFromLast(locationPredictor.getRecentLocations(), 2, TimeUnit.SECONDS);
-        onLocationUpdated(meanLocation);
+        // TODO add explanation
+        if (multilateration.getDeviation() < 1) {
+            locationPredictor.addLocation(location);
+            onLocationUpdated(LocationUtil.calculateMeanLocationFromLast(locationPredictor.getRecentLocations(), 2, TimeUnit.SECONDS));
+        }
+
     }
 
     public static List<Beacon> getUsableBeacons(Collection<Beacon> availableBeacons) {
