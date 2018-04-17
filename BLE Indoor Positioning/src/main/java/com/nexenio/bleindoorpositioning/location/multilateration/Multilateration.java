@@ -75,13 +75,12 @@ public class Multilateration {
     }
 
     /**
-     * Get an estimate of the standard deviation of the parameters. The returned values are the
-     * square root of the diagonal coefficients of the covariance matrix, sd(a[i]) ~= sqrt(C[i][i]),
-     * where a[i] is the optimized value of the i-th parameter, and C is the covariance matrix.
+     * Returns the maximum square root of the diagonal coefficients of the covariance matrix,
+     * as provided by {@link LeastSquaresOptimizer.Optimum#getSigma(double)}.
      *
-     * @see <a href="https://commons.apache.org/proper/commons-math/javadocs/api-3.4.1/org/apache/commons/math3/fitting/leastsquares/LeastSquaresProblem.Evaluation.html">Documentation</a>
+     * @see <a href="https://commons.apache.org/proper/commons-math/javadocs/api-3.4.1/org/apache/commons/math3/fitting/leastsquares/LeastSquaresProblem.Evaluation.html#getSigma(double)">LeastSquaresProblem.Evaluation Documentation</a>
      */
-    public static float getDeviation(LeastSquaresOptimizer.Optimum optimum) {
+    private static float getDeviation(LeastSquaresOptimizer.Optimum optimum) {
         RealVector standardDeviation = optimum.getSigma(0);
         float maximumDeviation = 0;
         for (double deviation : standardDeviation.toArray()) {

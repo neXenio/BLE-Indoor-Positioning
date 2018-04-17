@@ -59,6 +59,10 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         return lastKnownLocation;
     }
 
+    public static Location getMeanLocation(long amount, TimeUnit timeUnit) {
+        return LocationUtil.calculateMeanLocationFromLast(getInstance().locationPredictor.getRecentLocations(), amount, timeUnit);
+    }
+
     @Override
     public void onBeaconUpdated(Beacon beacon) {
         if (shouldUpdateLocation()) {
@@ -87,16 +91,16 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         // use deviation of multilateration to stabilize location
         if (multilateration.getDeviation() < 1) {
             locationPredictor.addLocation(location);
-            onLocationUpdated(LocationUtil.calculateMeanLocationFromLast(locationPredictor.getRecentLocations(), 2, TimeUnit.SECONDS));
+            onLocationUpdated(getMeanLocation(2, TimeUnit.SECONDS));
         }
 
     }
 
-    public static List<Beacon> getUsableBeacons(Collection<Beacon> availableBeacons) {
+    public static <B extends Beacon> List<B> getUsableBeacons(Collection<B> availableBeacons) {
         // TODO: implement as beacon filter
-        List<Beacon> usableBeacons = new ArrayList<>();
+        List<B> usableBeacons = new ArrayList<>();
         long minimumTimestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(1);
-        for (Beacon beacon : (List<Beacon>) getInstance().indoorPositioningBeaconFilter.getMatches(availableBeacons)) {
+        for (B beacon : (List<B>) getInstance().indoorPositioningBeaconFilter.getMatches(availableBeacons)) {
             if (!beacon.hasLocation()) {
                 continue; // beacon has no location assigned, can't use it for multilateration
             }
