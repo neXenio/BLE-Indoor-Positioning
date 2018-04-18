@@ -13,6 +13,7 @@ import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -32,7 +33,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     protected int transmissionPower; // in dBm
     protected float distance; // in m
     protected boolean shouldUpdateDistance = true;
-    protected List<P> advertisingPackets = new ArrayList<>();
+    protected final ArrayList<P> advertisingPackets = new ArrayList<>();
     protected LocationProvider locationProvider;
 
     public Beacon() {
@@ -63,6 +64,13 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return advertisingPackets != null && !advertisingPackets.isEmpty();
     }
 
+    public P getOldestAdvertisingPacket() {
+        if (!hasAnyAdvertisingPacket()) {
+            return null;
+        }
+        return advertisingPackets.get(0);
+    }
+
     public P getLatestAdvertisingPacket() {
         if (!hasAnyAdvertisingPacket()) {
             return null;
@@ -70,8 +78,8 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return advertisingPackets.get(advertisingPackets.size() - 1);
     }
 
-    public List<P> getAdvertisingPacketsBetween(long startTimestamp, long endTimestamp) {
-        List<P> matchingAdvertisingPackets = new ArrayList<>();
+    public ArrayList<P> getAdvertisingPacketsBetweenOld(long startTimestamp, long endTimestamp) {
+        ArrayList<P> matchingAdvertisingPackets = new ArrayList<>();
         for (P advertisingPacket : new ArrayList<>(advertisingPackets)) {
             if (advertisingPacket.getTimestamp() < startTimestamp) {
                 continue;
@@ -84,15 +92,95 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return matchingAdvertisingPackets;
     }
 
-    public List<P> getAdvertisingPacketsFromLast(long amount, TimeUnit timeUnit) {
+    /**
+     * Returns an ArrayList of AdvertisingPackets that have been received in the specified time range.
+     * If no packets match, an empty list will be returned.
+     *
+     * @param startTimestamp minimum timestamp, inclusive
+     * @param endTimestamp   maximum timestamp, exclusive
+     */
+    public ArrayList<P> getAdvertisingPacketsBetween(long startTimestamp, long endTimestamp) {
+        if (advertisingPackets.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        synchronized (advertisingPackets) {
+            P oldestAdvertisingPacket = getOldestAdvertisingPacket();
+            P latestAdvertisingPacket = getLatestAdvertisingPacket();
+
+            if (endTimestamp < oldestAdvertisingPacket.getTimestamp() || startTimestamp > latestAdvertisingPacket.getTimestamp()) {
+                return new ArrayList<>();
+            }
+
+            P midstAdvertisingPacket = advertisingPackets.get(advertisingPackets.size() / 2);
+
+            int startIndex = 0;
+            if (startTimestamp > oldestAdvertisingPacket.getTimestamp()) {
+                // figure out if the start timestamp is before or after the midst advertising packet
+                ListIterator<P> listIterator;
+                if (startTimestamp < midstAdvertisingPacket.getTimestamp()) {
+                    // start timestamp is in the first half of advertising packets
+                    // start iterating from the beginning
+                    listIterator = advertisingPackets.listIterator();
+                    while (listIterator.hasNext()) {
+                        if (listIterator.next().getTimestamp() >= startTimestamp) {
+                            startIndex = listIterator.nextIndex() - 1;
+                            break;
+                        }
+                    }
+                } else {
+                    // start timestamp is in the second half of advertising packets
+                    // start iterating from the end
+                    listIterator = advertisingPackets.listIterator(advertisingPackets.size());
+                    while (listIterator.hasPrevious()) {
+                        if (listIterator.previous().getTimestamp() < startTimestamp) {
+                            startIndex = listIterator.nextIndex();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            int endIndex = advertisingPackets.size() - 1;
+            if (endTimestamp < oldestAdvertisingPacket.getTimestamp()) {
+                // figure out if the end timestamp is before or after the midst advertising packet
+                ListIterator<P> listIterator;
+                if (endTimestamp < midstAdvertisingPacket.getTimestamp()) {
+                    // end timestamp is in the first half of advertising packets
+                    // start iterating from the beginning
+                    listIterator = advertisingPackets.listIterator();
+                    while (listIterator.hasNext()) {
+                        if (listIterator.next().getTimestamp() >= endTimestamp) {
+                            endIndex = listIterator.previousIndex();
+                            break;
+                        }
+                    }
+                } else {
+                    // end timestamp is in the second half of advertising packets
+                    // start iterating from the end
+                    listIterator = advertisingPackets.listIterator(advertisingPackets.size());
+                    while (listIterator.hasPrevious()) {
+                        if (listIterator.previous().getTimestamp() < endTimestamp) {
+                            startIndex = listIterator.previousIndex() + 1;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return new ArrayList<>(advertisingPackets.subList(startIndex, endIndex + 1));
+        }
+    }
+
+    public ArrayList<P> getAdvertisingPacketsFromLast(long amount, TimeUnit timeUnit) {
         return getAdvertisingPacketsBetween(System.currentTimeMillis() - timeUnit.toMillis(amount), System.currentTimeMillis());
     }
 
-    public List<P> getAdvertisingPacketsSince(long timestamp) {
+    public ArrayList<P> getAdvertisingPacketsSince(long timestamp) {
         return getAdvertisingPacketsBetween(timestamp, System.currentTimeMillis());
     }
 
-    public List<P> getAdvertisingPacketsBefore(long timestamp) {
+    public ArrayList<P> getAdvertisingPacketsBefore(long timestamp) {
         return getAdvertisingPacketsBetween(0, timestamp);
     }
 
@@ -245,13 +333,8 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         this.transmissionPower = transmissionPower;
     }
 
-    public List<P> getAdvertisingPackets() {
+    public ArrayList<P> getAdvertisingPackets() {
         return advertisingPackets;
-    }
-
-    public void setAdvertisingPackets(List<P> advertisingPackets) {
-        this.advertisingPackets = advertisingPackets;
-        invalidateDistance();
     }
 
     public LocationProvider getLocationProvider() {
