@@ -1,5 +1,6 @@
 package com.nexenio.bleindoorpositioning.location.projection;
 
+import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationTest;
 
 import org.junit.Test;
@@ -48,6 +49,16 @@ public class SphericalMercatorProjectionTest {
         double x = SphericalMercatorProjection.longitudeToX(expectedLongitude);
         double actualLongitude = SphericalMercatorProjection.xToLongitude(x);
         assertEquals(expectedLongitude, actualLongitude, 0.00001);
+    }
+
+    @Test
+    public void conversionWithAltitude() throws Exception {
+        Location expectedLocation = LocationTest.BERLIN;
+        expectedLocation.setAltitude(34);
+        double[] ecef = SphericalMercatorProjection.locationToEcef(expectedLocation);
+        Location actualLocation = SphericalMercatorProjection.ecefToLocation(ecef);
+        double delta = expectedLocation.getDistanceTo(actualLocation);
+        assertEquals(0, delta, 0.0000001);
     }
 
 }
