@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class BeaconTest {
 
@@ -33,6 +34,16 @@ public class BeaconTest {
             advertisingPacket.setTimestamp(oldestPacketTimestamp + (packetIndex * timestampDelta));
             iBeacon.addAdvertisingPacket(advertisingPacket);
         }
+    }
+
+    @Test
+    public void getOldestAdvertisingPacket() {
+        assertEquals(iBeacon.getAdvertisingPackets().get(0), iBeacon.getOldestAdvertisingPacket());
+    }
+
+    @Test
+    public void getLatestAdvertisingPacket() {
+        assertEquals(iBeacon.getAdvertisingPackets().get(iBeacon.getAdvertisingPackets().size() - 1), iBeacon.getLatestAdvertisingPacket());
     }
 
     @Test
@@ -76,5 +87,43 @@ public class BeaconTest {
         assertTrue(advertisingPackets.isEmpty());
     }
 
+    @Test
+    public void getAdvertisingPacketsFromLast() {
+        long duration = TimeUnit.SECONDS.toMillis(3);
+        long minimumTimestamp = System.currentTimeMillis() - duration;
+        List<IBeaconAdvertisingPacket> advertisingPackets = iBeacon.getAdvertisingPacketsFromLast(duration, TimeUnit.MILLISECONDS);
+        long maximumTimestamp = System.currentTimeMillis();
+        assertFalse(advertisingPackets.isEmpty());
+        for (IBeaconAdvertisingPacket advertisingPacket : advertisingPackets) {
+            if (advertisingPacket.getTimestamp() < minimumTimestamp) {
+                fail("Packet timestamp before minimum timestamp");
+            } else if (advertisingPacket.getTimestamp() > maximumTimestamp) {
+                fail("Packet timestamp after maximum timestamp");
+            }
+        }
+    }
 
+    @Test
+    public void getAdvertisingPacketsSince() {
+        long minimumTimestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(3);
+        List<IBeaconAdvertisingPacket> advertisingPackets = iBeacon.getAdvertisingPacketsSince(minimumTimestamp);
+        assertFalse(advertisingPackets.isEmpty());
+        for (IBeaconAdvertisingPacket advertisingPacket : advertisingPackets) {
+            if (advertisingPacket.getTimestamp() < minimumTimestamp) {
+                fail("Packet timestamp before minimum timestamp");
+            }
+        }
+    }
+
+    @Test
+    public void getAdvertisingPacketsBefore() {
+        long maximumTimestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(3);
+        List<IBeaconAdvertisingPacket> advertisingPackets = iBeacon.getAdvertisingPacketsBefore(maximumTimestamp);
+        assertFalse(advertisingPackets.isEmpty());
+        for (IBeaconAdvertisingPacket advertisingPacket : advertisingPackets) {
+            if (advertisingPacket.getTimestamp() > maximumTimestamp) {
+                fail("Packet timestamp after maximum timestamp");
+            }
+        }
+    }
 }
