@@ -100,20 +100,24 @@ public abstract class Beacon<P extends AdvertisingPacket> {
      * @param endTimestamp   maximum timestamp, exclusive
      */
     public ArrayList<P> getAdvertisingPacketsBetween(long startTimestamp, long endTimestamp) {
-        if (advertisingPackets.isEmpty()) {
-            return new ArrayList<>();
-        }
-
         synchronized (advertisingPackets) {
+            // check if advertising packets are available
+            if (advertisingPackets.isEmpty()) {
+                return new ArrayList<>();
+            }
+
             P oldestAdvertisingPacket = getOldestAdvertisingPacket();
             P latestAdvertisingPacket = getLatestAdvertisingPacket();
 
-            if (endTimestamp < oldestAdvertisingPacket.getTimestamp() || startTimestamp > latestAdvertisingPacket.getTimestamp()) {
+            // check if the timestamps are out of range
+            if (endTimestamp <= oldestAdvertisingPacket.getTimestamp() || startTimestamp > latestAdvertisingPacket.getTimestamp()) {
                 return new ArrayList<>();
             }
 
             P midstAdvertisingPacket = advertisingPackets.get(advertisingPackets.size() / 2);
 
+            // find the index of the first advertising packet with a timestamp
+            // larger than or equal to the specified startTimestamp
             int startIndex = 0;
             if (startTimestamp > oldestAdvertisingPacket.getTimestamp()) {
                 // figure out if the start timestamp is before or after the midst advertising packet
@@ -141,8 +145,10 @@ public abstract class Beacon<P extends AdvertisingPacket> {
                 }
             }
 
+            // find the index of the last advertising packet with a timestamp
+            // smaller than the specified endTimestamp
             int endIndex = advertisingPackets.size() - 1;
-            if (endTimestamp < oldestAdvertisingPacket.getTimestamp()) {
+            if (endTimestamp < latestAdvertisingPacket.getTimestamp()) {
                 // figure out if the end timestamp is before or after the midst advertising packet
                 ListIterator<P> listIterator;
                 if (endTimestamp < midstAdvertisingPacket.getTimestamp()) {
@@ -161,7 +167,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
                     listIterator = advertisingPackets.listIterator(advertisingPackets.size());
                     while (listIterator.hasPrevious()) {
                         if (listIterator.previous().getTimestamp() < endTimestamp) {
-                            startIndex = listIterator.previousIndex() + 1;
+                            endIndex = listIterator.previousIndex() + 1;
                             break;
                         }
                     }
