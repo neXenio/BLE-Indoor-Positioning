@@ -15,22 +15,23 @@ import static org.junit.Assert.fail;
 
 public class BeaconTest {
 
+    public static final byte[] IBEACON_ADVERTISING_DATA = new byte[]{2, 1, 6, 26, -1, 76, 0, 2, 21, -84, -3, 6, 94, -61, -64, 17, -29, -101, -66, 26, 81, 73, 50, -84, 1, 0, 1, 0, 2, -54};
+
     private IBeacon<IBeaconAdvertisingPacket> iBeacon;
-    private static final byte[] iBeaconAdvertisingData = new byte[]{2, 1, 6, 26, -1, 76, 0, 2, 21, -84, -3, 6, 94, -61, -64, 17, -29, -101, -66, 26, 81, 73, 50, -84, 1, 0, 1, 0, 2, -54};
 
     @Before
     public void setUp() {
         iBeacon = new IBeacon<>();
         IBeaconAdvertisingPacket advertisingPacket;
 
-        int packetsCount = 100; // number of packets to add
         int packetsFrequency = 10; // in Hertz
+        int packetsCount = 1000; // number of packets to add
         int timestampDelta = (int) TimeUnit.SECONDS.toMillis(1) / packetsFrequency;
         long latestPacketTimestamp = System.currentTimeMillis();
         long oldestPacketTimestamp = latestPacketTimestamp - ((packetsCount - 1) * timestampDelta);
 
         for (int packetIndex = 0; packetIndex < packetsCount; packetIndex++) {
-            advertisingPacket = new IBeaconAdvertisingPacket(iBeaconAdvertisingData);
+            advertisingPacket = new IBeaconAdvertisingPacket(IBEACON_ADVERTISING_DATA);
             advertisingPacket.setTimestamp(oldestPacketTimestamp + (packetIndex * timestampDelta));
             iBeacon.addAdvertisingPacket(advertisingPacket);
         }

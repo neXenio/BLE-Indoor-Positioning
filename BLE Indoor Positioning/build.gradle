@@ -21,6 +21,7 @@ apply plugin: 'jacoco'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.lemmingapex.trilateration:trilateration:1.0.2'
+    testCompile 'net.steppschuh.markdowngenerator:markdowngenerator:1.3.0.0'
     testImplementation 'junit:junit:4.12'
 }
 
