@@ -25,6 +25,7 @@ public class Multilateration {
 
     private Location location;
     private float deviation;
+    private float rms;
     private LeastSquaresOptimizer.Optimum optimum;
 
     public Multilateration(List<Beacon> beacons) {
@@ -36,11 +37,7 @@ public class Multilateration {
         Location location;
         for (int beaconIndex = 0; beaconIndex < beacons.size(); beaconIndex++) {
             location = beacons.get(beaconIndex).getLocation();
-            positions[beaconIndex] = new double[]{
-                    SphericalMercatorProjection.latitudeToY(location.getLatitude()),
-                    SphericalMercatorProjection.longitudeToX(location.getLongitude())
-                    // TODO: add altitude
-            };
+            positions[beaconIndex] = SphericalMercatorProjection.locationToEcef(location);
         }
         return positions;
     }
@@ -68,10 +65,7 @@ public class Multilateration {
 
     public static Location getLocation(LeastSquaresOptimizer.Optimum optimum) {
         double[] centroid = optimum.getPoint().toArray();
-        double latitude = SphericalMercatorProjection.yToLatitude(centroid[0]);
-        double longitude = SphericalMercatorProjection.xToLongitude(centroid[1]);
-        // TODO: add altitude
-        return new Location(latitude, longitude);
+        return SphericalMercatorProjection.ecefToLocation(centroid);
     }
 
     /**
@@ -89,9 +83,20 @@ public class Multilateration {
         return maximumDeviation;
     }
 
+    private static float getRMS(LeastSquaresOptimizer.Optimum optimum) {
+        return (float) optimum.getRMS();
+    }
+
     /*
         Getter & Setter
      */
+
+    public double getRMS() {
+        if (rms == 0) {
+            rms = getRMS(getOptimum());
+        }
+        return rms;
+    }
 
     public List<Beacon> getBeacons() {
         return beacons;

@@ -54,19 +54,19 @@ public class SphericalMercatorProjection {
         w = Math.sqrt(w2);
         r2 = w2 + z * z;
         r = Math.sqrt(r2);
-        geo[1] = Math.atan2(y, x);       // Lon (final)
+        geo[1] = Math.atan2(y, x);       // Longitude
         s2 = z * z / r2;
         c2 = w2 / r2;
         u = a2 / r;
         v = a3 - a4 / r;
         if (c2 > 0.3) {
             s = (zp / r) * (1.0 + c2 * (a1 + u + s2 * v) / r);
-            geo[0] = Math.asin(s);      // Lat
+            geo[0] = Math.asin(s);
             ss = s * s;
             c = Math.sqrt(1.0 - ss);
         } else {
             c = (w / r) * (1.0 - s2 * (a5 - u - c2 * v) / r);
-            geo[0] = Math.acos(c);      // Lat
+            geo[0] = Math.acos(c);
             ss = 1.0 - c * c;
             s = Math.sqrt(ss);
         }
@@ -79,30 +79,30 @@ public class SphericalMercatorProjection {
         m = c * v - s * u;
         p = m / (rf / g + f);
 
-        geo[0] = geo[0] + p;          // Lat
-        geo[2] = f + m * p / 2.0;     // Altitude
+        geo[0] = geo[0] + p;
+        geo[2] = f + m * p / 2.0;     // Elevation
         if (z < 0.0) {
-            geo[0] *= -1.0;           // Lat
+            geo[0] *= -1.0;           // Latitude
         }
-        return new Location(Math.toDegrees(geo[0]), Math.toDegrees(geo[1]), Math.toDegrees(geo[2]));
+        return new Location(Math.toDegrees(geo[0]), Math.toDegrees(geo[1]), 0, Math.toDegrees(geo[2]));
     }
 
     /**
-     * Convert Lat, Lon, Altitude to Earth-Centered-Earth-Fixed (ECEF).
-     * Input is a three element array containing lat, lon (degrees) and alt (m).
+     * Converts Latitude, Longitude, Elevation to Earth-Centered-Earth-Fixed (ECEF).
+     * Input is a three element array containing latitude, longitude (degrees) and elevation (m).
      * Returned array contains x, y, z in meters
      *
      * @see <a href="http://danceswithcode.net/engineeringnotes/geodetic_to_ecef/geodetic_to_ecef.html">Source</a>
      */
-    public static double[] locationToEcef(Location geo) {
+    public static double[] locationToEcef(Location location) {
         double[] ecef = new double[3];
-        double lat = Math.toRadians(geo.getLatitude());
-        double lon = Math.toRadians(geo.getLongitude());
-        double alt = Math.toRadians(geo.getAltitude());
-        double n = EARTH_RADIUS / Math.sqrt(1 - e2 * Math.sin(lat) * Math.sin(lat));
-        ecef[0] = (n + alt) * Math.cos(lat) * Math.cos(lon);
-        ecef[1] = (n + alt) * Math.cos(lat) * Math.sin(lon);
-        ecef[2] = (n * (1 - e2) + alt) * Math.sin(lat);
+        double latitude = Math.toRadians(location.getLatitude());
+        double longitude = Math.toRadians(location.getLongitude());
+        double elevation = Math.toRadians(location.getElevation());
+        double n = EARTH_RADIUS / Math.sqrt(1 - e2 * Math.sin(latitude) * Math.sin(latitude));
+        ecef[0] = (n + elevation) * Math.cos(latitude) * Math.cos(longitude);
+        ecef[1] = (n + elevation) * Math.cos(latitude) * Math.sin(longitude);
+        ecef[2] = (n * (1 - e2) + elevation) * Math.sin(latitude);
         return (ecef);
     }
 

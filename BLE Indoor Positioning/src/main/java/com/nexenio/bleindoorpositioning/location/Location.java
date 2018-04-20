@@ -140,6 +140,10 @@ public class Location {
         return altitude != VALUE_NOT_SET && !Double.isNaN(altitude);
     }
 
+    public boolean hasElevation() {
+        return elevation != VALUE_NOT_SET && !Double.isNaN(elevation);
+    }
+
     public URI generateGoogleMapsUri() {
         try {
             return new URI("https://www.google.com/maps/search/?api=1&query=" +
@@ -159,6 +163,9 @@ public class Location {
         sb.append("Longitude: ").append(longitude).append(" ");
         if (hasAltitude()) {
             sb.append("Altitude: ").append(altitude).append(" ");
+        }
+        if (hasElevation()) {
+            sb.append("Elevation: ").append(elevation).append(" ");
         }
         return sb.toString();
     }

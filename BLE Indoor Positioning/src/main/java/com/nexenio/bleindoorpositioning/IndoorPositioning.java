@@ -88,8 +88,8 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         Multilateration multilateration = new Multilateration(usableBeacons);
         Location location = multilateration.getLocation();
 
-        // use deviation of multilateration to stabilize location
-        if (multilateration.getDeviation() < 1) {
+        // use root mean square of multilateration to stabilize location
+        if (multilateration.getRMS() < 10) {
             locationPredictor.addLocation(location);
             onLocationUpdated(getMeanLocation(2, TimeUnit.SECONDS));
         }
