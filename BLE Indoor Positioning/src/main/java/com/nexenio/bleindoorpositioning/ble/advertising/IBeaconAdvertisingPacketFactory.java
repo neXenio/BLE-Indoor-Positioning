@@ -4,10 +4,10 @@ package com.nexenio.bleindoorpositioning.ble.advertising;
  * Created by steppschuh on 02.02.18.
  */
 
-public class IBeaconAdvertisingPacketFactory implements AdvertisingPacketFactory {
+public class IBeaconAdvertisingPacketFactory extends AdvertisingPacketFactory {
 
     @Override
-    public boolean couldCreateAdvertisingPacket(byte[] advertisingData) {
+    public boolean canCreateAdvertisingPacket(byte[] advertisingData) {
         return IBeaconAdvertisingPacket.meetsSpecification(advertisingData);
     }
 

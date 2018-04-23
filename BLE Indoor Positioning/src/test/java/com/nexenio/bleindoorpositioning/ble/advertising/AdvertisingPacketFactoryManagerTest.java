@@ -41,12 +41,12 @@ public class AdvertisingPacketFactoryManagerTest {
         assertEquals(0, advertisingPacketFactoryManager.getAdvertisingPacketFactories().indexOf(factory));
     }
 
-    public static class CustomAdvertisingPacketFactory implements AdvertisingPacketFactory {
+    public static class CustomAdvertisingPacketFactory extends AdvertisingPacketFactory {
 
         public CustomAdvertisingPacketFactory() {
         }
 
-        public boolean couldCreateAdvertisingPacket(byte[] advertisingData) {
+        public boolean canCreateAdvertisingPacket(byte[] advertisingData) {
             return true;
         }
 

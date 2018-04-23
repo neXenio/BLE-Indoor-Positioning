@@ -7,7 +7,7 @@ import java.util.List;
  * Created by steppschuh on 05.02.18.
  */
 
-public class AdvertisingPacketFactoryManager implements AdvertisingPacketFactory {
+public class AdvertisingPacketFactoryManager extends AdvertisingPacketFactory {
 
     /**
      * A list of factories that may be used for creating {@link AdvertisingPacket}s.
@@ -23,7 +23,7 @@ public class AdvertisingPacketFactoryManager implements AdvertisingPacketFactory
     }
 
     @Override
-    public boolean couldCreateAdvertisingPacket(byte[] advertisingData) {
+    public boolean canCreateAdvertisingPacket(byte[] advertisingData) {
         return getAdvertisingPacketFactory(advertisingData) != null;
     }
 
@@ -35,13 +35,13 @@ public class AdvertisingPacketFactoryManager implements AdvertisingPacketFactory
 
     /**
      * Iterates over {@link #advertisingPacketFactories} and returns the first element that returns
-     * true when calling {@link AdvertisingPacketFactory#couldCreateAdvertisingPacket(byte[])}.
+     * true when calling {@link AdvertisingPacketFactory#canCreateAdvertisingPacket(byte[])}.
      *
      * Returns null if no matching factory was found.
      */
     public AdvertisingPacketFactory getAdvertisingPacketFactory(byte[] advertisingData) {
         for (AdvertisingPacketFactory advertisingPacketFactory : advertisingPacketFactories) {
-            if (advertisingPacketFactory.couldCreateAdvertisingPacket(advertisingData)) {
+            if (advertisingPacketFactory.canCreateAdvertisingPacket(advertisingData)) {
                 return advertisingPacketFactory;
             }
         }
