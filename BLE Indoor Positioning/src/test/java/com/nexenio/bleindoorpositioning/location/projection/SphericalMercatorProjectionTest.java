@@ -54,7 +54,7 @@ public class SphericalMercatorProjectionTest {
     @Test
     public void conversionWithAltitude() throws Exception {
         Location expectedLocation = LocationTest.BERLIN;
-        expectedLocation.setAltitude(34);
+        expectedLocation.setElevation(2);
         double[] ecef = SphericalMercatorProjection.locationToEcef(expectedLocation);
         Location actualLocation = SphericalMercatorProjection.ecefToLocation(ecef);
         double delta = expectedLocation.getDistanceTo(actualLocation);
