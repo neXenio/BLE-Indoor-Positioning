@@ -78,20 +78,6 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return advertisingPackets.get(advertisingPackets.size() - 1);
     }
 
-    public ArrayList<P> getAdvertisingPacketsBetweenOld(long startTimestamp, long endTimestamp) {
-        ArrayList<P> matchingAdvertisingPackets = new ArrayList<>();
-        for (P advertisingPacket : new ArrayList<>(advertisingPackets)) {
-            if (advertisingPacket.getTimestamp() < startTimestamp) {
-                continue;
-            }
-            if (advertisingPacket.getTimestamp() >= endTimestamp) {
-                continue;
-            }
-            matchingAdvertisingPackets.add(advertisingPacket);
-        }
-        return matchingAdvertisingPackets;
-    }
-
     /**
      * Returns an ArrayList of AdvertisingPackets that have been received in the specified time range.
      * If no packets match, an empty list will be returned.

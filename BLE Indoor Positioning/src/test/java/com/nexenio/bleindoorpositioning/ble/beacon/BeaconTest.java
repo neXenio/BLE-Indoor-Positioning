@@ -98,7 +98,7 @@ public class BeaconTest {
         for (IBeaconAdvertisingPacket advertisingPacket : advertisingPackets) {
             if (advertisingPacket.getTimestamp() < minimumTimestamp) {
                 fail("Packet timestamp before minimum timestamp");
-            } else if (advertisingPacket.getTimestamp() > maximumTimestamp) {
+            } else if (advertisingPacket.getTimestamp() >= maximumTimestamp) {
                 fail("Packet timestamp after maximum timestamp");
             }
         }
@@ -122,7 +122,7 @@ public class BeaconTest {
         List<IBeaconAdvertisingPacket> advertisingPackets = iBeacon.getAdvertisingPacketsBefore(maximumTimestamp);
         assertFalse(advertisingPackets.isEmpty());
         for (IBeaconAdvertisingPacket advertisingPacket : advertisingPackets) {
-            if (advertisingPacket.getTimestamp() > maximumTimestamp) {
+            if (advertisingPacket.getTimestamp() >= maximumTimestamp) {
                 fail("Packet timestamp after maximum timestamp");
             }
         }

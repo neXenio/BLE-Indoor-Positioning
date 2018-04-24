@@ -120,7 +120,7 @@ public abstract class AdvertisingPacketUtil {
             if (endTimestamp < midstAdvertisingPacket.getTimestamp()) {
                 // end timestamp is in the first half of advertising packets
                 // start iterating from the beginning
-                listIterator = advertisingPackets.listIterator();
+                listIterator = advertisingPackets.listIterator(startIndex);
                 while (listIterator.hasNext()) {
                     if (listIterator.next().getTimestamp() >= endTimestamp) {
                         endIndex = listIterator.previousIndex();
