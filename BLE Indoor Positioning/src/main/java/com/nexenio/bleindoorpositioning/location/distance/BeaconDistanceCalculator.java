@@ -10,8 +10,14 @@ import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 
 public abstract class BeaconDistanceCalculator {
 
+    /**
+     * Different Path Loss Exponent parameters for different environments.
+     *
+     * @ see <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model"></a>
+     */
     public static final float PATH_LOSS_PARAMETER_OPEN_SPACE = 2;
     public static final float PATH_LOSS_PARAMETER_INDOOR = 1.7f;
+    public static final float PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION = 3f;
 
     public static final int SIGNAL_LOSS_AT_ONE_METER = -41;
 
@@ -50,7 +56,7 @@ public abstract class BeaconDistanceCalculator {
      * path loss model</a>.
      */
     public static float calculateDistanceTo(Beacon beacon, float rssi) {
-        return calculateDistance(rssi, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), PATH_LOSS_PARAMETER_INDOOR);
+        return calculateDistance(rssi, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION);
     }
 
     /**
