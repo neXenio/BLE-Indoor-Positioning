@@ -25,17 +25,17 @@ public abstract class BeaconDistanceCalculator {
 
     /**
      * Use this method to remove the altitude from the distance to the beacon. Calculation based on
-     * Pythagoras with altitude to calculate more accurate distance to the beacon, if the distance
-     * is double the altitude. The altitude expected refers to the distance above the floor ground,
+     * Pythagoras with altitude to calculate distance on the floor to the beacon, if the distance
+     * is double the elevation delta. The elevation expected refers to the distance above the floor ground,
      * rather than the altitude above sea level.
      */
-    public static float calculateDistanceWithoutAltitudeDeltaToFloor(Beacon beacon, float rssi) {
+    public static float calculateDistanceWithoutElevationDeltaToFloor(Beacon beacon, float rssi, double deviceElevation) {
         float distance = calculateDistanceTo(beacon, rssi);
         if (beacon.hasLocation() && beacon.getLocation().hasElevation()) {
-            double elevation = beacon.getLocation().getElevation();
-            // distance should be double of the elevation to make pythagoras meaningful
-            if (elevation > 0 && distance > (elevation * 2)) {
-                double delta = Math.pow(distance, 2) - Math.pow(elevation, 2);
+            double elevationDelta = Math.abs(beacon.getLocation().getElevation() - deviceElevation);
+            // distance should be double of the elevationDelta to make pythagoras meaningful
+            if (elevationDelta > 0 && distance > (elevationDelta * 2)) {
+                double delta = Math.pow(distance, 2) - Math.pow(elevationDelta, 2);
                 return (float) Math.sqrt(delta);
             } else {
                 return distance;

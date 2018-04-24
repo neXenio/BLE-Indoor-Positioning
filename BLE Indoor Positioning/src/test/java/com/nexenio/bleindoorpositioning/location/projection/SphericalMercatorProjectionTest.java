@@ -52,13 +52,43 @@ public class SphericalMercatorProjectionTest {
     }
 
     @Test
-    public void conversionWithAltitude() throws Exception {
+    public void conversionWithElevation() throws Exception {
         Location expectedLocation = LocationTest.BERLIN;
         expectedLocation.setElevation(2);
         double[] ecef = SphericalMercatorProjection.locationToEcef(expectedLocation);
         Location actualLocation = SphericalMercatorProjection.ecefToLocation(ecef);
         double delta = expectedLocation.getDistanceTo(actualLocation);
         assertEquals(0, delta, 0.0000001);
+    }
+
+    @Test
+    public void geodeticToEcef_location_accurateEcef() throws Exception {
+        double[] expectedCenter = new double[]{3786292.474596871, 890822.9600122868, 5037857.368752121}; // SOCCER_FIELD_CENTER
+        double[] geodetic = new double[]{
+                Math.toRadians(LocationTest.SOCCER_FIELD_CENTER.getLatitude()),
+                Math.toRadians(LocationTest.SOCCER_FIELD_CENTER.getLongitude()),
+                Math.toRadians(LocationTest.SOCCER_FIELD_CENTER.getElevation())
+        };
+        double[] actualCenter = SphericalMercatorProjection.geodeticToEcef(geodetic);
+
+        assertEquals(expectedCenter[0], actualCenter[0], 1);
+        assertEquals(expectedCenter[1], actualCenter[1], 1);
+        assertEquals(expectedCenter[2], actualCenter[2], 1);
+    }
+
+    @Test
+    public void ecefToGeodetic_ecefArray_accurateGeodetic() throws Exception {
+        double[] expectedGeodetic = new double[]{
+                LocationTest.SOCCER_FIELD_CENTER.getLatitude(),
+                LocationTest.SOCCER_FIELD_CENTER.getLongitude(),
+                LocationTest.SOCCER_FIELD_CENTER.getElevation()
+        };
+        double[] ecefArray = new double[]{3786292.474596871, 890822.9600122868, 5037857.368752121}; // SOCCER_FIELD_CENTER
+        double[] actualGeodetic = SphericalMercatorProjection.ecefToGeodetic(ecefArray);
+
+        assertEquals(expectedGeodetic[0], Math.toDegrees(actualGeodetic[0]), 1);
+        assertEquals(expectedGeodetic[1], Math.toDegrees(actualGeodetic[1]), 1);
+        assertEquals(expectedGeodetic[2], Math.toDegrees(actualGeodetic[2]), 1);
     }
 
 }

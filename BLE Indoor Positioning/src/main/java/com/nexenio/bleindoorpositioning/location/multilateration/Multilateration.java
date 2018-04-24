@@ -21,11 +21,13 @@ import java.util.List;
 
 public class Multilateration {
 
+    public static final int ROOT_MEAN_SQUARE_NOT_SET = -1;
+
     private List<Beacon> beacons;
 
     private Location location;
     private float deviation;
-    private float rms;
+    private double rootMeanSquare = ROOT_MEAN_SQUARE_NOT_SET;
     private LeastSquaresOptimizer.Optimum optimum;
 
     public Multilateration(List<Beacon> beacons) {
@@ -83,8 +85,8 @@ public class Multilateration {
         return maximumDeviation;
     }
 
-    private static float getRMS(LeastSquaresOptimizer.Optimum optimum) {
-        return (float) optimum.getRMS();
+    private static double getRMS(LeastSquaresOptimizer.Optimum optimum) {
+        return optimum.getRMS();
     }
 
     /*
@@ -92,10 +94,10 @@ public class Multilateration {
      */
 
     public double getRMS() {
-        if (rms == 0) {
-            rms = getRMS(getOptimum());
+        if (rootMeanSquare == -1) {
+            rootMeanSquare = getRMS(getOptimum());
         }
-        return rms;
+        return rootMeanSquare;
     }
 
     public List<Beacon> getBeacons() {

@@ -50,8 +50,8 @@ public class SphericalMercatorProjection {
 
     /**
      * Convert Earth-Centered-Earth-Fixed (ECEF) to latitude, longitude, elevation.
-     * Input is a three element array containing x, y, z. Expects input to be in degrees.
-     * Output array contains latitude and longitude in degrees, and elevation.
+     * Input is a three element array containing x, y, z in meters.
+     * Output array contains latitude and longitude in radians, and elevation in meters.
      *
      * @see <a href="http://danceswithcode.net/engineeringnotes/geodetic_to_ecef/geodetic_to_ecef.html">Source</a>
      */
@@ -109,8 +109,9 @@ public class SphericalMercatorProjection {
     }
 
     /**
-     * Input is a three element array containing latitude, longitude and elevation.
-     * Expects input to be in radians. Returned array contains x, y, z in meters
+     * Convert latitude, longitude, elevation to Earth-Centered-Earth-Fixed (ECEF).
+     * Input is a three element array containing latitude, longitude (radians) and elevation (in meter).
+     * Returned array contains x, y, z in meters
      *
      * @see <a href="http://danceswithcode.net/engineeringnotes/geodetic_to_ecef/geodetic_to_ecef.html">Source</a>
      */
