@@ -30,13 +30,16 @@ public abstract class BeaconDistanceCalculator {
      * rather than the altitude above sea level.
      */
     public static float calculateDistanceWithoutAltitudeDeltaToFloor(Beacon beacon, float rssi) {
-        // TODO fix null pointer for no location
-        double elevation = beacon.getLocation().getElevation();
         float distance = calculateDistanceTo(beacon, rssi);
-        // distance should be double of the elevation to make pythagoras meaningful
-        if (elevation > 0 && distance > (elevation * 2)) {
-            double delta = Math.pow(distance, 2) - Math.pow(elevation, 2);
-            return (float) Math.sqrt(delta);
+        if (beacon.hasLocation() && beacon.getLocation().hasElevation()) {
+            double elevation = beacon.getLocation().getElevation();
+            // distance should be double of the elevation to make pythagoras meaningful
+            if (elevation > 0 && distance > (elevation * 2)) {
+                double delta = Math.pow(distance, 2) - Math.pow(elevation, 2);
+                return (float) Math.sqrt(delta);
+            } else {
+                return distance;
+            }
         } else {
             return distance;
         }
