@@ -11,10 +11,9 @@ public abstract class LocationDistanceCalculator {
     public static final int EARTH_RADIUS = 6371; // in km
 
     public static double calculateDistanceBetween(Location fromLocation, Location toLocation) {
-        // TODO add elevation
         return calculateDistanceBetween(
-                fromLocation.getLatitude(), fromLocation.getLongitude(), fromLocation.getAltitude(),
-                toLocation.getLatitude(), toLocation.getLongitude(), toLocation.getAltitude()
+                fromLocation.getLatitude(), fromLocation.getLongitude(), fromLocation.getAltitude() + fromLocation.getElevation(),
+                toLocation.getLatitude(), toLocation.getLongitude(), toLocation.getAltitude() + toLocation.getElevation()
         );
     }
 
