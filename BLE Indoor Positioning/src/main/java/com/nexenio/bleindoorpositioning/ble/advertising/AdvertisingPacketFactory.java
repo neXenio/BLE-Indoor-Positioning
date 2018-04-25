@@ -55,9 +55,9 @@ public abstract class AdvertisingPacketFactory<AP extends AdvertisingPacket> {
     }
 
     public AdvertisingPacketFactory<AP> getAdvertisingFactory(byte[] advertisingData) {
-        if (canCreateAdvertisingPacketWithDescendants(advertisingData)) {
+        if (canCreateAdvertisingPacket(advertisingData)) {
             for (AdvertisingPacketFactory<AP> advertisingPacketFactory : subFactoryMap.values()) {
-                if (advertisingPacketFactory.canCreateAdvertisingPacket(advertisingData)) {
+                if (advertisingPacketFactory.getAdvertisingFactory(advertisingData) != null) {
                     return advertisingPacketFactory;
                 }
             }

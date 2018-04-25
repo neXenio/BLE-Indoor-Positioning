@@ -34,12 +34,14 @@ public class AdvertisingPacketFactoryManager {
      * Returns null if no matching factory was found.
      */
     public AdvertisingPacketFactory getAdvertisingPacketFactory(byte[] advertisingData) {
+        AdvertisingPacketFactory factory = null;
         for (AdvertisingPacketFactory advertisingPacketFactory : advertisingPacketFactories) {
-            if (advertisingPacketFactory.canCreateAdvertisingPacket(advertisingData)) {
-                return advertisingPacketFactory;
+            factory = advertisingPacketFactory.getAdvertisingFactory(advertisingData);
+            if (factory != null) {
+                break;
             }
         }
-        return null;
+        return factory;
     }
 
     /**
