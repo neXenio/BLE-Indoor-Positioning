@@ -7,7 +7,7 @@ import java.util.List;
  * Created by steppschuh on 05.02.18.
  */
 
-public class AdvertisingPacketFactoryManager extends AdvertisingPacketFactory {
+public class AdvertisingPacketFactoryManager {
 
     /**
      * A list of factories that may be used for creating {@link AdvertisingPacket}s.
@@ -22,12 +22,6 @@ public class AdvertisingPacketFactoryManager extends AdvertisingPacketFactory {
         advertisingPacketFactories.add(new IBeaconAdvertisingPacketFactory());
     }
 
-    @Override
-    public boolean canCreateAdvertisingPacket(byte[] advertisingData) {
-        return getAdvertisingPacketFactory(advertisingData) != null;
-    }
-
-    @Override
     public AdvertisingPacket createAdvertisingPacket(byte[] advertisingData) {
         AdvertisingPacketFactory advertisingPacketFactory = getAdvertisingPacketFactory(advertisingData);
         return advertisingPacketFactory != null ? advertisingPacketFactory.createAdvertisingPacket(advertisingData) : null;

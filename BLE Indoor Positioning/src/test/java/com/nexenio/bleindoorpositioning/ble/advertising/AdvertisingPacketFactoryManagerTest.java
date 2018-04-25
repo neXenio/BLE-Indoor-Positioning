@@ -44,6 +44,7 @@ public class AdvertisingPacketFactoryManagerTest {
     public static class CustomAdvertisingPacketFactory extends AdvertisingPacketFactory {
 
         public CustomAdvertisingPacketFactory() {
+            super(BeaconFactoryTest.CustomAdvertisingPacket.class);
         }
 
         public boolean canCreateAdvertisingPacket(byte[] advertisingData) {
@@ -55,4 +56,5 @@ public class AdvertisingPacketFactoryManagerTest {
         }
 
     }
+
 }

@@ -6,6 +6,14 @@ package com.nexenio.bleindoorpositioning.ble.advertising;
 
 public class IBeaconAdvertisingPacketFactory extends AdvertisingPacketFactory {
 
+    public IBeaconAdvertisingPacketFactory() {
+        this(IBeaconAdvertisingPacket.class);
+    }
+
+    public <AP extends AdvertisingPacket> IBeaconAdvertisingPacketFactory(Class<AP> packetClass) {
+        super(packetClass);
+    }
+
     @Override
     public boolean canCreateAdvertisingPacket(byte[] advertisingData) {
         return IBeaconAdvertisingPacket.meetsSpecification(advertisingData);
