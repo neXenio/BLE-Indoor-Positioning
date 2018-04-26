@@ -67,6 +67,7 @@ public class Multilateration {
 
     public static Location getLocation(LeastSquaresOptimizer.Optimum optimum) {
         double[] centroid = optimum.getPoint().toArray();
+        System.out.println(centroid[2]);
         return SphericalMercatorProjection.ecefToLocation(centroid);
     }
 
@@ -94,7 +95,7 @@ public class Multilateration {
      */
 
     public double getRMS() {
-        if (rootMeanSquare == -1) {
+        if (rootMeanSquare == ROOT_MEAN_SQUARE_NOT_SET) {
             rootMeanSquare = getRMS(getOptimum());
         }
         return rootMeanSquare;

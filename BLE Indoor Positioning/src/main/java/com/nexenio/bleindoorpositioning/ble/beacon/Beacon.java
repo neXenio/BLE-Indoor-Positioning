@@ -165,7 +165,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     public float getDistance(RssiFilter filter) {
         float filteredRssi = getRssi(filter);
         // TODO adapt to 3D multilateration
-        // return BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToFloor(this, filteredRssi, 1);
+        // return BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(this, filteredRssi, 1);
         return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
     }
 

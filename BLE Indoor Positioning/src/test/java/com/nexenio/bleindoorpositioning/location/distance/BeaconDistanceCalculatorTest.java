@@ -21,7 +21,7 @@ public class BeaconDistanceCalculatorTest {
         // without pythagoras
         lowDummyBeacon.setRssi(-65);
         float expectedDistance = BeaconDistanceCalculator.calculateDistanceTo(lowDummyBeacon, lowDummyBeacon.getRssi());
-        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToFloor(lowDummyBeacon, lowDummyBeacon.getRssi(), 0);
+        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(lowDummyBeacon, lowDummyBeacon.getRssi(), 0);
         assertEquals(expectedDistance, actualDistance, 0);
     }
 
@@ -32,7 +32,7 @@ public class BeaconDistanceCalculatorTest {
         lowDummyBeacon.setRssi(-90);
         float absoluteDistance = BeaconDistanceCalculator.calculateDistanceTo(lowDummyBeacon, lowDummyBeacon.getRssi());
         float expectedDistance = (float) Math.sqrt(Math.pow(absoluteDistance, 2) - Math.pow(lowDummyBeacon.getLocation().getElevation(), 2));
-        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToFloor(lowDummyBeacon, lowDummyBeacon.getRssi(), 0);
+        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(lowDummyBeacon, lowDummyBeacon.getRssi(), 0);
         assertEquals(expectedDistance, actualDistance, 0);
     }
 
@@ -42,7 +42,7 @@ public class BeaconDistanceCalculatorTest {
         // without pythagoras
         highDummyBeacon.setRssi(-65);
         float expectedDistance = BeaconDistanceCalculator.calculateDistanceTo(highDummyBeacon, highDummyBeacon.getRssi());
-        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToFloor(highDummyBeacon, highDummyBeacon.getRssi(), 0);
+        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(highDummyBeacon, highDummyBeacon.getRssi(), 0);
         assertEquals(expectedDistance, actualDistance, 0);
     }
 
@@ -53,7 +53,7 @@ public class BeaconDistanceCalculatorTest {
         highDummyBeacon.setRssi(-90);
         float absoluteDistance = BeaconDistanceCalculator.calculateDistanceTo(highDummyBeacon, highDummyBeacon.getRssi());
         float expectedDistance = (float) Math.sqrt(Math.pow(absoluteDistance, 2) - Math.pow(highDummyBeacon.getLocation().getElevation(), 2));
-        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToFloor(highDummyBeacon, highDummyBeacon.getRssi(), 0);
+        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(highDummyBeacon, highDummyBeacon.getRssi(), 0);
         assertEquals(expectedDistance, actualDistance, 0);
     }
 
