@@ -9,7 +9,7 @@ import java.util.Map;
 
 public abstract class AdvertisingPacketFactory<AP extends AdvertisingPacket> {
 
-    private Map<Class<AP>, AdvertisingPacketFactory<AP>> subFactoryMap = new HashMap<>();
+    private final Map<Class<AP>, AdvertisingPacketFactory<AP>> subFactoryMap = new HashMap<>();
     private Class<AP> packetClass;
 
     public AdvertisingPacketFactory(Class<AP> packetClass) {
@@ -18,9 +18,9 @@ public abstract class AdvertisingPacketFactory<AP extends AdvertisingPacket> {
 
     abstract boolean canCreateAdvertisingPacket(byte[] advertisingData);
 
-    protected boolean canCreateAdvertisingPacketWithDescendants(byte[] advertisingData) {
+    protected boolean canCreateAdvertisingPacketWithSubFactories(byte[] advertisingData) {
         for (AdvertisingPacketFactory<AP> advertisingPacketFactory : subFactoryMap.values()) {
-            if (advertisingPacketFactory.canCreateAdvertisingPacketWithDescendants(advertisingData)) {
+            if (advertisingPacketFactory.canCreateAdvertisingPacketWithSubFactories(advertisingData)) {
                 return true;
             }
         }
@@ -29,16 +29,16 @@ public abstract class AdvertisingPacketFactory<AP extends AdvertisingPacket> {
 
     abstract AP createAdvertisingPacket(byte[] advertisingData);
 
-    protected AP createAdvertisingPacketWithDescendants(byte[] advertisingData) {
+    protected AP createAdvertisingPacketWithSubFactories(byte[] advertisingData) {
         for (AdvertisingPacketFactory<AP> advertisingPacketFactory : subFactoryMap.values()) {
-            if (advertisingPacketFactory.canCreateAdvertisingPacketWithDescendants(advertisingData)) {
+            if (advertisingPacketFactory.canCreateAdvertisingPacketWithSubFactories(advertisingData)) {
                 return advertisingPacketFactory.createAdvertisingPacket(advertisingData);
             }
         }
         return createAdvertisingPacket(advertisingData);
     }
 
-    public AdvertisingPacketFactory<AP> getAdvertisingFactory(Class advertisingPacketClass) {
+    public AdvertisingPacketFactory<AP> getAdvertisingPacketFactory(Class advertisingPacketClass) {
         if (!packetClass.isAssignableFrom(advertisingPacketClass)) {
             return null;
         }
@@ -47,17 +47,17 @@ public abstract class AdvertisingPacketFactory<AP extends AdvertisingPacket> {
         } else {
             for (Map.Entry<Class<AP>, AdvertisingPacketFactory<AP>> classAdvertisingPacketFactoryEntry : subFactoryMap.entrySet()) {
                 if (classAdvertisingPacketFactoryEntry.getKey().isAssignableFrom(advertisingPacketClass)) {
-                    return classAdvertisingPacketFactoryEntry.getValue().getAdvertisingFactory(advertisingPacketClass);
+                    return classAdvertisingPacketFactoryEntry.getValue().getAdvertisingPacketFactory(advertisingPacketClass);
                 }
             }
             return null;
         }
     }
 
-    public AdvertisingPacketFactory<AP> getAdvertisingFactory(byte[] advertisingData) {
+    public AdvertisingPacketFactory<AP> getAdvertisingPacketFactory(byte[] advertisingData) {
         if (canCreateAdvertisingPacket(advertisingData)) {
             for (AdvertisingPacketFactory<AP> advertisingPacketFactory : subFactoryMap.values()) {
-                if (advertisingPacketFactory.getAdvertisingFactory(advertisingData) != null) {
+                if (advertisingPacketFactory.getAdvertisingPacketFactory(advertisingData) != null) {
                     return advertisingPacketFactory;
                 }
             }
@@ -66,7 +66,7 @@ public abstract class AdvertisingPacketFactory<AP extends AdvertisingPacket> {
         return null;
     }
 
-    public <F extends AdvertisingPacketFactory<AP>> void addAdvertisingFactory(F factory) {
+    public <F extends AdvertisingPacketFactory<AP>> void addAdvertisingPacketFactory(F factory) {
         if (!packetClass.isAssignableFrom(factory.getPacketClass())) {
             return;
         }
@@ -75,13 +75,13 @@ public abstract class AdvertisingPacketFactory<AP extends AdvertisingPacket> {
         } else {
             for (Map.Entry<Class<AP>, AdvertisingPacketFactory<AP>> classAdvertisingPacketFactoryEntry : subFactoryMap.entrySet()) {
                 if (classAdvertisingPacketFactoryEntry.getKey().isAssignableFrom(factory.getPacketClass())) {
-                    classAdvertisingPacketFactoryEntry.getValue().addAdvertisingFactory(factory);
+                    classAdvertisingPacketFactoryEntry.getValue().addAdvertisingPacketFactory(factory);
                 }
             }
         }
     }
 
-    public void removeAdvertisingFactory(Class<AP> advertisingPacketClass) {
+    public void removeAdvertisingPacketFactory(Class<AP> advertisingPacketClass) {
         if (!packetClass.isAssignableFrom(advertisingPacketClass)) {
             return;
         }
@@ -90,17 +90,17 @@ public abstract class AdvertisingPacketFactory<AP extends AdvertisingPacket> {
         } else {
             for (Map.Entry<Class<AP>, AdvertisingPacketFactory<AP>> classAdvertisingPacketFactoryEntry : subFactoryMap.entrySet()) {
                 if (classAdvertisingPacketFactoryEntry.getKey().isAssignableFrom(advertisingPacketClass)) {
-                    classAdvertisingPacketFactoryEntry.getValue().removeAdvertisingFactory(advertisingPacketClass);
+                    classAdvertisingPacketFactoryEntry.getValue().removeAdvertisingPacketFactory(advertisingPacketClass);
                 }
             }
         }
     }
 
-    public <F extends AdvertisingPacketFactory<AP>> void removeAdvertisingFactory(F factory) {
-        removeAdvertisingFactory(factory.getPacketClass());
+    public <F extends AdvertisingPacketFactory<AP>> void removeAdvertisingPacketFactory(F factory) {
+        removeAdvertisingPacketFactory(factory.getPacketClass());
     }
 
-    public Map<Class<AP>, AdvertisingPacketFactory<AP>> getSubFactoryMap() {
+    Map<Class<AP>, AdvertisingPacketFactory<AP>> getSubFactoryMap() {
         return subFactoryMap;
     }
 

@@ -12,16 +12,16 @@ public class AdvertisingPacketFactoryTest {
     public void test() throws Exception {
         EddystoneAdvertisingPacketFactory advertisingPacketFactory = new EddystoneAdvertisingPacketFactory(EddystoneAdvertisingPacket.class);
         AdvertisingPacketFactory testFactory = new TestAdvertisingPacketFactory();
-        advertisingPacketFactory.addAdvertisingFactory(testFactory);
+        advertisingPacketFactory.addAdvertisingPacketFactory(testFactory);
         assertEquals(1, advertisingPacketFactory.getSubFactoryMap().size());
-        assertEquals(testFactory, advertisingPacketFactory.getAdvertisingFactory(TestAdvertisingPacket.class));
+        assertEquals(testFactory, advertisingPacketFactory.getAdvertisingPacketFactory(TestAdvertisingPacket.class));
 
         assertFalse(advertisingPacketFactory.canCreateAdvertisingPacket(new byte[5]));
-        assertTrue(advertisingPacketFactory.canCreateAdvertisingPacketWithDescendants(new byte[5]));
+        assertTrue(advertisingPacketFactory.canCreateAdvertisingPacketWithSubFactories(new byte[5]));
 
-        advertisingPacketFactory.removeAdvertisingFactory(testFactory);
+        advertisingPacketFactory.removeAdvertisingPacketFactory(testFactory);
         assertEquals(0, advertisingPacketFactory.getSubFactoryMap().size());
-        assertEquals(null, advertisingPacketFactory.getAdvertisingFactory(TestAdvertisingPacket.class));
+        assertEquals(null, advertisingPacketFactory.getAdvertisingPacketFactory(TestAdvertisingPacket.class));
     }
 
     private class TestAdvertisingPacketFactory extends EddystoneAdvertisingPacketFactory {
@@ -43,6 +43,5 @@ public class AdvertisingPacketFactoryTest {
         }
 
     }
-
 
 }

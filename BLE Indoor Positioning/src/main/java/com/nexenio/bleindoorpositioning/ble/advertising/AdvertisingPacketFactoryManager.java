@@ -36,7 +36,7 @@ public class AdvertisingPacketFactoryManager {
     public AdvertisingPacketFactory getAdvertisingPacketFactory(byte[] advertisingData) {
         AdvertisingPacketFactory factory = null;
         for (AdvertisingPacketFactory advertisingPacketFactory : advertisingPacketFactories) {
-            factory = advertisingPacketFactory.getAdvertisingFactory(advertisingData);
+            factory = advertisingPacketFactory.getAdvertisingPacketFactory(advertisingData);
             if (factory != null) {
                 break;
             }
