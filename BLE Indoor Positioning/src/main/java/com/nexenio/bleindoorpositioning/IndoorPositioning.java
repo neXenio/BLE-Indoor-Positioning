@@ -91,6 +91,8 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
         Multilateration multilateration = new Multilateration(usableBeacons);
         Location location = multilateration.getLocation();
+        // convert to 2D
+        location.setElevation(0);
 
         // The root mean square of multilateration is used to filter out inaccurate locations.
         // Adjust value to allow location updates with higher deviation
