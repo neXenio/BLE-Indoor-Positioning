@@ -94,7 +94,7 @@ public abstract class AdvertisingPacketUtil {
                 listIterator = advertisingPackets.listIterator();
                 while (listIterator.hasNext()) {
                     if (listIterator.next().getTimestamp() >= startTimestamp) {
-                        startIndex = listIterator.nextIndex() - 1;
+                        startIndex = listIterator.previousIndex();
                         break;
                     }
                 }
@@ -133,7 +133,7 @@ public abstract class AdvertisingPacketUtil {
                 listIterator = advertisingPackets.listIterator(advertisingPackets.size());
                 while (listIterator.hasPrevious()) {
                     if (listIterator.previous().getTimestamp() < endTimestamp) {
-                        endIndex = listIterator.previousIndex() + 1;
+                        endIndex = listIterator.nextIndex();
                         break;
                     }
                 }
