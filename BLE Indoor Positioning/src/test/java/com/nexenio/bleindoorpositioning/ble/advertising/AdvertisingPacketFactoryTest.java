@@ -1,5 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.advertising;
 
+import com.nexenio.bleindoorpositioning.ble.beacon.BeaconTest;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -7,8 +9,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class AdvertisingPacketFactoryTest {
-
-    public static final byte[] IBEACON_ADVERTISING_DATA = new byte[]{2, 1, 6, 26, -1, 76, 0, 2, 21, -84, -3, 6, 94, -61, -64, 17, -29, -101, -66, 26, 81, 73, 50, -84, 1, 0, 1, 0, 2, -54};
 
     @Test
     public void addAdvertisingPacketFactory_validFactory_addsCorrectly() {
@@ -55,7 +55,7 @@ public class AdvertisingPacketFactoryTest {
     @Test
     public void canCreateAdvertisingPacket_validData_returnsTrue() {
         IBeaconAdvertisingPacketFactory advertisingPacketFactory = new IBeaconAdvertisingPacketFactory();
-        assertTrue(advertisingPacketFactory.canCreateAdvertisingPacketWithSubFactories(IBEACON_ADVERTISING_DATA));
+        assertTrue(advertisingPacketFactory.canCreateAdvertisingPacketWithSubFactories(BeaconTest.IBEACON_ADVERTISING_DATA));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class AdvertisingPacketFactoryTest {
         IndoorPositioningAdvertisingPacketFactory testFactory = new IndoorPositioningAdvertisingPacketFactory();
         advertisingPacketFactory.addAdvertisingPacketFactory(testFactory);
 
-        AdvertisingPacket advertisingPacket = advertisingPacketFactory.createAdvertisingPacket(IBEACON_ADVERTISING_DATA);
+        AdvertisingPacket advertisingPacket = advertisingPacketFactory.createAdvertisingPacket(BeaconTest.IBEACON_ADVERTISING_DATA);
         assertTrue(advertisingPacket instanceof IBeaconAdvertisingPacket);
         assertFalse(advertisingPacket instanceof IndoorPositioningAdvertisingPacket);
     }
@@ -101,7 +101,7 @@ public class AdvertisingPacketFactoryTest {
     public void createAdvertisingPacketWithSubFactories_hasNoSubFactories_createsCorrectPacket() {
         IBeaconAdvertisingPacketFactory advertisingPacketFactory = new IBeaconAdvertisingPacketFactory();
 
-        AdvertisingPacket advertisingPacket = advertisingPacketFactory.createAdvertisingPacketWithSubFactories(IBEACON_ADVERTISING_DATA);
+        AdvertisingPacket advertisingPacket = advertisingPacketFactory.createAdvertisingPacketWithSubFactories(BeaconTest.IBEACON_ADVERTISING_DATA);
         assertTrue(advertisingPacket instanceof IBeaconAdvertisingPacket);
     }
 
@@ -111,7 +111,7 @@ public class AdvertisingPacketFactoryTest {
         IndoorPositioningAdvertisingPacketFactory testFactory = new IndoorPositioningAdvertisingPacketFactory();
         advertisingPacketFactory.addAdvertisingPacketFactory(testFactory);
 
-        AdvertisingPacket advertisingPacket = advertisingPacketFactory.createAdvertisingPacketWithSubFactories(IBEACON_ADVERTISING_DATA);
+        AdvertisingPacket advertisingPacket = advertisingPacketFactory.createAdvertisingPacketWithSubFactories(BeaconTest.IBEACON_ADVERTISING_DATA);
         assertTrue(advertisingPacket instanceof IBeaconAdvertisingPacket);
         assertTrue(advertisingPacket instanceof IndoorPositioningAdvertisingPacket);
     }
