@@ -82,6 +82,14 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
         return true;
     }
 
+    public static boolean dataMatchesUuid(byte[] data, UUID referenceUuid) {
+        if (data.length < 9) {
+            return false;
+        }
+        return getProximityUuid(getProximityUuidBytes(data)).equals(referenceUuid);
+    }
+
+
     public static byte[] getFlagsBytes(byte[] data) {
         return Arrays.copyOfRange(data, 0, 3);
     }

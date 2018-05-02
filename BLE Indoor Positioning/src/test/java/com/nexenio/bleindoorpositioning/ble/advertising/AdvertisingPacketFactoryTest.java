@@ -10,6 +10,8 @@ import static org.junit.Assert.assertTrue;
 
 public class AdvertisingPacketFactoryTest {
 
+    public final static byte[] INDOOR_POSITIONING_DATA = new byte[]{2, 1, 6, 26, -1, 76, 0, 2, 21, 3, 37, 63, -35, 85, -53, 68, -62, -95, -21, -128, -56, 53, 95, -126, -111, 0, 1, 0, 2, -54};
+
     @Test
     public void addAdvertisingPacketFactory_validFactory_addsCorrectly() {
         EddystoneAdvertisingPacketFactory advertisingPacketFactory = new EddystoneAdvertisingPacketFactory();
@@ -81,7 +83,16 @@ public class AdvertisingPacketFactoryTest {
         AdvertisingPacketFactory testFactory = new IndoorPositioningAdvertisingPacketFactory();
         advertisingPacketFactory.addAdvertisingPacketFactory(testFactory);
 
-        byte[] testData = new byte[5];
+        byte[] testData = new byte[8];
+        // make sure this doesn't fails through ArrayIndexOutOfBoundException
+        assertFalse(advertisingPacketFactory.canCreateAdvertisingPacket(testData));
+        assertFalse(advertisingPacketFactory.canCreateAdvertisingPacketWithSubFactories(testData));
+
+        testData = new byte[9];
+        assertFalse(advertisingPacketFactory.canCreateAdvertisingPacket(testData));
+        assertFalse(advertisingPacketFactory.canCreateAdvertisingPacketWithSubFactories(testData));
+
+        testData = new byte[29];
         assertFalse(advertisingPacketFactory.canCreateAdvertisingPacket(testData));
         assertFalse(advertisingPacketFactory.canCreateAdvertisingPacketWithSubFactories(testData));
     }
@@ -111,9 +122,20 @@ public class AdvertisingPacketFactoryTest {
         IndoorPositioningAdvertisingPacketFactory testFactory = new IndoorPositioningAdvertisingPacketFactory();
         advertisingPacketFactory.addAdvertisingPacketFactory(testFactory);
 
-        AdvertisingPacket advertisingPacket = advertisingPacketFactory.createAdvertisingPacketWithSubFactories(BeaconTest.IBEACON_ADVERTISING_DATA);
+        AdvertisingPacket advertisingPacket = advertisingPacketFactory.createAdvertisingPacketWithSubFactories(INDOOR_POSITIONING_DATA);
         assertTrue(advertisingPacket instanceof IBeaconAdvertisingPacket);
         assertTrue(advertisingPacket instanceof IndoorPositioningAdvertisingPacket);
+    }
+
+    @Test
+    public void createAdvertisingPacketWithSubFactories_hasNoMatchingSubFactories_createsCorrectPacket() {
+        IBeaconAdvertisingPacketFactory advertisingPacketFactory = new IBeaconAdvertisingPacketFactory();
+        IndoorPositioningAdvertisingPacketFactory testFactory = new IndoorPositioningAdvertisingPacketFactory();
+        advertisingPacketFactory.addAdvertisingPacketFactory(testFactory);
+
+        AdvertisingPacket advertisingPacket = advertisingPacketFactory.createAdvertisingPacketWithSubFactories(BeaconTest.IBEACON_ADVERTISING_DATA);
+        assertTrue(advertisingPacket instanceof IBeaconAdvertisingPacket);
+        assertFalse(advertisingPacket instanceof IndoorPositioningAdvertisingPacket);
     }
 
     private class TestAdvertisingPacketFactory extends EddystoneAdvertisingPacketFactory {

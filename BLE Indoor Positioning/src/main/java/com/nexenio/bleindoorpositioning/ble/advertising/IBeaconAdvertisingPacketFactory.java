@@ -10,7 +10,7 @@ public class IBeaconAdvertisingPacketFactory extends AdvertisingPacketFactory {
         this(IBeaconAdvertisingPacket.class);
     }
 
-    public <AP extends AdvertisingPacket> IBeaconAdvertisingPacketFactory(Class<AP> packetClass) {
+    <AP extends AdvertisingPacket> IBeaconAdvertisingPacketFactory(Class<AP> packetClass) {
         super(packetClass);
     }
 

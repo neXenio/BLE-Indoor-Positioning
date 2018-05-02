@@ -1,6 +1,6 @@
 package com.nexenio.bleindoorpositioning.ble.advertising;
 
-import java.util.Arrays;
+import java.util.UUID;
 
 /**
  * For advertising packets as specified in Apples <a href="http://www.blueupbeacons.com/docs/dev/Proximity%20Beacon%20Specification%20R1.pdf">Proximity
@@ -9,24 +9,14 @@ import java.util.Arrays;
 
 public class IndoorPositioningAdvertisingPacket extends IBeaconAdvertisingPacket {
 
+    public final static UUID INDOOR_POSITIONING_UUID = UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291");
+
     public IndoorPositioningAdvertisingPacket(byte[] data) {
         super(data);
     }
 
     public static boolean meetsSpecification(byte[] data) {
-        // TODO: extract position
-        if (data == null || data.length < 29) {
-            return false;
-        }
-        if (getTypeBytes(data) != EXPECTED_TYPE) {
-            return false;
-        }
-        if (!Arrays.equals(getFlagsBytes(data), EXPECTED_FLAGS)) {
-            return false;
-        }
-        if (!Arrays.equals(getBeaconTypeBytes(data), EXPECTED_BEACON_TYPE)) {
-            return false;
-        }
-        return true;
+        return dataMatchesUuid(data, INDOOR_POSITIONING_UUID) && IBeaconAdvertisingPacket.meetsSpecification(data);
     }
+
 }
