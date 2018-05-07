@@ -16,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 public class BeaconDistanceCalculatorTest {
 
     @Test
-    public void calculateDistanceWithoutAltitudeDeltaToFloor_smallDistanceLowAltitude_correctDistance() throws Exception {
+    public void calculateDistanceWithoutElevationDeltaToFloor_smallDistanceLowAltitude_correctDistance() throws Exception {
         Beacon lowDummyBeacon = createLowElevationDummyBeacon();
         // without pythagoras
         lowDummyBeacon.setRssi(-65);
@@ -26,7 +26,7 @@ public class BeaconDistanceCalculatorTest {
     }
 
     @Test
-    public void calculateDistanceWithoutAltitudeDeltaToFloor_largeDistanceLowAltitude_correctDistance() throws Exception {
+    public void calculateDistanceWithoutElevationDeltaToFloor_largeDistanceLowAltitude_correctDistance() throws Exception {
         Beacon lowDummyBeacon = createLowElevationDummyBeacon();
         // with pythagoras
         lowDummyBeacon.setRssi(-90);
@@ -37,7 +37,7 @@ public class BeaconDistanceCalculatorTest {
     }
 
     @Test
-    public void calculateDistanceWithoutAltitudeDeltaToFloor_smallDistanceHighAltitude_correctDistance() throws Exception {
+    public void calculateDistanceWithoutElevationDeltaToFloor_smallDistanceHighAltitude_correctDistance() throws Exception {
         Beacon highDummyBeacon = createHighElevationDummyBeacon();
         // without pythagoras
         highDummyBeacon.setRssi(-65);
@@ -47,7 +47,7 @@ public class BeaconDistanceCalculatorTest {
     }
 
     @Test
-    public void calculateDistanceWithoutAltitudeDeltaToFloor_largeDistanceHighAltitude_correctDistance() throws Exception {
+    public void calculateDistanceWithoutElevationDeltaToFloor_largeDistanceHighAltitude_correctDistance() throws Exception {
         Beacon highDummyBeacon = createHighElevationDummyBeacon();
         // with pythagoras
         highDummyBeacon.setRssi(-90);
