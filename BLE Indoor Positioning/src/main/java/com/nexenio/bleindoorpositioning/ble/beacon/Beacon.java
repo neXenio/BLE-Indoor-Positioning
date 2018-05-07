@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
@@ -32,7 +33,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     protected int transmissionPower; // in dBm
     protected float distance; // in m
     protected boolean shouldUpdateDistance = true;
-    protected List<P> advertisingPackets = new ArrayList<>();
+    protected final ArrayList<P> advertisingPackets = new ArrayList<>();
     protected LocationProvider locationProvider;
 
     public Beacon() {
@@ -63,6 +64,13 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return advertisingPackets != null && !advertisingPackets.isEmpty();
     }
 
+    public P getOldestAdvertisingPacket() {
+        if (!hasAnyAdvertisingPacket()) {
+            return null;
+        }
+        return advertisingPackets.get(0);
+    }
+
     public P getLatestAdvertisingPacket() {
         if (!hasAnyAdvertisingPacket()) {
             return null;
@@ -70,29 +78,26 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return advertisingPackets.get(advertisingPackets.size() - 1);
     }
 
-    public List<P> getAdvertisingPacketsBetween(long startTimestamp, long endTimestamp) {
-        List<P> matchingAdvertisingPackets = new ArrayList<>();
-        for (P advertisingPacket : new ArrayList<>(advertisingPackets)) {
-            if (advertisingPacket.getTimestamp() < startTimestamp) {
-                continue;
-            }
-            if (advertisingPacket.getTimestamp() >= endTimestamp) {
-                continue;
-            }
-            matchingAdvertisingPackets.add(advertisingPacket);
-        }
-        return matchingAdvertisingPackets;
+    /**
+     * Returns an ArrayList of AdvertisingPackets that have been received in the specified time range.
+     * If no packets match, an empty list will be returned.
+     *
+     * @param startTimestamp minimum timestamp, inclusive
+     * @param endTimestamp   maximum timestamp, exclusive
+     */
+    public ArrayList<P> getAdvertisingPacketsBetween(long startTimestamp, long endTimestamp) {
+        return AdvertisingPacketUtil.getAdvertisingPacketsBetween(new ArrayList<>(advertisingPackets), startTimestamp, endTimestamp);
     }
 
-    public List<P> getAdvertisingPacketsFromLast(long amount, TimeUnit timeUnit) {
+    public ArrayList<P> getAdvertisingPacketsFromLast(long amount, TimeUnit timeUnit) {
         return getAdvertisingPacketsBetween(System.currentTimeMillis() - timeUnit.toMillis(amount), System.currentTimeMillis());
     }
 
-    public List<P> getAdvertisingPacketsSince(long timestamp) {
+    public ArrayList<P> getAdvertisingPacketsSince(long timestamp) {
         return getAdvertisingPacketsBetween(timestamp, System.currentTimeMillis());
     }
 
-    public List<P> getAdvertisingPacketsBefore(long timestamp) {
+    public ArrayList<P> getAdvertisingPacketsBefore(long timestamp) {
         return getAdvertisingPacketsBetween(0, timestamp);
     }
 
@@ -246,13 +251,8 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         this.transmissionPower = transmissionPower;
     }
 
-    public List<P> getAdvertisingPackets() {
+    public ArrayList<P> getAdvertisingPackets() {
         return advertisingPackets;
-    }
-
-    public void setAdvertisingPackets(List<P> advertisingPackets) {
-        this.advertisingPackets = advertisingPackets;
-        invalidateDistance();
     }
 
     public LocationProvider getLocationProvider() {

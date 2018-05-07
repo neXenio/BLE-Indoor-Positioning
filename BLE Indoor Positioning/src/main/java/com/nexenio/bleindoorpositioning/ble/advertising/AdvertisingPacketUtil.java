@@ -2,7 +2,9 @@ package com.nexenio.bleindoorpositioning.ble.advertising;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -53,6 +55,92 @@ public abstract class AdvertisingPacketUtil {
             return 0;
         }
         return packetCount / (float) (timeUnit.toSeconds(duration));
+    }
+
+    /**
+     * Returns an ArrayList of AdvertisingPackets that have been received in the specified time range.
+     * If no packets match, an empty list will be returned. Expects the specified AdvertisingPackets
+     * to be sorted by timestamp in ascending order (i.e. the oldest timestamp first)!
+     *
+     * @param advertisingPackets the packets to filter (sorted by timestamp ascending)
+     * @param startTimestamp     minimum timestamp, inclusive
+     * @param endTimestamp       maximum timestamp, exclusive
+     */
+    public static <P extends AdvertisingPacket> ArrayList<P> getAdvertisingPacketsBetween(final ArrayList<P> advertisingPackets, long startTimestamp, long endTimestamp) {
+        // check if advertising packets are available
+        if (advertisingPackets.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        P oldestAdvertisingPacket = advertisingPackets.get(0);
+        P latestAdvertisingPacket = advertisingPackets.get(advertisingPackets.size() - 1);
+
+        // check if the timestamps are out of range
+        if (endTimestamp <= oldestAdvertisingPacket.getTimestamp() || startTimestamp > latestAdvertisingPacket.getTimestamp()) {
+            return new ArrayList<>();
+        }
+
+        P midstAdvertisingPacket = advertisingPackets.get(advertisingPackets.size() / 2);
+
+        // find the index of the first advertising packet with a timestamp
+        // larger than or equal to the specified startTimestamp
+        int startIndex = 0;
+        if (startTimestamp > oldestAdvertisingPacket.getTimestamp()) {
+            // figure out if the start timestamp is before or after the midst advertising packet
+            ListIterator<P> listIterator;
+            if (startTimestamp < midstAdvertisingPacket.getTimestamp()) {
+                // start timestamp is in the first half of advertising packets
+                // start iterating from the beginning
+                listIterator = advertisingPackets.listIterator();
+                while (listIterator.hasNext()) {
+                    if (listIterator.next().getTimestamp() >= startTimestamp) {
+                        startIndex = listIterator.previousIndex();
+                        break;
+                    }
+                }
+            } else {
+                // start timestamp is in the second half of advertising packets
+                // start iterating from the end
+                listIterator = advertisingPackets.listIterator(advertisingPackets.size());
+                while (listIterator.hasPrevious()) {
+                    if (listIterator.previous().getTimestamp() < startTimestamp) {
+                        startIndex = listIterator.nextIndex() + 1;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // find the index of the last advertising packet with a timestamp
+        // smaller than the specified endTimestamp
+        int endIndex = advertisingPackets.size() - 1;
+        if (endTimestamp < latestAdvertisingPacket.getTimestamp()) {
+            // figure out if the end timestamp is before or after the midst advertising packet
+            ListIterator<P> listIterator;
+            if (endTimestamp < midstAdvertisingPacket.getTimestamp()) {
+                // end timestamp is in the first half of advertising packets
+                // start iterating from the beginning
+                listIterator = advertisingPackets.listIterator(startIndex);
+                while (listIterator.hasNext()) {
+                    if (listIterator.next().getTimestamp() >= endTimestamp) {
+                        endIndex = listIterator.previousIndex();
+                        break;
+                    }
+                }
+            } else {
+                // end timestamp is in the second half of advertising packets
+                // start iterating from the end
+                listIterator = advertisingPackets.listIterator(advertisingPackets.size());
+                while (listIterator.hasPrevious()) {
+                    if (listIterator.previous().getTimestamp() < endTimestamp) {
+                        endIndex = listIterator.nextIndex();
+                        break;
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(advertisingPackets.subList(startIndex, endIndex + 1));
     }
 
 }
