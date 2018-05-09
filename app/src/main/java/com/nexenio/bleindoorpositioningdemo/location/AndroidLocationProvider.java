@@ -271,6 +271,7 @@ public final class AndroidLocationProvider implements LocationProvider {
         convertedLocation.setLatitude(androidLocation.getLatitude());
         convertedLocation.setLongitude(androidLocation.getLongitude());
         convertedLocation.setAltitude(convertedLocation.getAltitude());
+        convertedLocation.setElevation(convertedLocation.getElevation());
         return convertedLocation;
     }
 

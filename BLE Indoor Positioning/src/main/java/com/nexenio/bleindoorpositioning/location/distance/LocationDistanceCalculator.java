@@ -12,8 +12,8 @@ public abstract class LocationDistanceCalculator {
 
     public static double calculateDistanceBetween(Location fromLocation, Location toLocation) {
         return calculateDistanceBetween(
-                fromLocation.getLatitude(), fromLocation.getLongitude(), fromLocation.getAltitude(),
-                toLocation.getLatitude(), toLocation.getLongitude(), toLocation.getAltitude()
+                fromLocation.getLatitude(), fromLocation.getLongitude(), fromLocation.getAltitude() + fromLocation.getElevation(),
+                toLocation.getLatitude(), toLocation.getLongitude(), toLocation.getAltitude() + toLocation.getElevation()
         );
     }
 

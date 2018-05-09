@@ -30,6 +30,10 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public static final long UPDATE_INTERVAL_MEDIUM = 500;
     public static final long UPDATE_INTERVAL_SLOW = 3000;
 
+    public static final int ROOT_MEAN_SQUARE_THRESHOLD_STRICT = 5;
+    public static final int ROOT_MEAN_SQUARE_THRESHOLD_MEDIUM = 10;
+    public static final int ROOT_MEAN_SQUARE_THRESHOLD_LIGHT = 25;
+
     public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
     // set maximum distance to new location
     private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
@@ -87,9 +91,12 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
         Multilateration multilateration = new Multilateration(usableBeacons);
         Location location = multilateration.getLocation();
+        // convert to 2D
+        location.setElevation(0);
 
-        // use deviation of multilateration to stabilize location
-        if (multilateration.getDeviation() < 1) {
+        // The root mean square of multilateration is used to filter out inaccurate locations.
+        // Adjust value to allow location updates with higher deviation
+        if (multilateration.getRMS() < ROOT_MEAN_SQUARE_THRESHOLD_STRICT) {
             locationPredictor.addLocation(location);
             onLocationUpdated(getMeanLocation(2, TimeUnit.SECONDS));
         }

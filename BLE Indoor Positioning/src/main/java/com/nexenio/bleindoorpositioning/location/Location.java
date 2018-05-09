@@ -30,7 +30,16 @@ public class Location {
 
     private double latitude = VALUE_NOT_SET;
     private double longitude = VALUE_NOT_SET;
+
+    /**
+     * The altitude describes the distance to the sea level.
+     */
     private double altitude = VALUE_NOT_SET;
+
+    /**
+     * The elevation describes the relative height to the floor.
+     */
+    private double elevation = VALUE_NOT_SET;
 
     private long timestamp;
 
@@ -49,8 +58,14 @@ public class Location {
         this.altitude = altitude;
     }
 
+    public Location(double latitude, double longitude, double altitude, double elevation) {
+        this(latitude, longitude);
+        this.altitude = altitude;
+        this.elevation = elevation;
+    }
+
     public Location(Location location) {
-        this(location.latitude, location.longitude, location.altitude);
+        this(location.latitude, location.longitude, location.altitude, location.elevation);
         this.timestamp = location.timestamp;
     }
 
@@ -125,6 +140,10 @@ public class Location {
         return altitude != VALUE_NOT_SET && !Double.isNaN(altitude);
     }
 
+    public boolean hasElevation() {
+        return elevation != VALUE_NOT_SET && !Double.isNaN(elevation);
+    }
+
     public URI generateGoogleMapsUri() {
         try {
             return new URI("https://www.google.com/maps/search/?api=1&query=" +
@@ -144,6 +163,9 @@ public class Location {
         sb.append("Longitude: ").append(longitude).append(" ");
         if (hasAltitude()) {
             sb.append("Altitude: ").append(altitude).append(" ");
+        }
+        if (hasElevation()) {
+            sb.append("Elevation: ").append(elevation).append(" ");
         }
         return sb.toString();
     }
@@ -215,5 +237,13 @@ public class Location {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public double getElevation() {
+        return elevation;
+    }
+
+    public void setElevation(double elevation) {
+        this.elevation = elevation;
     }
 }

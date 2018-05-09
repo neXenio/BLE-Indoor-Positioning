@@ -22,12 +22,18 @@ public class LocationUtil {
             Location meanLocation = new Location();
             double latitudeSum = 0;
             double longitudeSum = 0;
+            double altitudeSum = 0;
+            double elevationSum = 0;
             for (Location location : locationList) {
                 latitudeSum += location.getLatitude();
                 longitudeSum += location.getLongitude();
+                altitudeSum += location.getAltitude();
+                elevationSum += location.getElevation();
             }
             meanLocation.setLatitude(latitudeSum / locationList.size());
             meanLocation.setLongitude(longitudeSum / locationList.size());
+            meanLocation.setAltitude(altitudeSum / locationList.size());
+            meanLocation.setElevation(elevationSum / locationList.size());
             return meanLocation;
         }
     }

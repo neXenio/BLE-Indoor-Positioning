@@ -160,73 +160,84 @@ public class BluetoothClient {
             case 1: {
                 location.setLatitude(52.512437);
                 location.setLongitude(13.391124);
-                location.setAltitude(2);
+                location.setAltitude(36);
                 break;
             }
             case 2: {
                 location.setLatitude(52.512411788476356);
                 location.setLongitude(13.390875654442985);
-                location.setAltitude(2.65);
+                location.setElevation(2.65);
+                location.setAltitude(36);
                 break;
             }
             case 3: {
                 location.setLatitude(52.51240486636751);
                 location.setLongitude(13.390770270005437);
-                location.setAltitude(2.65);
+                location.setElevation(2.65);
+                location.setAltitude(36);
                 break;
             }
             case 4: {
                 location.setLatitude(52.512426);
                 location.setLongitude(13.390887);
-                location.setAltitude(2);
+                location.setElevation(2);
+                location.setAltitude(36);
                 break;
             }
             case 5: {
                 location.setLatitude(52.512347534813834);
                 location.setLongitude(13.390780437281524);
-                location.setAltitude(2.9);
-                break;
-            }
-            case 11: {
-                location.setLatitude(52.51241493443051);
-                location.setLongitude(13.39092354979104);
-                location.setAltitude(2.65);
+                location.setElevation(2.9);
+                location.setAltitude(36);
                 break;
             }
             case 12: {
                 location.setLatitude(52.51239708899507);
                 location.setLongitude(13.390878261276518);
-                location.setAltitude(2.65);
+                location.setElevation(2.65);
+                location.setAltitude(36);
                 break;
             }
             case 13: {
                 location.setLatitude(52.51242692608082);
                 location.setLongitude(13.390872969910035);
-                location.setAltitude(2.65);
+                location.setElevation(2.65);
+                location.setAltitude(36);
                 break;
             }
             case 14: {
                 location.setLatitude(52.51240825552749);
                 location.setLongitude(13.390821867681456);
-                location.setAltitude(2.65);
+                location.setElevation(2.65);
+                location.setAltitude(36);
                 break;
             }
             case 15: {
                 location.setLatitude(52.51240194910502);
                 location.setLongitude(13.390725856632926);
-                location.setAltitude(2.65);
+                location.setElevation(2.65);
+                location.setAltitude(36);
                 break;
             }
             case 16: {
                 location.setLatitude(52.512390301005595);
                 location.setLongitude(13.39077285305359);
-                location.setAltitude(2.65);
+                location.setElevation(2.65);
+                location.setAltitude(36);
                 break;
             }
             case 17: {
                 location.setLatitude(52.51241817994876);
                 location.setLongitude(13.390767908948872);
-                location.setAltitude(2.65);
+                location.setElevation(2.65);
+                location.setAltitude(36);
+                break;
+            }
+            case 18: {
+                location.setLatitude(52.51241494408066);
+                location.setLongitude(13.390923696709294);
+                location.setElevation(2.65);
+                location.setAltitude(36);
                 break;
             }
         }
