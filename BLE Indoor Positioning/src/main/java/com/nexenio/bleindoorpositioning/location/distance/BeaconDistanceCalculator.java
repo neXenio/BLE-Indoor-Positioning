@@ -13,7 +13,7 @@ public abstract class BeaconDistanceCalculator {
     /**
      * Different Path Loss Exponent parameters for different environments.
      *
-     * @ see <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model"></a>
+     * @see <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model"></a>
      */
     public static final float PATH_LOSS_PARAMETER_OPEN_SPACE = 2;
     public static final float PATH_LOSS_PARAMETER_INDOOR = 1.7f;
