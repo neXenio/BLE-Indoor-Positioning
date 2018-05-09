@@ -24,7 +24,7 @@ public class IBeacon<P extends IBeaconAdvertisingPacket> extends Beacon<P> {
 
     @Override
     public LocationProvider createLocationProvider() {
-        return new IBeaconLocationProvider(this);
+        return new IBeaconLocationProvider<>(this);
     }
 
     @Override
