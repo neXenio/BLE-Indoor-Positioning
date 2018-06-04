@@ -7,6 +7,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,8 +98,8 @@ public class BeaconManager {
     }
 
     private void notifyBeaconUpdateListeners(Beacon beacon) {
-        for (BeaconUpdateListener beaconUpdateListener : beaconUpdateListeners) {
-            beaconUpdateListener.onBeaconUpdated(beacon);
+        for (Iterator<BeaconUpdateListener> beaconUpdateListenerIterator = beaconUpdateListeners.iterator(); beaconUpdateListenerIterator.hasNext(); ) {
+            beaconUpdateListenerIterator.next().onBeaconUpdated(beacon);
         }
     }
 
@@ -143,7 +144,8 @@ public class BeaconManager {
         BeaconManager instance = getInstance();
         AdvertisingPacket latestAdvertisingPacket;
         List<String> inactiveBeaconKeys = new ArrayList<>();
-        for (Map.Entry<String, Beacon> beaconEntry : instance.beaconMap.entrySet()) {
+        for (Iterator<Map.Entry<String, Beacon>> beaconMapIterator = instance.beaconMap.entrySet().iterator(); beaconMapIterator.hasNext(); ) {
+            Map.Entry<String, Beacon> beaconEntry = beaconMapIterator.next();
             latestAdvertisingPacket = beaconEntry.getValue().getLatestAdvertisingPacket();
             if (latestAdvertisingPacket == null || latestAdvertisingPacket.getTimestamp() < minimumAdvertisingTimestamp) {
                 inactiveBeaconKeys.add(beaconEntry.getKey());
