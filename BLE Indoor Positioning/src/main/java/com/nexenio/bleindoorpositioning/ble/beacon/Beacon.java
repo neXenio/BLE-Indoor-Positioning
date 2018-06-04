@@ -101,6 +101,17 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return getAdvertisingPacketsBetween(0, timestamp);
     }
 
+    public static List<Location> getLocations(List<? extends Beacon> beacons) {
+        List<Location> locations = new ArrayList<>();
+        for (Beacon beacon : beacons) {
+            Location location = beacon.getLocation();
+            if (location != null && location.hasLatitudeAndLongitude()) {
+                locations.add(location);
+            }
+        }
+        return locations;
+    }
+
     public void addAdvertisingPacket(P advertisingPacket) {
         rssi = advertisingPacket.getRssi();
         if (!hasAnyAdvertisingPacket() || !advertisingPacket.dataEquals(getLatestAdvertisingPacket())) {
