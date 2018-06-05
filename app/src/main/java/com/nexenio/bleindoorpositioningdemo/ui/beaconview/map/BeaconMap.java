@@ -234,6 +234,9 @@ public class BeaconMap extends BeaconView {
     }
 
     protected PointF getPointFromLocation(Location location) {
+        if (location == null || !location.hasLatitudeAndLongitude()) {
+            return new PointF(0, 0);
+        }
         float x = canvasProjection.getXFromLocation(location);
         float y = canvasProjection.getYFromLocation(location);
         return new PointF(x, y);

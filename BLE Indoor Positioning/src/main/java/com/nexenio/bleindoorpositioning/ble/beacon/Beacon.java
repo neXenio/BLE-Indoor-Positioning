@@ -9,6 +9,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
+import com.nexenio.bleindoorpositioning.location.provider.BeaconLocationProvider;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
@@ -34,12 +35,16 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     protected float distance; // in m
     protected boolean shouldUpdateDistance = true;
     protected final ArrayList<P> advertisingPackets = new ArrayList<>();
-    protected LocationProvider locationProvider;
+    protected BeaconLocationProvider<? extends Beacon> locationProvider;
 
     public Beacon() {
         this.locationProvider = createLocationProvider();
     }
 
+    /**
+     * @deprecated use a {@link BeaconFactory} instead (e.g. in {@link BeaconManager#beaconFactory}).
+     */
+    @Deprecated
     public static Beacon from(AdvertisingPacket advertisingPacket) {
         Beacon beacon = null;
         if (advertisingPacket instanceof IBeaconAdvertisingPacket) {
@@ -51,31 +56,45 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public boolean hasLocation() {
-        return locationProvider.getLocation() != null && locationProvider.getLocation().hasLatitudeAndLongitude();
+        return locationProvider != null && locationProvider.hasLocation();
     }
 
     public Location getLocation() {
-        return locationProvider.getLocation();
+        return locationProvider == null ? null : locationProvider.getLocation();
     }
 
-    public abstract LocationProvider createLocationProvider();
+    public static List<Location> getLocations(List<? extends Beacon> beacons) {
+        List<Location> locations = new ArrayList<>();
+        for (Beacon beacon : beacons) {
+            if (beacon.hasLocation()) {
+                locations.add(beacon.getLocation());
+            }
+        }
+        return locations;
+    }
+
+    public abstract BeaconLocationProvider<? extends Beacon> createLocationProvider();
 
     public boolean hasAnyAdvertisingPacket() {
         return advertisingPackets != null && !advertisingPackets.isEmpty();
     }
 
     public P getOldestAdvertisingPacket() {
-        if (!hasAnyAdvertisingPacket()) {
-            return null;
+        synchronized (advertisingPackets) {
+            if (!hasAnyAdvertisingPacket()) {
+                return null;
+            }
+            return advertisingPackets.get(0);
         }
-        return advertisingPackets.get(0);
     }
 
     public P getLatestAdvertisingPacket() {
-        if (!hasAnyAdvertisingPacket()) {
-            return null;
+        synchronized (advertisingPackets) {
+            if (!hasAnyAdvertisingPacket()) {
+                return null;
+            }
+            return advertisingPackets.get(advertisingPackets.size() - 1);
         }
-        return advertisingPackets.get(advertisingPackets.size() - 1);
     }
 
     /**
@@ -101,25 +120,16 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return getAdvertisingPacketsBetween(0, timestamp);
     }
 
-    public static List<Location> getLocations(List<? extends Beacon> beacons) {
-        List<Location> locations = new ArrayList<>();
-        for (Beacon beacon : beacons) {
-            Location location = beacon.getLocation();
-            if (location != null && location.hasLatitudeAndLongitude()) {
-                locations.add(location);
-            }
-        }
-        return locations;
-    }
-
     public void addAdvertisingPacket(P advertisingPacket) {
-        rssi = advertisingPacket.getRssi();
-        if (!hasAnyAdvertisingPacket() || !advertisingPacket.dataEquals(getLatestAdvertisingPacket())) {
-            applyPropertiesFromAdvertisingPacket(advertisingPacket);
+        synchronized (advertisingPackets) {
+            rssi = advertisingPacket.getRssi();
+            if (!hasAnyAdvertisingPacket() || !advertisingPacket.dataEquals(getLatestAdvertisingPacket())) {
+                applyPropertiesFromAdvertisingPacket(advertisingPacket);
+            }
+            advertisingPackets.add(advertisingPacket);
+            trimAdvertisingPackets();
+            invalidateDistance();
         }
-        advertisingPackets.add(advertisingPacket);
-        trimAdvertisingPackets();
-        invalidateDistance();
     }
 
     public void applyPropertiesFromAdvertisingPacket(P advertisingPacket) {
@@ -127,24 +137,26 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public void trimAdvertisingPackets() {
-        if (!hasAnyAdvertisingPacket()) {
-            return;
-        }
-        List<P> removableAdvertisingPackets = new ArrayList<>();
-        AdvertisingPacket latestAdvertisingPacket = getLatestAdvertisingPacket();
-        long minimumPacketTimestamp = System.currentTimeMillis() - MAXIMUM_PACKET_AGE;
-        for (P advertisingPacket : advertisingPackets) {
-            if (advertisingPacket == latestAdvertisingPacket) {
-                // don't remove the latest packet
-                continue;
+        synchronized (advertisingPackets) {
+            if (!hasAnyAdvertisingPacket()) {
+                return;
             }
-            if (advertisingPacket.getTimestamp() < minimumPacketTimestamp) {
-                // mark old packets as removable
-                removableAdvertisingPackets.add(advertisingPacket);
+            List<P> removableAdvertisingPackets = new ArrayList<>();
+            AdvertisingPacket latestAdvertisingPacket = getLatestAdvertisingPacket();
+            long minimumPacketTimestamp = System.currentTimeMillis() - MAXIMUM_PACKET_AGE;
+            for (P advertisingPacket : advertisingPackets) {
+                if (advertisingPacket == latestAdvertisingPacket) {
+                    // don't remove the latest packet
+                    continue;
+                }
+                if (advertisingPacket.getTimestamp() < minimumPacketTimestamp) {
+                    // mark old packets as removable
+                    removableAdvertisingPackets.add(advertisingPacket);
+                }
             }
-        }
 
-        advertisingPackets.removeAll(removableAdvertisingPackets);
+            advertisingPackets.removeAll(removableAdvertisingPackets);
+        }
     }
 
     public boolean equalsLastAdvertisingPackage(P advertisingPacket) {
@@ -181,7 +193,8 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     public float getDistance(RssiFilter filter) {
         float filteredRssi = getRssi(filter);
         // TODO get real device elevation with 3D multilateration
-        return BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(this, filteredRssi, 1);
+        //return BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(this, filteredRssi, 1);
+        return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
     }
 
     public float getEstimatedAdvertisingRange() {
@@ -270,7 +283,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return locationProvider;
     }
 
-    public void setLocationProvider(LocationProvider locationProvider) {
+    public void setLocationProvider(BeaconLocationProvider<? extends Beacon> locationProvider) {
         this.locationProvider = locationProvider;
     }
 }

@@ -246,4 +246,9 @@ public class Location {
     public void setElevation(double elevation) {
         this.elevation = elevation;
     }
+
+    public double getHeight() {
+        return Math.max(altitude, elevation);
+    }
+
 }

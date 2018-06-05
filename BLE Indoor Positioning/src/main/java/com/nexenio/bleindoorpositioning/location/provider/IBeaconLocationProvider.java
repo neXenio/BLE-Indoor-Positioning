@@ -16,8 +16,8 @@ public class IBeaconLocationProvider<B extends IBeacon> extends BeaconLocationPr
 
     @Override
     public void updateLocation() {
-        AdvertisingPacket advertisingPacket = beacon.getLatestAdvertisingPacket();
-        location = new Location();
+        //AdvertisingPacket advertisingPacket = beacon.getLatestAdvertisingPacket();
+        //location = new Location();
         // TODO: get location from advertising packets
     }
 
