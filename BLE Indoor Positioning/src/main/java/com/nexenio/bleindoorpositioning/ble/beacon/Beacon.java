@@ -170,6 +170,13 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return getLatestAdvertisingPacket().getTimestamp() > timestamp;
     }
 
+    public boolean hasBeenSeenInThePast(long duration, TimeUnit timeUnit) {
+        if (!hasAnyAdvertisingPacket()) {
+            return false;
+        }
+        return getLatestAdvertisingPacket().getTimestamp() > System.currentTimeMillis() - timeUnit.toMillis(duration);
+    }
+
     public float getRssi(RssiFilter filter) {
         return filter.filter(this);
     }

@@ -5,6 +5,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.GenericBeaconFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
@@ -14,7 +15,6 @@ import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -44,6 +44,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private long maximumLocationUpdateInterval = UPDATE_INTERVAL_MEDIUM;
     private Set<LocationListener> locationListeners = new HashSet<>();
     private BeaconFilter indoorPositioningBeaconFilter = createIndoorPositioningBeaconFilter();
+    private GenericBeaconFilter usableIndoorPositioningBeaconFilter = createUsableIndoorPositioningBeaconFilter();
     private LocationPredictor locationPredictor = new LocationPredictor();
 
     private IndoorPositioning() {
@@ -102,19 +103,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     }
 
     public static <B extends Beacon> List<B> getUsableBeacons(Collection<B> availableBeacons) {
-        // TODO: implement as beacon filter
-        List<B> usableBeacons = new ArrayList<>();
-        long minimumTimestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(1);
-        for (B beacon : (List<B>) getInstance().indoorPositioningBeaconFilter.getMatches(availableBeacons)) {
-            if (!beacon.hasLocation()) {
-                continue; // beacon has no location assigned, can't use it for multilateration
-            }
-            if (!beacon.hasBeenSeenSince(minimumTimestamp)) {
-                continue; // beacon hasn't been in range recently, avoid using outdated data
-            }
-            usableBeacons.add(beacon);
-        }
-        return usableBeacons;
+        return getInstance().usableIndoorPositioningBeaconFilter.getMatches(availableBeacons);
     }
 
     private void onLocationUpdated(Location location) {
@@ -158,6 +147,26 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
                 }
                 return false;
             }
+        };
+    }
+
+    public static GenericBeaconFilter<? extends Beacon> createUsableIndoorPositioningBeaconFilter() {
+        return new GenericBeaconFilter<Beacon>() {
+
+            @Override
+            public boolean matches(Beacon beacon) {
+                if (!getInstance().indoorPositioningBeaconFilter.matches(beacon)) {
+                    return false;
+                }
+                if (!beacon.hasLocation()) {
+                    return false; // beacon has no location assigned, can't use it for multilateration
+                }
+                if (!beacon.hasBeenSeenInThePast(2, TimeUnit.SECONDS)) {
+                    return false; // beacon hasn't been in range recently, avoid using outdated data
+                }
+                return true;
+            }
+
         };
     }
 
