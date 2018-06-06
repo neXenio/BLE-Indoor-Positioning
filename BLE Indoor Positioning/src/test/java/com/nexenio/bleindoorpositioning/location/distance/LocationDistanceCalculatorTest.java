@@ -52,7 +52,7 @@ public class LocationDistanceCalculatorTest {
         Location lowLocation = new Location(0, 0, 0, 0);
         Location highLocation = new Location(0, 0, 0, 10);
         double calculatedDistance = LocationDistanceCalculator.calculateDistanceBetween(lowLocation, highLocation);
-        assertEquals(10, calculatedDistance, 0);
+        assertEquals(0, calculatedDistance, 0);
     }
 
     @Test

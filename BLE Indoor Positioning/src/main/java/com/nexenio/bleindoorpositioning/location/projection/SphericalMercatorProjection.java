@@ -103,13 +103,13 @@ public class SphericalMercatorProjection {
      * Converts latitude, longitude, elevation to Earth-Centered-Earth-Fixed (ECEF).
      */
     public static double[] locationToEcef(Location location) {
-        double[] geodetic = new double[]{Math.toRadians(location.getLatitude()), Math.toRadians(location.getLongitude()), Math.toRadians(location.getHeight())};
+        double[] geodetic = new double[]{Math.toRadians(location.getLatitude()), Math.toRadians(location.getLongitude()), location.getAltitude()};
         return geodeticToEcef(geodetic);
     }
 
     /**
      * Convert latitude, longitude, height to Earth-Centered-Earth-Fixed (ECEF).
-     * Input is a three element array containing latitude, longitude (radians) and height (in meters).
+     * Input is a three element array containing latitude, longitude (radians) and altitude (in meters).
      * Returned array contains x, y, z in meters
      *
      * @see <a href="http://danceswithcode.net/engineeringnotes/geodetic_to_ecef/geodetic_to_ecef.html">Source</a>
@@ -118,11 +118,11 @@ public class SphericalMercatorProjection {
         double[] ecef = new double[3];
         double latitude = geodetic[0];
         double longitude = geodetic[1];
-        double height = geodetic[2]; // altitude + elevation
+        double altitude = geodetic[2];
         double n = EARTH_RADIUS / Math.sqrt(1 - e2 * Math.sin(latitude) * Math.sin(latitude));
-        ecef[0] = (n + height) * Math.cos(latitude) * Math.cos(longitude);
-        ecef[1] = (n + height) * Math.cos(latitude) * Math.sin(longitude);
-        ecef[2] = (n * (1 - e2) + height) * Math.sin(latitude);
+        ecef[0] = (n + altitude) * Math.cos(latitude) * Math.cos(longitude);
+        ecef[1] = (n + altitude) * Math.cos(latitude) * Math.sin(longitude);
+        ecef[2] = (n * (1 - e2) + altitude) * Math.sin(latitude);
         return ecef;
     }
 
