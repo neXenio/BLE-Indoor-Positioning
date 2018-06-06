@@ -27,23 +27,7 @@ public class BeaconMapFragment extends BeaconViewFragment {
 
     public BeaconMapFragment() {
         super();
-        IBeaconFilter uuidFilter = new IBeaconFilter() {
-
-            private UUID legacyUuid = UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01");
-            private UUID indoorPositioningUuid = UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291");
-
-            @Override
-            public boolean matches(IBeacon beacon) {
-                if (legacyUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                return false;
-            }
-        };
-        beaconFilters.add(uuidFilter);
+        beaconFilters.add(new IBeaconFilter(UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01"), UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291")));
     }
 
     @Override

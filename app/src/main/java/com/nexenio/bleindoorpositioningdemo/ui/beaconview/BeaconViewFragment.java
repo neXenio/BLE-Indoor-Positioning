@@ -19,12 +19,14 @@ import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public abstract class BeaconViewFragment extends Fragment {
 
@@ -68,6 +70,7 @@ public abstract class BeaconViewFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        IndoorPositioning.getInstance().setIndoorPositioningBeaconFilter(new IBeaconFilter(UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01"), UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291")));
         IndoorPositioning.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.requestLastKnownLocation();

@@ -135,7 +135,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
             @Override
             public boolean matches(Beacon beacon) {
-                if (!getInstance().indoorPositioningBeaconFilter.matches(beacon)) {
+                if (getInstance().indoorPositioningBeaconFilter != null && !getInstance().indoorPositioningBeaconFilter.matches(beacon)) {
                     return false;
                 }
                 if (!beacon.hasLocation()) {

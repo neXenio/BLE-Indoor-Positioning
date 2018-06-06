@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
-import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.GenericBeaconFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
@@ -46,11 +46,11 @@ public class BeaconChartFragment extends BeaconViewFragment {
         }
     }
 
-    public IBeaconFilter createClosestBeaconFilter() {
-        return new IBeaconFilter() {
+    public GenericBeaconFilter createClosestBeaconFilter() {
+        return new GenericBeaconFilter() {
 
             @Override
-            public boolean matches(IBeacon beacon) {
+            public boolean matches(Beacon beacon) {
                 if (BeaconManager.getInstance().getClosestBeacon().equals(beacon)) {
                     return true;
                 }
@@ -60,26 +60,7 @@ public class BeaconChartFragment extends BeaconViewFragment {
     }
 
     public IBeaconFilter createUuidFilter() {
-        return new IBeaconFilter() {
-
-            private UUID legacyUuid = UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01");
-            private UUID gateDetectionUuid = UUID.fromString("f175c9a8-d51c-4d25-8449-4d3d340d1067");
-            private UUID indoorPositioningUuid = UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291");
-
-            @Override
-            public boolean matches(IBeacon beacon) {
-                if (legacyUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                if (gateDetectionUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                return false;
-            }
-        };
+        return new IBeaconFilter(UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01"), UUID.fromString("f175c9a8-d51c-4d25-8449-4d3d340d1067"), UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291"));
     }
 
     @Override
