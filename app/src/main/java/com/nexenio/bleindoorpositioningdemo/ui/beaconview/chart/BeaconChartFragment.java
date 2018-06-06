@@ -136,12 +136,20 @@ public class BeaconChartFragment extends BeaconViewFragment {
                 onValueTypeSelected(BeaconChart.VALUE_TYPE_RSSI, item);
                 return true;
             }
+            case R.id.menu_value_rssi_filtered: {
+                onValueTypeSelected(BeaconChart.VALUE_TYPE_RSSI_FILTERED, item);
+                return true;
+            }
             case R.id.menu_value_distance: {
                 onValueTypeSelected(BeaconChart.VALUE_TYPE_DISTANCE, item);
                 return true;
             }
             case R.id.menu_value_frequency: {
                 onValueTypeSelected(BeaconChart.VALUE_TYPE_FREQUENCY, item);
+                return true;
+            }
+            case R.id.menu_value_variance: {
+                onValueTypeSelected(BeaconChart.VALUE_TYPE_VARIANCE, item);
                 return true;
             }
         }

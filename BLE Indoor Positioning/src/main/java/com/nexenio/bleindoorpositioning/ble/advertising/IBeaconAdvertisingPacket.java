@@ -14,11 +14,11 @@ import java.util.UUID;
 
 public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
-    private static final byte[] EXPECTED_FLAGS = {0x02, 0x01, 0x06};
-    private static final byte EXPECTED_LENGTH = 0x1A;
-    private static final byte EXPECTED_TYPE = (byte) 0xFF;
-    private static final byte[] EXPECTED_COMPANY_ID = {0x4C, 0x00};
-    private static final byte[] EXPECTED_BEACON_TYPE = {0x02, 0x15};
+    protected static final byte[] EXPECTED_FLAGS = {0x02, 0x01, 0x06};
+    protected static final byte EXPECTED_LENGTH = 0x1A;
+    protected static final byte EXPECTED_TYPE = (byte) 0xFF;
+    protected static final byte[] EXPECTED_COMPANY_ID = {0x4C, 0x00};
+    protected static final byte[] EXPECTED_BEACON_TYPE = {0x02, 0x15};
 
     private byte[] flagsBytes;
     private byte lengthByte;
@@ -81,6 +81,14 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
         }
         return true;
     }
+
+    public static boolean dataMatchesUuid(byte[] data, UUID referenceUuid) {
+        if (data.length < 9) {
+            return false;
+        }
+        return getProximityUuid(getProximityUuidBytes(data)).equals(referenceUuid);
+    }
+
 
     public static byte[] getFlagsBytes(byte[] data) {
         return Arrays.copyOfRange(data, 0, 3);

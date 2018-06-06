@@ -3,6 +3,7 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.map;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RadialGradient;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by steppschuh on 16.11.17.
@@ -44,6 +46,8 @@ public class BeaconMap extends BeaconView {
 
     protected Location predictedDeviceLocation;
     protected LocationAnimator predictedDeviceLocationAnimator;
+
+    protected List<Location> recentLocations = new ArrayList<>();
 
     public BeaconMap(Context context) {
         super(context);
@@ -82,6 +86,7 @@ public class BeaconMap extends BeaconView {
 
     @Override
     protected void drawDevice(Canvas canvas) {
+        drawDeviceHistory(canvas);
         drawDevicePrediction(canvas);
 
         PointF deviceCenter = (deviceLocationAnimator == null) ? canvasCenter : getPointFromLocation(deviceLocationAnimator.getLocation());
@@ -98,6 +103,26 @@ public class BeaconMap extends BeaconView {
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, whiteFillPaint);
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, secondaryStrokePaint);
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, pixelsPerDip * 8, secondaryFillPaint);
+    }
+
+    protected void drawDeviceHistory(Canvas canvas) {
+        float accuracy = 1; // in meters TODO: get real value
+        float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(accuracy);
+        Paint historyFillPaint = new Paint(secondaryFillPaint);
+
+        for (Location location : recentLocations) {
+            if (location == null || !location.hasLatitudeAndLongitude()) {
+                continue;
+            }
+            PointF deviceCenter = getPointFromLocation(location);
+            float recencyScore = getRecencyScore(location.getTimestamp(), TimeUnit.SECONDS.toMillis(10));
+            int alpha = (int) (255 * 0.25 * recencyScore);
+            historyFillPaint.setAlpha(alpha);
+            RadialGradient gradient = new RadialGradient(deviceCenter.x, deviceCenter.y, advertisingRadius,
+                    new int[]{secondaryFillPaint.getColor(), Color.TRANSPARENT}, null, Shader.TileMode.CLAMP);
+            historyFillPaint.setShader(gradient);
+            canvas.drawCircle(deviceCenter.x, deviceCenter.y, advertisingRadius, historyFillPaint);
+        }
     }
 
     protected void drawDevicePrediction(Canvas canvas) {
@@ -234,6 +259,9 @@ public class BeaconMap extends BeaconView {
     }
 
     protected PointF getPointFromLocation(Location location) {
+        if (location == null || !location.hasLatitudeAndLongitude()) {
+            return new PointF(0, 0);
+        }
         float x = canvasProjection.getXFromLocation(location);
         float y = canvasProjection.getYFromLocation(location);
         return new PointF(x, y);
@@ -310,6 +338,10 @@ public class BeaconMap extends BeaconView {
     @Override
     public void onDeviceLocationChanged() {
         startDeviceRadiusAnimation();
+        recentLocations.add(deviceLocation);
+        if (recentLocations.size() > 100) {
+            recentLocations.remove(0);
+        }
         super.onDeviceLocationChanged();
     }
 
@@ -337,6 +369,21 @@ public class BeaconMap extends BeaconView {
             }
         });
         deviceAccuracyAnimator.start();
+    }
+
+    /**
+     * Calculates a score based on the recency of the specified timestamp.
+     *
+     * @return score between 0 and 1
+     */
+    public static float getRecencyScore(long timestamp, long maximumAge) {
+        long age = System.currentTimeMillis() - timestamp;
+        long ageDelta = Math.max(0, maximumAge - age);
+        if (ageDelta == 0 || maximumAge == 0) {
+            return 0;
+        }
+        float linearScore = ageDelta / (float) maximumAge;
+        return (float) ((Math.log(ageDelta) / Math.log(10)) / ((Math.log(maximumAge)) / Math.log(1 + (9 * linearScore))));
     }
 
     /*

@@ -15,6 +15,11 @@
                 <item
                         android:id="@+id/menu_value_rssi"
                         android:title="@string/menu_value_rssi"
+                        android:checked="false"/>
+
+                <item
+                        android:id="@+id/menu_value_rssi_filtered"
+                        android:title="@string/menu_value_rssi_filtered"
                         android:checked="true"/>
 
                 <item
@@ -24,6 +29,10 @@
                 <item
                         android:id="@+id/menu_value_frequency"
                         android:title="@string/menu_value_frequency"/>
+
+                <item
+                        android:id="@+id/menu_value_variance"
+                        android:title="@string/menu_value_variance"/>
 
             </group>
 

@@ -21,10 +21,13 @@ import java.util.List;
 
 public class Multilateration {
 
+    public static final int ROOT_MEAN_SQUARE_NOT_SET = -1;
+
     private List<Beacon> beacons;
 
     private Location location;
     private float deviation;
+    private double rootMeanSquare = ROOT_MEAN_SQUARE_NOT_SET;
     private LeastSquaresOptimizer.Optimum optimum;
 
     public Multilateration(List<Beacon> beacons) {
@@ -36,11 +39,7 @@ public class Multilateration {
         Location location;
         for (int beaconIndex = 0; beaconIndex < beacons.size(); beaconIndex++) {
             location = beacons.get(beaconIndex).getLocation();
-            positions[beaconIndex] = new double[]{
-                    SphericalMercatorProjection.latitudeToY(location.getLatitude()),
-                    SphericalMercatorProjection.longitudeToX(location.getLongitude())
-                    // TODO: add altitude
-            };
+            positions[beaconIndex] = SphericalMercatorProjection.locationToEcef(location);
         }
         return positions;
     }
@@ -68,13 +67,16 @@ public class Multilateration {
 
     public static Location getLocation(LeastSquaresOptimizer.Optimum optimum) {
         double[] centroid = optimum.getPoint().toArray();
-        double latitude = SphericalMercatorProjection.yToLatitude(centroid[0]);
-        double longitude = SphericalMercatorProjection.xToLongitude(centroid[1]);
-        // TODO: add altitude
-        return new Location(latitude, longitude);
+        return SphericalMercatorProjection.ecefToLocation(centroid);
     }
 
-    public static float getDeviation(LeastSquaresOptimizer.Optimum optimum) {
+    /**
+     * Returns the maximum square root of the diagonal coefficients of the covariance matrix,
+     * as provided by {@link LeastSquaresOptimizer.Optimum#getSigma(double)}.
+     *
+     * @see <a href="https://commons.apache.org/proper/commons-math/javadocs/api-3.4.1/org/apache/commons/math3/fitting/leastsquares/LeastSquaresProblem.Evaluation.html#getSigma(double)">LeastSquaresProblem.Evaluation Documentation</a>
+     */
+    private static float getDeviation(LeastSquaresOptimizer.Optimum optimum) {
         RealVector standardDeviation = optimum.getSigma(0);
         float maximumDeviation = 0;
         for (double deviation : standardDeviation.toArray()) {
@@ -83,9 +85,20 @@ public class Multilateration {
         return maximumDeviation;
     }
 
+    private static double getRMS(LeastSquaresOptimizer.Optimum optimum) {
+        return optimum.getRMS();
+    }
+
     /*
         Getter & Setter
      */
+
+    public double getRMS() {
+        if (rootMeanSquare == ROOT_MEAN_SQUARE_NOT_SET) {
+            rootMeanSquare = getRMS(getOptimum());
+        }
+        return rootMeanSquare;
+    }
 
     public List<Beacon> getBeacons() {
         return beacons;

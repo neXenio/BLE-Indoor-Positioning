@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.advertising.EddystoneAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
@@ -8,6 +9,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
+import com.nexenio.bleindoorpositioning.location.provider.BeaconLocationProvider;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.ArrayList;
@@ -32,13 +34,17 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     protected int transmissionPower; // in dBm
     protected float distance; // in m
     protected boolean shouldUpdateDistance = true;
-    protected List<P> advertisingPackets = new ArrayList<>();
-    protected LocationProvider locationProvider;
+    protected final ArrayList<P> advertisingPackets = new ArrayList<>();
+    protected BeaconLocationProvider<? extends Beacon> locationProvider;
 
     public Beacon() {
         this.locationProvider = createLocationProvider();
     }
 
+    /**
+     * @deprecated use a {@link BeaconFactory} instead (e.g. in {@link BeaconManager#beaconFactory}).
+     */
+    @Deprecated
     public static Beacon from(AdvertisingPacket advertisingPacket) {
         Beacon beacon = null;
         if (advertisingPacket instanceof IBeaconAdvertisingPacket) {
@@ -50,60 +56,80 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public boolean hasLocation() {
-        return locationProvider.getLocation() != null && locationProvider.getLocation().hasLatitudeAndLongitude();
+        return locationProvider != null && locationProvider.hasLocation();
     }
 
     public Location getLocation() {
-        return locationProvider.getLocation();
+        return locationProvider == null ? null : locationProvider.getLocation();
     }
 
-    public abstract LocationProvider createLocationProvider();
+    public static List<Location> getLocations(List<? extends Beacon> beacons) {
+        List<Location> locations = new ArrayList<>();
+        for (Beacon beacon : beacons) {
+            if (beacon.hasLocation()) {
+                locations.add(beacon.getLocation());
+            }
+        }
+        return locations;
+    }
+
+    public abstract BeaconLocationProvider<? extends Beacon> createLocationProvider();
 
     public boolean hasAnyAdvertisingPacket() {
         return advertisingPackets != null && !advertisingPackets.isEmpty();
     }
 
+    public P getOldestAdvertisingPacket() {
+        synchronized (advertisingPackets) {
+            if (!hasAnyAdvertisingPacket()) {
+                return null;
+            }
+            return advertisingPackets.get(0);
+        }
+    }
+
     public P getLatestAdvertisingPacket() {
-        if (!hasAnyAdvertisingPacket()) {
-            return null;
+        synchronized (advertisingPackets) {
+            if (!hasAnyAdvertisingPacket()) {
+                return null;
+            }
+            return advertisingPackets.get(advertisingPackets.size() - 1);
         }
-        return advertisingPackets.get(advertisingPackets.size() - 1);
     }
 
-    public List<P> getAdvertisingPacketsBetween(long startTimestamp, long endTimestamp) {
-        List<P> matchingAdvertisingPackets = new ArrayList<>();
-        for (P advertisingPacket : new ArrayList<>(advertisingPackets)) {
-            if (advertisingPacket.getTimestamp() <= startTimestamp) {
-                continue;
-            }
-            if (advertisingPacket.getTimestamp() > endTimestamp) {
-                continue;
-            }
-            matchingAdvertisingPackets.add(advertisingPacket);
-        }
-        return matchingAdvertisingPackets;
+    /**
+     * Returns an ArrayList of AdvertisingPackets that have been received in the specified time range.
+     * If no packets match, an empty list will be returned.
+     *
+     * @param startTimestamp minimum timestamp, inclusive
+     * @param endTimestamp   maximum timestamp, exclusive
+     */
+    public ArrayList<P> getAdvertisingPacketsBetween(long startTimestamp, long endTimestamp) {
+        return AdvertisingPacketUtil.getAdvertisingPacketsBetween(new ArrayList<>(advertisingPackets), startTimestamp, endTimestamp);
     }
 
-    public List<P> getAdvertisingPacketsFromLast(long amount, TimeUnit timeUnit) {
+    public ArrayList<P> getAdvertisingPacketsFromLast(long amount, TimeUnit timeUnit) {
         return getAdvertisingPacketsBetween(System.currentTimeMillis() - timeUnit.toMillis(amount), System.currentTimeMillis());
     }
 
-    public List<P> getAdvertisingPacketsSince(long timestamp) {
+    public ArrayList<P> getAdvertisingPacketsSince(long timestamp) {
         return getAdvertisingPacketsBetween(timestamp, System.currentTimeMillis());
     }
 
-    public List<P> getAdvertisingPacketsBefore(long timestamp) {
+    public ArrayList<P> getAdvertisingPacketsBefore(long timestamp) {
         return getAdvertisingPacketsBetween(0, timestamp);
     }
 
     public void addAdvertisingPacket(P advertisingPacket) {
-        rssi = advertisingPacket.getRssi();
-        if (!hasAnyAdvertisingPacket() || !advertisingPacket.dataEquals(getLatestAdvertisingPacket())) {
-            applyPropertiesFromAdvertisingPacket(advertisingPacket);
+        synchronized (advertisingPackets) {
+            rssi = advertisingPacket.getRssi();
+            if (!hasAnyAdvertisingPacket() || !advertisingPacket.dataEquals(getLatestAdvertisingPacket())) {
+                applyPropertiesFromAdvertisingPacket(advertisingPacket);
+            }
+            advertisingPackets.add(advertisingPacket);
+            trimAdvertisingPackets();
+            invalidateDistance();
         }
-        advertisingPackets.add(advertisingPacket);
-        trimAdvertisingPackets();
-        invalidateDistance();
     }
 
     public void applyPropertiesFromAdvertisingPacket(P advertisingPacket) {
@@ -111,24 +137,26 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public void trimAdvertisingPackets() {
-        if (!hasAnyAdvertisingPacket()) {
-            return;
-        }
-        List<P> removableAdvertisingPackets = new ArrayList<>();
-        AdvertisingPacket latestAdvertisingPacket = getLatestAdvertisingPacket();
-        long minimumPacketTimestamp = System.currentTimeMillis() - MAXIMUM_PACKET_AGE;
-        for (P advertisingPacket : advertisingPackets) {
-            if (advertisingPacket == latestAdvertisingPacket) {
-                // don't remove the latest packet
-                continue;
+        synchronized (advertisingPackets) {
+            if (!hasAnyAdvertisingPacket()) {
+                return;
             }
-            if (advertisingPacket.getTimestamp() < minimumPacketTimestamp) {
-                // mark old packets as removable
-                removableAdvertisingPackets.add(advertisingPacket);
+            List<P> removableAdvertisingPackets = new ArrayList<>();
+            AdvertisingPacket latestAdvertisingPacket = getLatestAdvertisingPacket();
+            long minimumPacketTimestamp = System.currentTimeMillis() - MAXIMUM_PACKET_AGE;
+            for (P advertisingPacket : advertisingPackets) {
+                if (advertisingPacket == latestAdvertisingPacket) {
+                    // don't remove the latest packet
+                    continue;
+                }
+                if (advertisingPacket.getTimestamp() < minimumPacketTimestamp) {
+                    // mark old packets as removable
+                    removableAdvertisingPackets.add(advertisingPacket);
+                }
             }
-        }
 
-        advertisingPackets.removeAll(removableAdvertisingPackets);
+            advertisingPackets.removeAll(removableAdvertisingPackets);
+        }
     }
 
     public boolean equalsLastAdvertisingPackage(P advertisingPacket) {
@@ -140,6 +168,13 @@ public abstract class Beacon<P extends AdvertisingPacket> {
             return false;
         }
         return getLatestAdvertisingPacket().getTimestamp() > timestamp;
+    }
+
+    public boolean hasBeenSeenInThePast(long duration, TimeUnit timeUnit) {
+        if (!hasAnyAdvertisingPacket()) {
+            return false;
+        }
+        return getLatestAdvertisingPacket().getTimestamp() > System.currentTimeMillis() - timeUnit.toMillis(duration);
     }
 
     public float getRssi(RssiFilter filter) {
@@ -164,7 +199,9 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public float getDistance(RssiFilter filter) {
         float filteredRssi = getRssi(filter);
-        return BeaconDistanceCalculator.calculateDistanceWithoutAltitudeDeltaToFloor(this, filteredRssi);
+        // TODO get real device elevation with 3D multilateration
+        //return BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(this, filteredRssi, 1);
+        return BeaconDistanceCalculator.calculateDistanceTo(this, filteredRssi);
     }
 
     public float getEstimatedAdvertisingRange() {
@@ -245,20 +282,15 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         this.transmissionPower = transmissionPower;
     }
 
-    public List<P> getAdvertisingPackets() {
+    public ArrayList<P> getAdvertisingPackets() {
         return advertisingPackets;
-    }
-
-    public void setAdvertisingPackets(List<P> advertisingPackets) {
-        this.advertisingPackets = advertisingPackets;
-        invalidateDistance();
     }
 
     public LocationProvider getLocationProvider() {
         return locationProvider;
     }
 
-    public void setLocationProvider(LocationProvider locationProvider) {
+    public void setLocationProvider(BeaconLocationProvider<? extends Beacon> locationProvider) {
         this.locationProvider = locationProvider;
     }
 }
