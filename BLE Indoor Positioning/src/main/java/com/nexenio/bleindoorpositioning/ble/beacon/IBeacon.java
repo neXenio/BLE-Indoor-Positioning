@@ -1,8 +1,8 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
+import com.nexenio.bleindoorpositioning.location.provider.BeaconLocationProvider;
 import com.nexenio.bleindoorpositioning.location.provider.IBeaconLocationProvider;
-import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.UUID;
 
@@ -23,7 +23,7 @@ public class IBeacon<P extends IBeaconAdvertisingPacket> extends Beacon<P> {
     }
 
     @Override
-    public LocationProvider createLocationProvider() {
+    public BeaconLocationProvider<IBeacon<P>> createLocationProvider() {
         return new IBeaconLocationProvider<>(this);
     }
 

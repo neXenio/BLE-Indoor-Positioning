@@ -246,4 +246,5 @@ public class Location {
     public void setElevation(double elevation) {
         this.elevation = elevation;
     }
+
 }
