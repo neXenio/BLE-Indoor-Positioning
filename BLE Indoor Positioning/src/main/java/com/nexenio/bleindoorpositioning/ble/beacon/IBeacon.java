@@ -3,7 +3,6 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.location.provider.BeaconLocationProvider;
 import com.nexenio.bleindoorpositioning.location.provider.IBeaconLocationProvider;
-import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import java.util.UUID;
 
