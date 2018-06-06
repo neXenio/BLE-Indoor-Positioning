@@ -4,7 +4,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationTest;
-import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
+import com.nexenio.bleindoorpositioning.location.provider.IBeaconLocationProvider;
 
 import org.junit.Test;
 
@@ -88,13 +88,18 @@ public class BeaconDistanceCalculatorTest {
     }
 
     public Beacon createDummyBeacon(final Location location, final double elevation, int calibratedRssi) {
-        Beacon dummyBeacon = new IBeacon();
+        IBeacon dummyBeacon = new IBeacon();
         final Location adjustedLocation = new Location(location);
         location.setElevation(elevation);
-        dummyBeacon.setLocationProvider(new LocationProvider() {
+        dummyBeacon.setLocationProvider(new IBeaconLocationProvider<IBeacon>(dummyBeacon) {
             @Override
-            public Location getLocation() {
-                return adjustedLocation;
+            protected boolean canUpdateLocation() {
+                return true;
+            }
+
+            @Override
+            public void updateLocation() {
+                this.location = adjustedLocation;
             }
         });
         dummyBeacon.setCalibratedRssi(calibratedRssi);
