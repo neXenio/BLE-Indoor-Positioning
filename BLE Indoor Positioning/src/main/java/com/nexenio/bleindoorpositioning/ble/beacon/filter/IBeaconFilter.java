@@ -18,6 +18,14 @@ public class IBeaconFilter<B extends IBeacon> extends GenericBeaconFilter<B> {
     protected boolean matchMajor;
     protected boolean matchMinor;
 
+    public IBeaconFilter() {
+    }
+
+    public IBeaconFilter(UUID proximityUuid) {
+        this.proximityUuid = proximityUuid;
+        matchProximityUuid = true;
+    }
+
     @Override
     public boolean matches(B beacon) {
         if (!super.matches(beacon)) {
