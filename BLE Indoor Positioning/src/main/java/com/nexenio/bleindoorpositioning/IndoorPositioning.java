@@ -12,7 +12,6 @@ import com.nexenio.bleindoorpositioning.location.LocationUtil;
 import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
-import com.sun.istack.internal.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -174,7 +173,6 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         this.locationPredictor = locationPredictor;
     }
 
-    @Nullable
     public BeaconFilter getIndoorPositioningBeaconFilter() {
         return indoorPositioningBeaconFilter;
     }
