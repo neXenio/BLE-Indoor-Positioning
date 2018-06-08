@@ -194,4 +194,19 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         this.locationPredictor = locationPredictor;
     }
 
+    public BeaconFilter getIndoorPositioningBeaconFilter() {
+        return indoorPositioningBeaconFilter;
+    }
+
+    public void setIndoorPositioningBeaconFilter(BeaconFilter indoorPositioningBeaconFilter) {
+        this.indoorPositioningBeaconFilter = indoorPositioningBeaconFilter;
+    }
+
+    public GenericBeaconFilter getUsableIndoorPositioningBeaconFilter() {
+        return usableIndoorPositioningBeaconFilter;
+    }
+
+    public void setUsableIndoorPositioningBeaconFilter(GenericBeaconFilter usableIndoorPositioningBeaconFilter) {
+        this.usableIndoorPositioningBeaconFilter = usableIndoorPositioningBeaconFilter;
+    }
 }
