@@ -71,7 +71,9 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
             return false;
         }
         if (getTypeBytes(data) != EXPECTED_TYPE) {
-            return false;
+            // In order to support advertising packets from manufacturers that
+            // adjusted the data type, we'll ignore this for now.
+            // See: https://github.com/neXenio/BLE-Indoor-Positioning/issues/79
         }
         if (!Arrays.equals(getFlagsBytes(data), EXPECTED_FLAGS)) {
             return false;
