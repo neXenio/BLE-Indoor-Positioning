@@ -35,7 +35,6 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public static final int ROOT_MEAN_SQUARE_THRESHOLD_LIGHT = 25;
 
     public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
-    // set maximum distance to new location
     private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
 
     private static IndoorPositioning instance;
@@ -173,6 +172,10 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     /*
         Getter & Setter
      */
+
+    public double getMaximumMovementSpeed() {
+        return maximumMovementSpeed;
+    }
 
     public void setMaximumMovementSpeed(double maximumMovementSpeed) {
         this.maximumMovementSpeed = maximumMovementSpeed;
