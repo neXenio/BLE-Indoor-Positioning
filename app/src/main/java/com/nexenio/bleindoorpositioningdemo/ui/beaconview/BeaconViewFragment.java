@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.nexenio.bleindoorpositioning.IndoorPositioning;
+import com.nexenio.bleindoorpositioning.ble.advertising.IndoorPositioningAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
@@ -26,7 +27,6 @@ import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public abstract class BeaconViewFragment extends Fragment {
 
@@ -34,6 +34,8 @@ public abstract class BeaconViewFragment extends Fragment {
     protected LocationListener deviceLocationListener;
     protected BeaconUpdateListener beaconUpdateListener;
     protected List<BeaconFilter> beaconFilters = new ArrayList<>();
+
+    protected IBeaconFilter uuidFilter = getUuidFilter();
 
     protected CoordinatorLayout coordinatorLayout;
 
@@ -70,7 +72,7 @@ public abstract class BeaconViewFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        IndoorPositioning.getInstance().setIndoorPositioningBeaconFilter(new IBeaconFilter(UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01"), UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291")));
+        IndoorPositioning.getInstance().setIndoorPositioningBeaconFilter(new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID));
         IndoorPositioning.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.requestLastKnownLocation();
@@ -111,6 +113,14 @@ public abstract class BeaconViewFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    public IBeaconFilter getUuidFilter() {
+        if (uuidFilter == null) {
+            uuidFilter = new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID);
+        }
+        return uuidFilter;
+
+    }
+
     protected void onColoringModeSelected(@ColorUtil.ColoringMode int coloringMode, MenuItem menuItem) {
         menuItem.setChecked(true);
         this.coloringMode = coloringMode;
@@ -132,4 +142,7 @@ public abstract class BeaconViewFragment extends Fragment {
         return beacons;
     }
 
+    public void setUuidFilter(IBeaconFilter uuidFilter) {
+        this.uuidFilter = uuidFilter;
+    }
 }

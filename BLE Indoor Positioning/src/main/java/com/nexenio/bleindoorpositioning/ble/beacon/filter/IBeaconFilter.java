@@ -4,6 +4,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,7 +41,8 @@ public class IBeaconFilter<B extends IBeacon> extends GenericBeaconFilter<B> {
         }
         if (matchProximityUuid) {
             boolean uuidMatches = false;
-            for (UUID proximityUuid : proximityUuids) {
+            Iterator<UUID> uuidIterator = proximityUuids.iterator();
+            for (UUID proximityUuid = uuidIterator.next(); uuidIterator.hasNext();) {
                 if (!proximityUuid.equals(beacon.getProximityUuid())) {
                     uuidMatches = true;
                     break;
