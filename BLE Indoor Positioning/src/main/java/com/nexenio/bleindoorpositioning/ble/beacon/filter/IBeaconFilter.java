@@ -78,9 +78,11 @@ public class IBeaconFilter<B extends IBeacon> extends GenericBeaconFilter<B> {
     }
 
     public void setProximityUuids(List<UUID> proximityUuids) {
-        this.proximityUuids.clear();
-        this.proximityUuids.addAll(proximityUuids);
-        matchProximityUuid = true;
+        synchronized (this.proximityUuids) {
+            this.proximityUuids.clear();
+            this.proximityUuids.addAll(proximityUuids);
+            matchProximityUuid = true;
+        }
     }
 
     public int getMajor() {
