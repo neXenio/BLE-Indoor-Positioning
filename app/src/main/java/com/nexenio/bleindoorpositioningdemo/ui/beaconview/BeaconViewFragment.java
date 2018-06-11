@@ -35,7 +35,7 @@ public abstract class BeaconViewFragment extends Fragment {
     protected BeaconUpdateListener beaconUpdateListener;
     protected List<BeaconFilter> beaconFilters = new ArrayList<>();
 
-    protected IBeaconFilter uuidFilter = getUuidFilter();
+    protected IBeaconFilter uuidFilter = new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID);
 
     protected CoordinatorLayout coordinatorLayout;
 
@@ -114,9 +114,6 @@ public abstract class BeaconViewFragment extends Fragment {
     }
 
     public IBeaconFilter getUuidFilter() {
-        if (uuidFilter == null) {
-            uuidFilter = new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID);
-        }
         return uuidFilter;
 
     }

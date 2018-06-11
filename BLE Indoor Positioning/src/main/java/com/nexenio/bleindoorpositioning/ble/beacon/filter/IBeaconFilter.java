@@ -41,11 +41,13 @@ public class IBeaconFilter<B extends IBeacon> extends GenericBeaconFilter<B> {
         }
         if (matchProximityUuid) {
             boolean uuidMatches = false;
-            Iterator<UUID> uuidIterator = proximityUuids.iterator();
-            for (UUID proximityUuid = uuidIterator.next(); uuidIterator.hasNext();) {
-                if (!proximityUuid.equals(beacon.getProximityUuid())) {
-                    uuidMatches = true;
-                    break;
+            synchronized (proximityUuids) {
+                Iterator<UUID> uuidIterator = proximityUuids.iterator();
+                for (UUID proximityUuid = uuidIterator.next(); uuidIterator.hasNext(); ) {
+                    if (!proximityUuid.equals(beacon.getProximityUuid())) {
+                        uuidMatches = true;
+                        break;
+                    }
                 }
             }
             if (!uuidMatches) {
