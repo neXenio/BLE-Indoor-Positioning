@@ -3,7 +3,8 @@ package com.nexenio.bleindoorpositioning.ble.advertising;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 
-import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -137,11 +138,15 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
     }
 
     public static int getMajor(byte[] majorBytes) {
-        return new BigInteger(majorBytes).intValue();
+        return getUnsignedInt(majorBytes);
     }
 
     public static int getMinor(byte[] minorBytes) {
-        return new BigInteger(minorBytes).intValue();
+        return getUnsignedInt(minorBytes);
+    }
+
+    public static int getUnsignedInt(byte[] data) {
+        return ByteBuffer.wrap(new byte[]{data[1], data[0], 0, 0}).order(ByteOrder.LITTLE_ENDIAN).getInt();
     }
 
     /*
