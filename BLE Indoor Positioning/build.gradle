@@ -28,8 +28,8 @@ dependencies {
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
-def releaseVersionCode = 9
-def releaseVersionName = "0.3.3"
+def releaseVersionCode = 10
+def releaseVersionName = "0.3.4"
 
 def projectName = 'BLE Indoor Positioning'
 def projectDescription = 'Java library for indoor positioing using bluetooth beacons'

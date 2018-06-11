@@ -15,15 +15,11 @@ import android.view.ViewGroup;
 import com.nexenio.bleindoorpositioning.IndoorPositioning;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
-import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
-import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.BeaconViewFragment;
-
-import java.util.UUID;
 
 public class BeaconRadarFragment extends BeaconViewFragment {
 
@@ -39,22 +35,6 @@ public class BeaconRadarFragment extends BeaconViewFragment {
 
     public BeaconRadarFragment() {
         super();
-        IBeaconFilter uuidFilter = new IBeaconFilter() {
-
-            private UUID legacyUuid = UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01");
-            private UUID indoorPositioningUuid = UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291");
-
-            @Override
-            public boolean matches(IBeacon beacon) {
-                if (legacyUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                return false;
-            }
-        };
         beaconFilters.add(uuidFilter);
 
         sensorEventListener = new SensorEventListener() {
