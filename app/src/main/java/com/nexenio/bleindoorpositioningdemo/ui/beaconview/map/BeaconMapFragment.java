@@ -23,7 +23,7 @@ public class BeaconMapFragment extends BeaconViewFragment {
 
     public BeaconMapFragment() {
         super();
-        beaconFilters.add(getUuidFilter());
+        beaconFilters.add(uuidFilter);
     }
 
     @Override

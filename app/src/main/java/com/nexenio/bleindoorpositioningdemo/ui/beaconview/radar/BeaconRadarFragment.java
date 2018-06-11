@@ -35,7 +35,7 @@ public class BeaconRadarFragment extends BeaconViewFragment {
 
     public BeaconRadarFragment() {
         super();
-        beaconFilters.add(getUuidFilter());
+        beaconFilters.add(uuidFilter);
 
         sensorEventListener = new SensorEventListener() {
             @Override

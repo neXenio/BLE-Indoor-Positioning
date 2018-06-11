@@ -40,7 +40,7 @@ public class BeaconChartFragment extends BeaconViewFragment {
         if (this.rssiFilterView) {
             beaconFilters.add(createClosestBeaconFilter());
         } else {
-            beaconFilters.add(getUuidFilter());
+            beaconFilters.add(uuidFilter);
         }
     }
 

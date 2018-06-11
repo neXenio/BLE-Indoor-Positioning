@@ -72,7 +72,7 @@ public abstract class BeaconViewFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        IndoorPositioning.getInstance().setIndoorPositioningBeaconFilter(new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID));
+        IndoorPositioning.getInstance().setIndoorPositioningBeaconFilter(uuidFilter);
         IndoorPositioning.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.requestLastKnownLocation();
