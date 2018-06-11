@@ -146,7 +146,11 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
     }
 
     public static int getUnsignedInt(byte[] data) {
-        return ByteBuffer.wrap(new byte[]{data[1], data[0], 0, 0}).order(ByteOrder.LITTLE_ENDIAN).getInt();
+        if (data.length == 2) {
+            return ByteBuffer.wrap(new byte[]{data[1], data[0], 0, 0}).order(ByteOrder.LITTLE_ENDIAN).getInt();
+        } else {
+            return ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt();
+        }
     }
 
     /*
