@@ -115,7 +115,6 @@ public abstract class BeaconViewFragment extends Fragment {
 
     public IBeaconFilter getUuidFilter() {
         return uuidFilter;
-
     }
 
     protected void onColoringModeSelected(@ColorUtil.ColoringMode int coloringMode, MenuItem menuItem) {
