@@ -15,16 +15,19 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.nexenio.bleindoorpositioning.IndoorPositioning;
+import com.nexenio.bleindoorpositioning.ble.advertising.IndoorPositioningAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public abstract class BeaconViewFragment extends Fragment {
 
@@ -32,6 +35,10 @@ public abstract class BeaconViewFragment extends Fragment {
     protected LocationListener deviceLocationListener;
     protected BeaconUpdateListener beaconUpdateListener;
     protected List<BeaconFilter> beaconFilters = new ArrayList<>();
+
+    // TODO: Remove legacy uuid once all beacons are updated
+    // protected IBeaconFilter uuidFilter = new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID);
+    protected IBeaconFilter uuidFilter = new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID, UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01"));
 
     protected CoordinatorLayout coordinatorLayout;
 
@@ -68,6 +75,7 @@ public abstract class BeaconViewFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        IndoorPositioning.getInstance().setIndoorPositioningBeaconFilter(uuidFilter);
         IndoorPositioning.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.registerLocationListener(deviceLocationListener);
         AndroidLocationProvider.requestLastKnownLocation();
@@ -108,6 +116,10 @@ public abstract class BeaconViewFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    public IBeaconFilter getUuidFilter() {
+        return uuidFilter;
+    }
+
     protected void onColoringModeSelected(@ColorUtil.ColoringMode int coloringMode, MenuItem menuItem) {
         menuItem.setChecked(true);
         this.coloringMode = coloringMode;
@@ -129,4 +141,7 @@ public abstract class BeaconViewFragment extends Fragment {
         return beacons;
     }
 
+    public void setUuidFilter(IBeaconFilter uuidFilter) {
+        this.uuidFilter = uuidFilter;
+    }
 }
