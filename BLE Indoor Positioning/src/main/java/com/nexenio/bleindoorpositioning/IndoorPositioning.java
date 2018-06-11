@@ -3,10 +3,8 @@ package com.nexenio.bleindoorpositioning;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
-import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.GenericBeaconFilter;
-import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.LocationPredictor;
@@ -20,7 +18,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class IndoorPositioning implements LocationProvider, BeaconUpdateListener {
@@ -42,8 +39,9 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private Location lastKnownLocation;
     private long maximumLocationUpdateInterval = UPDATE_INTERVAL_MEDIUM;
     private Set<LocationListener> locationListeners = new HashSet<>();
-    private BeaconFilter indoorPositioningBeaconFilter = createIndoorPositioningBeaconFilter();
+    private BeaconFilter indoorPositioningBeaconFilter = null;
     private GenericBeaconFilter usableIndoorPositioningBeaconFilter = createUsableIndoorPositioningBeaconFilter();
+
     private LocationPredictor locationPredictor = new LocationPredictor();
 
     private IndoorPositioning() {
@@ -130,31 +128,12 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         return getInstance().locationListeners.remove(locationListener);
     }
 
-    public static IBeaconFilter createIndoorPositioningBeaconFilter() {
-        return new IBeaconFilter() {
-
-            private UUID legacyUuid = UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01");
-            private UUID indoorPositioningUuid = UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291");
-
-            @Override
-            public boolean matches(IBeacon beacon) {
-                if (legacyUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                return false;
-            }
-        };
-    }
-
     public static GenericBeaconFilter<? extends Beacon> createUsableIndoorPositioningBeaconFilter() {
         return new GenericBeaconFilter<Beacon>() {
 
             @Override
             public boolean matches(Beacon beacon) {
-                if (!getInstance().indoorPositioningBeaconFilter.matches(beacon)) {
+                if (getInstance().indoorPositioningBeaconFilter != null && !getInstance().indoorPositioningBeaconFilter.matches(beacon)) {
                     return false;
                 }
                 if (!beacon.hasLocation()) {
@@ -212,4 +191,5 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public void setUsableIndoorPositioningBeaconFilter(GenericBeaconFilter usableIndoorPositioningBeaconFilter) {
         this.usableIndoorPositioningBeaconFilter = usableIndoorPositioningBeaconFilter;
     }
+
 }

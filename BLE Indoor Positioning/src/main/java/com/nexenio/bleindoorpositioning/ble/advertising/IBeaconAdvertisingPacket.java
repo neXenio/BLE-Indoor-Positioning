@@ -280,7 +280,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     public int getMinor() {
         if (minor == 0) {
-            minor = getMajor(getMinorBytes());
+            minor = getMinor(getMinorBytes());
         }
         return minor;
     }
