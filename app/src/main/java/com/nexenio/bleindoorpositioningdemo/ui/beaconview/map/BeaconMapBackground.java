@@ -2,9 +2,11 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.map;
 
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.support.annotation.NonNull;
 
 import com.nexenio.bleindoorpositioning.location.Location;
+import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
 
 public class BeaconMapBackground {
 
@@ -18,8 +20,20 @@ public class BeaconMapBackground {
 
     private Location bottomRightLocation;
 
+    private CanvasProjection projection = new CanvasProjection();
+
     private BeaconMapBackground(Bitmap imageBitmap) {
         this.imageBitmap = imageBitmap;
+        projection.setCanvasWidth(imageBitmap.getWidth());
+        projection.setCanvasHeight(imageBitmap.getHeight());
+    }
+
+    public Location getLocation(float x, float y) {
+        //projection.get
+    }
+
+    public PointF getPoint(Location location) {
+
     }
 
     public static float getMetersPerPixel(Location firstReferenceLocation, Point firstReferencePoint, Location secondReferenceLocation, Point secondReferencePoint) {
@@ -32,10 +46,6 @@ public class BeaconMapBackground {
 
     public Bitmap getImageBitmap() {
         return imageBitmap;
-    }
-
-    public void setImageBitmap(Bitmap imageBitmap) {
-        this.imageBitmap = imageBitmap;
     }
 
     public float getMetersPerPixel() {
@@ -60,6 +70,7 @@ public class BeaconMapBackground {
 
     public void setTopLeftLocation(Location topLeftLocation) {
         this.topLeftLocation = topLeftLocation;
+        projection.setTopLeftLocation(topLeftLocation);
     }
 
     public Location getBottomRightLocation() {
@@ -68,6 +79,7 @@ public class BeaconMapBackground {
 
     public void setBottomRightLocation(Location bottomRightLocation) {
         this.bottomRightLocation = bottomRightLocation;
+        projection.setBottomRightLocation(bottomRightLocation);
     }
 
     public static class Builder {
