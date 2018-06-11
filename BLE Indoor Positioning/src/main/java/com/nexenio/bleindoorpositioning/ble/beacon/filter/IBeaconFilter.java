@@ -42,7 +42,7 @@ public class IBeaconFilter<B extends IBeacon> extends GenericBeaconFilter<B> {
             boolean uuidMatches = false;
             synchronized (proximityUuids) {
                 for (UUID proximityUuid : proximityUuids) {
-                    if (!proximityUuid.equals(beacon.getProximityUuid())) {
+                    if (proximityUuid.equals(beacon.getProximityUuid())) {
                         uuidMatches = true;
                         break;
                     }
