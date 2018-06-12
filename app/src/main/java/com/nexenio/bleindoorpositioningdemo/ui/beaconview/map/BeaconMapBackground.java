@@ -12,9 +12,9 @@ public class BeaconMapBackground {
 
     private Bitmap imageBitmap;
 
-    private float metersPerPixel;
+    private double metersPerPixel;
 
-    private float bearing;
+    private double bearing;
 
     private Location topLeftLocation;
 
@@ -29,11 +29,11 @@ public class BeaconMapBackground {
     }
 
     public Location getLocation(float x, float y) {
-        //projection.get
+        return new Location();
     }
 
     public PointF getPoint(Location location) {
-
+        return new PointF(0, 0);
     }
 
     public static float getMetersPerPixel(Location firstReferenceLocation, Point firstReferencePoint, Location secondReferenceLocation, Point secondReferencePoint) {
@@ -44,23 +44,38 @@ public class BeaconMapBackground {
         return (float) (distanceInMeters / distanceInPixels);
     }
 
+    public static double getBearing(Location firstReferenceLocation, Point firstReferencePoint, Location secondReferenceLocation, Point secondReferencePoint) {
+        double locationAngle = getAngle(firstReferenceLocation, secondReferenceLocation);
+        double pointAngle = getAngle(firstReferencePoint, secondReferencePoint);
+        return ((locationAngle - pointAngle) + 360) % 360;
+    }
+
+    public static double getAngle(Point firstReferencePoint, Point secondReferencePoint) {
+        double angle = Math.atan2(secondReferencePoint.y - firstReferencePoint.y, secondReferencePoint.x - firstReferencePoint.x) * 180 / Math.PI;
+        return (angle + 90) % 360;
+    }
+
+    public static double getAngle(Location firstReferenceLocation, Location secondReferenceLocation) {
+        return firstReferenceLocation.getAngleTo(secondReferenceLocation);
+    }
+
     public Bitmap getImageBitmap() {
         return imageBitmap;
     }
 
-    public float getMetersPerPixel() {
+    public double getMetersPerPixel() {
         return metersPerPixel;
     }
 
-    public void setMetersPerPixel(float metersPerPixel) {
+    public void setMetersPerPixel(double metersPerPixel) {
         this.metersPerPixel = metersPerPixel;
     }
 
-    public float getBearing() {
+    public double getBearing() {
         return bearing;
     }
 
-    public void setBearing(float bearing) {
+    public void setBearing(double bearing) {
         this.bearing = bearing;
     }
 
@@ -94,6 +109,9 @@ public class BeaconMapBackground {
 
         private Point secondReferencePoint;
 
+        private Builder() {
+        }
+
         public static Builder from(@NonNull Bitmap imageBitmap) {
             Builder builder = new Builder();
             builder.beaconMapBackground = new BeaconMapBackground(imageBitmap);
@@ -105,15 +123,15 @@ public class BeaconMapBackground {
             return this;
         }
 
-        public Builder withFirstReferenceLocation(Location location, int x, int y) {
+        public Builder withFirstReferenceLocation(Location location, Point point) {
             firstReferenceLocation = location;
-            firstReferencePoint = new Point(x, y);
+            firstReferencePoint = point;
             return this;
         }
 
-        public Builder withSecondReferenceLocation(Location location, int x, int y) {
+        public Builder withSecondReferenceLocation(Location location, Point point) {
             secondReferenceLocation = location;
-            secondReferencePoint = new Point(x, y);
+            secondReferencePoint = point;
             return this;
         }
 
@@ -122,8 +140,12 @@ public class BeaconMapBackground {
             if (firstReferenceLocation == null || secondReferenceLocation == null) {
                 throw new IllegalArgumentException("You have to specify two reference locations first.");
             }
-            float metersPerPixel = getMetersPerPixel(firstReferenceLocation, firstReferencePoint, secondReferenceLocation, secondReferencePoint);
+            double metersPerPixel = getMetersPerPixel(firstReferenceLocation, firstReferencePoint, secondReferenceLocation, secondReferencePoint);
             beaconMapBackground.setMetersPerPixel(metersPerPixel);
+
+            // bearing
+            double bearing = getBearing(firstReferenceLocation, firstReferencePoint, secondReferenceLocation, secondReferencePoint);
+            beaconMapBackground.setBearing(bearing);
 
             return beaconMapBackground;
         }
