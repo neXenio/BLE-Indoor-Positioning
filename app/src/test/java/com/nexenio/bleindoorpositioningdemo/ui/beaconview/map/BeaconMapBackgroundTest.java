@@ -49,6 +49,17 @@ public class BeaconMapBackgroundTest {
 
     @Test
     public void getLocation() {
+        Location location = BeaconMapBackground.getLocation(secondReferencePoint, firstReferenceLocation, firstReferencePoint, beaconMapBackground.getMetersPerPixel());
+        double distance = secondReferenceLocation.getDistanceTo(location);
+        assertEquals(0, distance, 0.1);
+
+        location = BeaconMapBackground.getLocation(firstReferencePoint, secondReferenceLocation, secondReferencePoint, beaconMapBackground.getMetersPerPixel());
+        distance = firstReferenceLocation.getDistanceTo(location);
+        assertEquals(0, distance, 0.1);
+    }
+
+    @Test
+    public void getLocation1() {
         Location location = beaconMapBackground.getLocation(firstReferencePoint.x, firstReferencePoint.y);
         assertTrue(firstReferenceLocation.getDistanceTo(location) < 1);
 

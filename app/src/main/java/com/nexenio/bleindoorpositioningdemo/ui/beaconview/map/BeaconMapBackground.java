@@ -37,9 +37,7 @@ public class BeaconMapBackground {
     }
 
     public static float getMetersPerPixel(Location firstReferenceLocation, Point firstReferencePoint, Location secondReferenceLocation, Point secondReferencePoint) {
-        int deltaX = Math.abs(secondReferencePoint.x - firstReferencePoint.x);
-        int deltaY = Math.abs(secondReferencePoint.y - firstReferencePoint.y);
-        double distanceInPixels = Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+        double distanceInPixels = getPixelDistance(firstReferencePoint, secondReferencePoint);
         double distanceInMeters = firstReferenceLocation.getDistanceTo(secondReferenceLocation);
         return (float) (distanceInMeters / distanceInPixels);
     }
@@ -50,13 +48,25 @@ public class BeaconMapBackground {
         return ((locationAngle - pointAngle) + 360) % 360;
     }
 
-    public static double getAngle(Point firstReferencePoint, Point secondReferencePoint) {
-        double angle = Math.atan2(secondReferencePoint.y - firstReferencePoint.y, secondReferencePoint.x - firstReferencePoint.x) * 180 / Math.PI;
+    public static double getAngle(Point firstPoint, Point secondPoint) {
+        double angle = Math.atan2(secondPoint.y - firstPoint.y, secondPoint.x - firstPoint.x) * 180 / Math.PI;
         return (angle + 90) % 360;
     }
 
-    public static double getAngle(Location firstReferenceLocation, Location secondReferenceLocation) {
-        return firstReferenceLocation.getAngleTo(secondReferenceLocation);
+    public static double getAngle(Location firstLocation, Location secondLocation) {
+        return firstLocation.getAngleTo(secondLocation);
+    }
+
+    public static double getPixelDistance(Point firstPoint, Point secondPoint) {
+        int deltaX = Math.abs(secondPoint.x - firstPoint.x);
+        int deltaY = Math.abs(secondPoint.y - firstPoint.y);
+        return Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
+    }
+
+    public static Location getLocation(Point point, Location referenceLocation, Point referencePoint, double metersPerPixel) {
+        double distance = metersPerPixel * getPixelDistance(referencePoint, point);
+        double angle = getAngle(referencePoint, point);
+        return referenceLocation.getShiftedLocation(distance, angle);
     }
 
     public Bitmap getImageBitmap() {
