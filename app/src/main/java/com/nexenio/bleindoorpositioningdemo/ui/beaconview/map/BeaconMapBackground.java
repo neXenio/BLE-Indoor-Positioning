@@ -2,7 +2,6 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.map;
 
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.graphics.PointF;
 import android.support.annotation.NonNull;
 
 import com.nexenio.bleindoorpositioning.location.Location;
@@ -17,8 +16,10 @@ public class BeaconMapBackground {
     private double bearing;
 
     private Location topLeftLocation;
-
     private Location bottomRightLocation;
+
+    private Point topLeftPoint;
+    private Point bottomRightPoint;
 
     private CanvasProjection projection = new CanvasProjection();
 
@@ -26,14 +27,16 @@ public class BeaconMapBackground {
         this.imageBitmap = imageBitmap;
         projection.setCanvasWidth(imageBitmap.getWidth());
         projection.setCanvasHeight(imageBitmap.getHeight());
+        topLeftPoint = new Point(0, 0);
+        bottomRightPoint = new Point(imageBitmap.getWidth(), imageBitmap.getHeight());
     }
 
-    public Location getLocation(float x, float y) {
-        return new Location();
+    public Location getLocation(Point point) {
+        return getLocation(point, topLeftLocation, topLeftPoint, metersPerPixel, bearing);
     }
 
-    public PointF getPoint(Location location) {
-        return new PointF(0, 0);
+    public Point getPoint(Location location) {
+        return getPoint(location, topLeftLocation, topLeftPoint, metersPerPixel, bearing);
     }
 
     public static float getMetersPerPixel(Location firstReferenceLocation, Point firstReferencePoint, Location secondReferenceLocation, Point secondReferencePoint) {
@@ -67,6 +70,20 @@ public class BeaconMapBackground {
         double distance = metersPerPixel * getPixelDistance(referencePoint, point);
         double angle = (getAngle(referencePoint, point) + bearing + 360) % 360;
         return referenceLocation.getShiftedLocation(distance, angle);
+    }
+
+    public static Point getPoint(Location location, Location referenceLocation, Point referencePoint, double metersPerPixel, double bearing) {
+        double distance = location.getDistanceTo(referenceLocation) / metersPerPixel;
+        double angle = (getAngle(location, referenceLocation) + bearing + 360) % 360;
+        return getShiftedPoint(referencePoint, distance, angle);
+    }
+
+    public static Point getShiftedPoint(Point referencePoint, double distance, double bearing) {
+        double angleInRadians = Math.toRadians(bearing + 90);
+        return new Point(
+                -(int) (referencePoint.x + (distance * Math.cos(angleInRadians))),
+                -(int) (referencePoint.y + (distance * Math.sin(angleInRadians)))
+        );
     }
 
     public Bitmap getImageBitmap() {
@@ -105,6 +122,22 @@ public class BeaconMapBackground {
     public void setBottomRightLocation(Location bottomRightLocation) {
         this.bottomRightLocation = bottomRightLocation;
         projection.setBottomRightLocation(bottomRightLocation);
+    }
+
+    public Point getTopLeftPoint() {
+        return topLeftPoint;
+    }
+
+    public void setTopLeftPoint(Point topLeftPoint) {
+        this.topLeftPoint = topLeftPoint;
+    }
+
+    public Point getBottomRightPoint() {
+        return bottomRightPoint;
+    }
+
+    public void setBottomRightPoint(Point bottomRightPoint) {
+        this.bottomRightPoint = bottomRightPoint;
     }
 
     public static class Builder {
@@ -156,6 +189,26 @@ public class BeaconMapBackground {
             // bearing
             double bearing = getBearing(firstReferenceLocation, firstReferencePoint, secondReferenceLocation, secondReferencePoint);
             beaconMapBackground.setBearing(bearing);
+
+            // top left location
+            Location topLeftLocation = getLocation(
+                    beaconMapBackground.getTopLeftPoint(),
+                    firstReferenceLocation,
+                    firstReferencePoint,
+                    metersPerPixel,
+                    bearing
+            );
+            beaconMapBackground.setTopLeftLocation(topLeftLocation);
+
+            // bottom right location
+            Location bottomRightLocation = getLocation(
+                    beaconMapBackground.getBottomRightPoint(),
+                    firstReferenceLocation,
+                    firstReferencePoint,
+                    metersPerPixel,
+                    bearing
+            );
+            beaconMapBackground.setBottomRightLocation(bottomRightLocation);
 
             return beaconMapBackground;
         }

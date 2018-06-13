@@ -3,7 +3,6 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.map;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.graphics.PointF;
 
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioningdemo.R;
@@ -15,7 +14,6 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 public class BeaconMapBackgroundTest {
@@ -48,43 +46,37 @@ public class BeaconMapBackgroundTest {
     }
 
     @Test
-    public void getLocation() {
-        Location location = BeaconMapBackground.getLocation(secondReferencePoint,
-                firstReferenceLocation,
-                firstReferencePoint,
-                beaconMapBackground.getMetersPerPixel(),
-                beaconMapBackground.getBearing());
-        double distance = secondReferenceLocation.getDistanceTo(location);
-        assertEquals(0, distance, 0.1);
+    public void getLocation_referencePoint_referenceLocation() {
+        Location location = beaconMapBackground.getLocation(firstReferencePoint);
+        assertEquals(0, firstReferenceLocation.getDistanceTo(location), 0.1);
 
-        location = BeaconMapBackground.getLocation(
-                firstReferencePoint,
-                secondReferenceLocation,
-                secondReferencePoint,
-                beaconMapBackground.getMetersPerPixel(),
-                beaconMapBackground.getBearing());
-        distance = firstReferenceLocation.getDistanceTo(location);
-        assertEquals(0, distance, 0.1);
+        location = beaconMapBackground.getLocation(secondReferencePoint);
+        assertEquals(0, secondReferenceLocation.getDistanceTo(location), 0.1);
+
+        location = beaconMapBackground.getLocation(beaconMapBackground.getTopLeftPoint());
+        assertEquals(0, beaconMapBackground.getTopLeftLocation().getDistanceTo(location), 0.1);
+
+        location = beaconMapBackground.getLocation(beaconMapBackground.getBottomRightPoint());
+        assertEquals(0, beaconMapBackground.getBottomRightLocation().getDistanceTo(location), 0.1);
     }
 
     @Test
-    public void getLocation1() {
-        Location location = beaconMapBackground.getLocation(firstReferencePoint.x, firstReferencePoint.y);
-        assertTrue(firstReferenceLocation.getDistanceTo(location) < 1);
-
-        location = beaconMapBackground.getLocation(secondReferencePoint.x, secondReferencePoint.y);
-        assertTrue(secondReferenceLocation.getDistanceTo(location) < 1);
-    }
-
-    @Test
-    public void getPoint() {
-        PointF point = beaconMapBackground.getPoint(firstReferenceLocation);
+    public void getPoint_referenceLocation_referencePoint() {
+        Point point = beaconMapBackground.getPoint(firstReferenceLocation);
         assertEquals(firstReferencePoint.x, point.x, 0.001);
         assertEquals(firstReferencePoint.y, point.y, 0.001);
 
         point = beaconMapBackground.getPoint(secondReferenceLocation);
         assertEquals(secondReferencePoint.x, point.x, 0.001);
         assertEquals(secondReferencePoint.y, point.y, 0.001);
+
+        point = beaconMapBackground.getPoint(beaconMapBackground.getTopLeftLocation());
+        assertEquals(beaconMapBackground.getTopLeftPoint().x, point.x, 0.001);
+        assertEquals(beaconMapBackground.getTopLeftPoint().y, point.y, 0.001);
+
+        point = beaconMapBackground.getPoint(beaconMapBackground.getBottomRightLocation());
+        assertEquals(beaconMapBackground.getBottomRightPoint().x, point.x, 0.001);
+        assertEquals(beaconMapBackground.getBottomRightPoint().y, point.y, 0.001);
     }
 
     @Test
@@ -96,13 +88,11 @@ public class BeaconMapBackgroundTest {
 
     @Test
     public void getBearing() {
-        //double bearing = BeaconMapBackground.getBearing(firstReferenceLocation, firstReferencePoint, secondReferenceLocation, secondReferencePoint);
-
         double pointAngle = BeaconMapBackground.getAngle(firstReferencePoint, secondReferencePoint);
         System.out.println("Point angle: " + String.valueOf(pointAngle));
 
         double locationAngle = BeaconMapBackground.getAngle(firstReferenceLocation, secondReferenceLocation);
-        System.out.println("Location angle: " + String.valueOf(pointAngle));
+        System.out.println("Location angle: " + String.valueOf(locationAngle));
 
         double bearing = firstReferenceLocation.getAngleTo(secondReferenceLocation);
         System.out.println("First to second: " + String.valueOf(bearing));
@@ -116,4 +106,31 @@ public class BeaconMapBackgroundTest {
         assertEquals(353.84, bearing, 0.001);
         assertEquals(bearing, beaconMapBackground.getBearing(), 0.001);
     }
+
+    @Test
+    public void getShiftedPoint() {
+        Point referencePoint = new Point(0, 0);
+        double distance = 10;
+
+        double angle = 0;
+        Point shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
+        assertEquals(0, shiftedPoint.x);
+        assertEquals(-10, shiftedPoint.y);
+
+        angle = 90;
+        shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
+        assertEquals(10, shiftedPoint.x);
+        assertEquals(0, shiftedPoint.y);
+
+        angle = 180;
+        shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
+        assertEquals(0, shiftedPoint.x);
+        assertEquals(10, shiftedPoint.y);
+
+        angle = 270;
+        shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
+        assertEquals(-10, shiftedPoint.x);
+        assertEquals(0, shiftedPoint.y);
+    }
+
 }
