@@ -63,9 +63,9 @@ public class BeaconMapBackground {
         return Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
     }
 
-    public static Location getLocation(Point point, Location referenceLocation, Point referencePoint, double metersPerPixel) {
+    public static Location getLocation(Point point, Location referenceLocation, Point referencePoint, double metersPerPixel, double bearing) {
         double distance = metersPerPixel * getPixelDistance(referencePoint, point);
-        double angle = getAngle(referencePoint, point);
+        double angle = (getAngle(referencePoint, point) + bearing + 360) % 360;
         return referenceLocation.getShiftedLocation(distance, angle);
     }
 
