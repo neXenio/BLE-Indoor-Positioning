@@ -83,8 +83,8 @@ public class BeaconMapBackground {
     public static Point getShiftedPoint(Point referencePoint, double distanceInPixels, double bearing) {
         double angleInRadians = Math.toRadians(bearing + 90);
         return new Point(
-                -(int) (referencePoint.x + (distanceInPixels * Math.cos(angleInRadians))),
-                -(int) (referencePoint.y + (distanceInPixels * Math.sin(angleInRadians)))
+                (int) (referencePoint.x - (distanceInPixels * Math.cos(angleInRadians))),
+                (int) (referencePoint.y - (distanceInPixels * Math.sin(angleInRadians)))
         );
     }
 

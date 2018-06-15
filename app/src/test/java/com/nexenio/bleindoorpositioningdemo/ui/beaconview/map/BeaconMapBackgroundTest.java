@@ -100,10 +100,10 @@ public class BeaconMapBackgroundTest {
                 beaconMapBackground.getBottomRightLocation()
         );
 
-        System.out.println("firstReferenceLocation: " + firstReferenceLocation.generateGoogleMapsUri());
-        System.out.println("secondReferenceLocation: " + secondReferenceLocation.generateGoogleMapsUri());
         System.out.println("topLeftLocation: " + beaconMapBackground.getTopLeftLocation().generateGoogleMapsUri());
         System.out.println("bottomRightLocation: " + beaconMapBackground.getBottomRightLocation().generateGoogleMapsUri());
+        System.out.println("firstReferenceLocation: " + firstReferenceLocation.generateGoogleMapsUri());
+        System.out.println("secondReferenceLocation: " + secondReferenceLocation.generateGoogleMapsUri());
         System.out.println("centerLocation: " + centerLocation.generateGoogleMapsUri());
 
         Point centerPointUsingTopLeft = BeaconMapBackground.getPoint(
@@ -185,15 +185,16 @@ public class BeaconMapBackgroundTest {
     }
 
     @Test
-    public void getShiftedPoint() {
+    public void getShiftedPoint_zeroReference_correctPoints() {
         Point referencePoint;
+        Point shiftedPoint;
         double distance;
         double angle;
 
         referencePoint = new Point(0, 0);
         distance = 10;
         angle = 0;
-        Point shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
+        shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
         assertPointEquals(new Point(0, -10), shiftedPoint, 0);
 
         angle = 90;
@@ -207,6 +208,32 @@ public class BeaconMapBackgroundTest {
         angle = 270;
         shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
         assertPointEquals(new Point(-10, 0), shiftedPoint, 0);
+    }
+
+    @Test
+    public void getShiftedPoint_positiveReference_correctPoints() {
+        Point referencePoint;
+        Point shiftedPoint;
+        double distance;
+        double angle;
+
+        referencePoint = new Point(100, 100);
+        distance = 50;
+        angle = 0;
+        shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
+        assertPointEquals(new Point(100, 50), shiftedPoint, 0);
+
+        angle = 90;
+        shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
+        assertPointEquals(new Point(150, 100), shiftedPoint, 0);
+
+        angle = 180;
+        shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
+        assertPointEquals(new Point(100, 150), shiftedPoint, 0);
+
+        angle = 270;
+        shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
+        assertPointEquals(new Point(50, 100), shiftedPoint, 0);
     }
 
     public static void assertPointEquals(Point expectedPoint, Point actualPoint, double delta) {
