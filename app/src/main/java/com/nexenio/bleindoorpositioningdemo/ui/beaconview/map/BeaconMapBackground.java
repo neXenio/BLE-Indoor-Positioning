@@ -36,8 +36,7 @@ public class BeaconMapBackground {
     }
 
     public Point getPoint(Location location) {
-        //return getPoint(location, topLeftLocation, topLeftPoint, metersPerPixel, bearing);
-        return getPoint(location, bottomRightLocation, bottomRightPoint, metersPerPixel, bearing);
+        return getPoint(location, topLeftLocation, topLeftPoint, metersPerPixel, bearing);
     }
 
     public static float getMetersPerPixel(Location firstReferenceLocation, Point firstReferencePoint, Location secondReferenceLocation, Point secondReferencePoint) {
@@ -74,16 +73,18 @@ public class BeaconMapBackground {
     }
 
     public static Point getPoint(Location location, Location referenceLocation, Point referencePoint, double metersPerPixel, double bearing) {
-        double distance = location.getDistanceTo(referenceLocation) / metersPerPixel;
-        double angle = (getAngle(location, referenceLocation) + bearing + 360) % 360;
-        return getShiftedPoint(referencePoint, distance, angle);
+        double distanceInMeters = location.getDistanceTo(referenceLocation);
+        double distanceInPixels = distanceInMeters / metersPerPixel;
+        double locationAngle = getAngle(referenceLocation, location);
+        double angle = (locationAngle - bearing + 360) % 360;
+        return getShiftedPoint(referencePoint, distanceInPixels, angle);
     }
 
-    public static Point getShiftedPoint(Point referencePoint, double distance, double bearing) {
+    public static Point getShiftedPoint(Point referencePoint, double distanceInPixels, double bearing) {
         double angleInRadians = Math.toRadians(bearing + 90);
         return new Point(
-                -(int) (referencePoint.x + (distance * Math.cos(angleInRadians))),
-                -(int) (referencePoint.y + (distance * Math.sin(angleInRadians)))
+                -(int) (referencePoint.x + (distanceInPixels * Math.cos(angleInRadians))),
+                -(int) (referencePoint.y + (distanceInPixels * Math.sin(angleInRadians)))
         );
     }
 

@@ -31,16 +31,14 @@ public class BeaconMapBackgroundTest {
 
     @Before
     public void setUp() {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("map_view_background.png");
+        backgroundImage = BitmapFactory.decodeStream(inputStream);
+
         firstReferenceLocation = new Location(52.51239236816364, 13.390579996297987);
         secondReferenceLocation = new Location(52.51240825552749, 13.390821867681456);
 
         firstReferencePoint = new Point(953, 1830);
         secondReferencePoint = new Point(1926, 1830);
-
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("map_view_background.png");
-        backgroundImage = BitmapFactory.decodeStream(inputStream);
-
-        System.out.println(backgroundImage);
 
         beaconMapBackgroundBuilder = BeaconMapBackground.Builder.from(backgroundImage)
                 .withFirstReferenceLocation(firstReferenceLocation, firstReferencePoint)
@@ -80,17 +78,19 @@ public class BeaconMapBackgroundTest {
 
     @Test
     public void getPoint_referenceLocation_referencePoint() {
-        Point point = beaconMapBackground.getPoint(firstReferenceLocation);
-        assertPointEquals(firstReferencePoint, point, 0);
-
-        point = beaconMapBackground.getPoint(secondReferenceLocation);
-        assertPointEquals(secondReferencePoint, point, 0);
+        Point point;
 
         point = beaconMapBackground.getPoint(beaconMapBackground.getTopLeftLocation());
-        assertPointEquals(beaconMapBackground.getTopLeftPoint(), point, 0);
+        assertPointEquals(beaconMapBackground.getTopLeftPoint(), point, 1);
 
         point = beaconMapBackground.getPoint(beaconMapBackground.getBottomRightLocation());
-        assertPointEquals(beaconMapBackground.getBottomRightPoint(), point, 0);
+        assertPointEquals(beaconMapBackground.getBottomRightPoint(), point, 1);
+
+        point = beaconMapBackground.getPoint(firstReferenceLocation);
+        assertPointEquals(firstReferencePoint, point, 1);
+
+        point = beaconMapBackground.getPoint(secondReferenceLocation);
+        assertPointEquals(secondReferencePoint, point, 1);
     }
 
     @Test
@@ -186,33 +186,32 @@ public class BeaconMapBackgroundTest {
 
     @Test
     public void getShiftedPoint() {
-        Point referencePoint = new Point(0, 0);
-        double distance = 10;
+        Point referencePoint;
+        double distance;
+        double angle;
 
-        double angle = 0;
+        referencePoint = new Point(0, 0);
+        distance = 10;
+        angle = 0;
         Point shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
-        assertEquals(0, shiftedPoint.x);
-        assertEquals(-10, shiftedPoint.y);
+        assertPointEquals(new Point(0, -10), shiftedPoint, 0);
 
         angle = 90;
         shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
-        assertEquals(10, shiftedPoint.x);
-        assertEquals(0, shiftedPoint.y);
+        assertPointEquals(new Point(10, 0), shiftedPoint, 0);
 
         angle = 180;
         shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
-        assertEquals(0, shiftedPoint.x);
-        assertEquals(10, shiftedPoint.y);
+        assertPointEquals(new Point(0, 10), shiftedPoint, 0);
 
         angle = 270;
         shiftedPoint = BeaconMapBackground.getShiftedPoint(referencePoint, distance, angle);
-        assertEquals(-10, shiftedPoint.x);
-        assertEquals(0, shiftedPoint.y);
+        assertPointEquals(new Point(-10, 0), shiftedPoint, 0);
     }
 
     public static void assertPointEquals(Point expectedPoint, Point actualPoint, double delta) {
-        assertEquals(expectedPoint.x, actualPoint.x, delta);
-        assertEquals(expectedPoint.y, actualPoint.y, delta);
+        double distance = BeaconMapBackground.getPixelDistance(expectedPoint, actualPoint);
+        assertEquals("Distance from expected point: " + expectedPoint + " to actual point: " + actualPoint + " is " + distance, 0, distance, delta);
     }
 
     @Test

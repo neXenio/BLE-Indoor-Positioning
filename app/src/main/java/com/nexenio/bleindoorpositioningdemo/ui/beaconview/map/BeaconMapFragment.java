@@ -71,7 +71,7 @@ public class BeaconMapFragment extends BeaconViewFragment {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inScaled = false;
         Bitmap backgroundImage = BitmapFactory.decodeResource(getResources(), R.drawable.map_view_background, options);
-        
+
         Location centerLocation = new Location(52.512390301005595, 13.39077285305359);
         float metersScale = 10.95f / 717.1f;
         float scale = (backgroundImage.getWidth() / 36.0f);
