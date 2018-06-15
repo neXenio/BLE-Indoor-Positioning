@@ -100,12 +100,6 @@ public class BeaconMapBackgroundTest {
                 beaconMapBackground.getBottomRightLocation()
         );
 
-        System.out.println("topLeftLocation: " + beaconMapBackground.getTopLeftLocation().generateGoogleMapsUri());
-        System.out.println("bottomRightLocation: " + beaconMapBackground.getBottomRightLocation().generateGoogleMapsUri());
-        System.out.println("firstReferenceLocation: " + firstReferenceLocation.generateGoogleMapsUri());
-        System.out.println("secondReferenceLocation: " + secondReferenceLocation.generateGoogleMapsUri());
-        System.out.println("centerLocation: " + centerLocation.generateGoogleMapsUri());
-
         Point centerPointUsingTopLeft = BeaconMapBackground.getPoint(
                 centerLocation,
                 beaconMapBackground.getTopLeftLocation(),
@@ -143,13 +137,6 @@ public class BeaconMapBackgroundTest {
                 backgroundImage.getHeight() / 2
         );
 
-        System.out.println("expectedPoint: " + expectedPoint);
-
-        System.out.println("centerPointUsingTopLeft: " + centerPointUsingTopLeft);
-        System.out.println("centerPointUsingBottomRight: " + centerPointUsingBottomRight);
-        System.out.println("centerPointUsingFirstReference: " + centerPointUsingFirstReference);
-        System.out.println("centerPointUsingSecondReference: " + centerPointUsingSecondReference);
-
         assertPointEquals(expectedPoint, centerPointUsingTopLeft, 0);
         assertPointEquals(expectedPoint, centerPointUsingBottomRight, 0);
         assertPointEquals(expectedPoint, centerPointUsingFirstReference, 0);
@@ -165,21 +152,7 @@ public class BeaconMapBackgroundTest {
 
     @Test
     public void getBearing() {
-        double pointAngle = BeaconMapBackground.getAngle(firstReferencePoint, secondReferencePoint);
-        System.out.println("Point angle: " + String.valueOf(pointAngle));
-
-        double locationAngle = BeaconMapBackground.getAngle(firstReferenceLocation, secondReferenceLocation);
-        System.out.println("Location angle: " + String.valueOf(locationAngle));
-
-        double bearing = firstReferenceLocation.getAngleTo(secondReferenceLocation);
-        System.out.println("First to second: " + String.valueOf(bearing));
-
-        bearing = secondReferenceLocation.getAngleTo(firstReferenceLocation);
-        System.out.println("Second to first: " + String.valueOf(bearing));
-
-        bearing = BeaconMapBackground.getBearing(firstReferenceLocation, firstReferencePoint, secondReferenceLocation, secondReferencePoint);
-        System.out.println("Background image bearing: " + String.valueOf(bearing));
-
+        double bearing = BeaconMapBackground.getBearing(firstReferenceLocation, firstReferencePoint, secondReferenceLocation, secondReferencePoint);
         assertEquals(353.84, bearing, 0.001);
         assertEquals(bearing, beaconMapBackground.getBearing(), 0.001);
     }
@@ -243,10 +216,14 @@ public class BeaconMapBackgroundTest {
 
     @Test
     public void getTopLeftLocation() {
+        Location topLeftLocation = new Location(52.512653658536856, 13.390293996004692);
+        assertEquals(0, topLeftLocation.getDistanceTo(beaconMapBackground.getTopLeftLocation()), 0.001);
     }
 
     @Test
     public void getBottomRightLocation() {
+        Location bottomRightLocation = new Location(52.512295922346524, 13.391304257299764);
+        assertEquals(0, bottomRightLocation.getDistanceTo(beaconMapBackground.getBottomRightLocation()), 0.001);
     }
 
     @Test
@@ -256,8 +233,6 @@ public class BeaconMapBackgroundTest {
 
     @Test
     public void getBottomRightPoint() {
-        System.out.println(beaconMapBackground.getBottomRightPoint());
-        System.out.println(beaconMapBackground.getImageBitmap());
         assertPointEquals(new Point(backgroundImage.getWidth(), backgroundImage.getHeight()), beaconMapBackground.getBottomRightPoint(), 0);
     }
 }
