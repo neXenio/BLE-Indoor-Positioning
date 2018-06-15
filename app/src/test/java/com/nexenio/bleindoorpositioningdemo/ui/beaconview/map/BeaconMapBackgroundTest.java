@@ -5,13 +5,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioningdemo.R;
+import com.nexenio.bleindoorpositioning.location.LocationUtil;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
+
+import java.io.InputStream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -36,7 +37,10 @@ public class BeaconMapBackgroundTest {
         firstReferencePoint = new Point(953, 1830);
         secondReferencePoint = new Point(1926, 1830);
 
-        backgroundImage = BitmapFactory.decodeResource(RuntimeEnvironment.application.getResources(), R.mipmap.map_view_background);
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("map_view_background.png");
+        backgroundImage = BitmapFactory.decodeStream(inputStream);
+
+        System.out.println(backgroundImage);
 
         beaconMapBackgroundBuilder = BeaconMapBackground.Builder.from(backgroundImage)
                 .withFirstReferenceLocation(firstReferenceLocation, firstReferencePoint)
@@ -61,22 +65,95 @@ public class BeaconMapBackgroundTest {
     }
 
     @Test
+    public void getLocation_edgePoints_edgeLocations() {
+        double distanceInPixels;
+        double distanceInMeters;
+
+        distanceInPixels = BeaconMapBackground.getPixelDistance(firstReferencePoint, secondReferencePoint);
+        distanceInMeters = beaconMapBackground.getMetersPerPixel() * distanceInPixels;
+        assertEquals(distanceInMeters, firstReferenceLocation.getDistanceTo(secondReferenceLocation), 0.1);
+
+        distanceInPixels = BeaconMapBackground.getPixelDistance(beaconMapBackground.getTopLeftPoint(), beaconMapBackground.getBottomRightPoint());
+        distanceInMeters = beaconMapBackground.getMetersPerPixel() * distanceInPixels;
+        assertEquals(distanceInMeters, beaconMapBackground.getTopLeftLocation().getDistanceTo(beaconMapBackground.getBottomRightLocation()), 0.1);
+    }
+
+    @Test
     public void getPoint_referenceLocation_referencePoint() {
         Point point = beaconMapBackground.getPoint(firstReferenceLocation);
-        assertEquals(firstReferencePoint.x, point.x, 0.001);
-        assertEquals(firstReferencePoint.y, point.y, 0.001);
+        assertPointEquals(firstReferencePoint, point, 0);
 
         point = beaconMapBackground.getPoint(secondReferenceLocation);
-        assertEquals(secondReferencePoint.x, point.x, 0.001);
-        assertEquals(secondReferencePoint.y, point.y, 0.001);
+        assertPointEquals(secondReferencePoint, point, 0);
 
         point = beaconMapBackground.getPoint(beaconMapBackground.getTopLeftLocation());
-        assertEquals(beaconMapBackground.getTopLeftPoint().x, point.x, 0.001);
-        assertEquals(beaconMapBackground.getTopLeftPoint().y, point.y, 0.001);
+        assertPointEquals(beaconMapBackground.getTopLeftPoint(), point, 0);
 
         point = beaconMapBackground.getPoint(beaconMapBackground.getBottomRightLocation());
-        assertEquals(beaconMapBackground.getBottomRightPoint().x, point.x, 0.001);
-        assertEquals(beaconMapBackground.getBottomRightPoint().y, point.y, 0.001);
+        assertPointEquals(beaconMapBackground.getBottomRightPoint(), point, 0);
+    }
+
+    @Test
+    public void getPoint_differentReferenceLocations_samePoint() {
+        Location centerLocation = LocationUtil.calculateMeanLocation(
+                beaconMapBackground.getTopLeftLocation(),
+                beaconMapBackground.getBottomRightLocation()
+        );
+
+        System.out.println("firstReferenceLocation: " + firstReferenceLocation.generateGoogleMapsUri());
+        System.out.println("secondReferenceLocation: " + secondReferenceLocation.generateGoogleMapsUri());
+        System.out.println("topLeftLocation: " + beaconMapBackground.getTopLeftLocation().generateGoogleMapsUri());
+        System.out.println("bottomRightLocation: " + beaconMapBackground.getBottomRightLocation().generateGoogleMapsUri());
+        System.out.println("centerLocation: " + centerLocation.generateGoogleMapsUri());
+
+        Point centerPointUsingTopLeft = BeaconMapBackground.getPoint(
+                centerLocation,
+                beaconMapBackground.getTopLeftLocation(),
+                beaconMapBackground.getTopLeftPoint(),
+                beaconMapBackground.getMetersPerPixel(),
+                beaconMapBackground.getBearing()
+        );
+
+        Point centerPointUsingBottomRight = BeaconMapBackground.getPoint(
+                centerLocation,
+                beaconMapBackground.getBottomRightLocation(),
+                beaconMapBackground.getBottomRightPoint(),
+                beaconMapBackground.getMetersPerPixel(),
+                beaconMapBackground.getBearing()
+        );
+
+        Point centerPointUsingFirstReference = BeaconMapBackground.getPoint(
+                centerLocation,
+                firstReferenceLocation,
+                firstReferencePoint,
+                beaconMapBackground.getMetersPerPixel(),
+                beaconMapBackground.getBearing()
+        );
+
+        Point centerPointUsingSecondReference = BeaconMapBackground.getPoint(
+                centerLocation,
+                secondReferenceLocation,
+                secondReferencePoint,
+                beaconMapBackground.getMetersPerPixel(),
+                beaconMapBackground.getBearing()
+        );
+
+        Point expectedPoint = new Point(
+                backgroundImage.getWidth() / 2,
+                backgroundImage.getHeight() / 2
+        );
+
+        System.out.println("expectedPoint: " + expectedPoint);
+
+        System.out.println("centerPointUsingTopLeft: " + centerPointUsingTopLeft);
+        System.out.println("centerPointUsingBottomRight: " + centerPointUsingBottomRight);
+        System.out.println("centerPointUsingFirstReference: " + centerPointUsingFirstReference);
+        System.out.println("centerPointUsingSecondReference: " + centerPointUsingSecondReference);
+
+        assertPointEquals(expectedPoint, centerPointUsingTopLeft, 0);
+        assertPointEquals(expectedPoint, centerPointUsingBottomRight, 0);
+        assertPointEquals(expectedPoint, centerPointUsingFirstReference, 0);
+        assertPointEquals(expectedPoint, centerPointUsingSecondReference, 0);
     }
 
     @Test
@@ -133,4 +210,28 @@ public class BeaconMapBackgroundTest {
         assertEquals(0, shiftedPoint.y);
     }
 
+    public static void assertPointEquals(Point expectedPoint, Point actualPoint, double delta) {
+        assertEquals(expectedPoint.x, actualPoint.x, delta);
+        assertEquals(expectedPoint.y, actualPoint.y, delta);
+    }
+
+    @Test
+    public void getTopLeftLocation() {
+    }
+
+    @Test
+    public void getBottomRightLocation() {
+    }
+
+    @Test
+    public void getTopLeftPoint() {
+        assertPointEquals(new Point(0, 0), beaconMapBackground.getTopLeftPoint(), 0);
+    }
+
+    @Test
+    public void getBottomRightPoint() {
+        System.out.println(beaconMapBackground.getBottomRightPoint());
+        System.out.println(beaconMapBackground.getImageBitmap());
+        assertPointEquals(new Point(backgroundImage.getWidth(), backgroundImage.getHeight()), beaconMapBackground.getBottomRightPoint(), 0);
+    }
 }

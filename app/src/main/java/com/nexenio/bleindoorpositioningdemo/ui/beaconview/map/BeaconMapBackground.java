@@ -36,7 +36,8 @@ public class BeaconMapBackground {
     }
 
     public Point getPoint(Location location) {
-        return getPoint(location, topLeftLocation, topLeftPoint, metersPerPixel, bearing);
+        //return getPoint(location, topLeftLocation, topLeftPoint, metersPerPixel, bearing);
+        return getPoint(location, bottomRightLocation, bottomRightPoint, metersPerPixel, bearing);
     }
 
     public static float getMetersPerPixel(Location firstReferenceLocation, Point firstReferencePoint, Location secondReferenceLocation, Point secondReferencePoint) {
