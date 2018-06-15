@@ -46,17 +46,17 @@ public class BeaconMapBackground {
     }
 
     public static double getBearing(Location firstReferenceLocation, Point firstReferencePoint, Location secondReferenceLocation, Point secondReferencePoint) {
-        double locationAngle = getAngle(firstReferenceLocation, secondReferenceLocation);
-        double pointAngle = getAngle(firstReferencePoint, secondReferencePoint);
-        return ((locationAngle - pointAngle) + 360) % 360;
+        double locationBearing = getBearing(firstReferenceLocation, secondReferenceLocation);
+        double pointBearing = getBearing(firstReferencePoint, secondReferencePoint);
+        return ((locationBearing - pointBearing) + 360) % 360;
     }
 
-    public static double getAngle(Point firstPoint, Point secondPoint) {
+    public static double getBearing(Point firstPoint, Point secondPoint) {
         double angle = Math.atan2(secondPoint.y - firstPoint.y, secondPoint.x - firstPoint.x) * 180 / Math.PI;
         return (angle + 90) % 360;
     }
 
-    public static double getAngle(Location firstLocation, Location secondLocation) {
+    public static double getBearing(Location firstLocation, Location secondLocation) {
         return firstLocation.getAngleTo(secondLocation);
     }
 
@@ -66,18 +66,18 @@ public class BeaconMapBackground {
         return Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
     }
 
-    public static Location getLocation(Point point, Location referenceLocation, Point referencePoint, double metersPerPixel, double bearing) {
+    public static Location getLocation(Point point, Location referenceLocation, Point referencePoint, double metersPerPixel, double backgroundBearing) {
         double distance = metersPerPixel * getPixelDistance(referencePoint, point);
-        double angle = (getAngle(referencePoint, point) + bearing + 360) % 360;
-        return referenceLocation.getShiftedLocation(distance, angle);
+        double bearing = (getBearing(referencePoint, point) + backgroundBearing + 360) % 360;
+        return referenceLocation.getShiftedLocation(distance, bearing);
     }
 
-    public static Point getPoint(Location location, Location referenceLocation, Point referencePoint, double metersPerPixel, double bearing) {
+    public static Point getPoint(Location location, Location referenceLocation, Point referencePoint, double metersPerPixel, double backgroundBearing) {
         double distanceInMeters = location.getDistanceTo(referenceLocation);
         double distanceInPixels = distanceInMeters / metersPerPixel;
-        double locationAngle = getAngle(referenceLocation, location);
-        double angle = (locationAngle - bearing + 360) % 360;
-        return getShiftedPoint(referencePoint, distanceInPixels, angle);
+        double locationBearing = getBearing(referenceLocation, location);
+        double bearing = (locationBearing - backgroundBearing + 360) % 360;
+        return getShiftedPoint(referencePoint, distanceInPixels, bearing);
     }
 
     public static Point getShiftedPoint(Point referencePoint, double distanceInPixels, double bearing) {
@@ -161,11 +161,6 @@ public class BeaconMapBackground {
             Builder builder = new Builder();
             builder.beaconMapBackground = new BeaconMapBackground(imageBitmap);
             return builder;
-        }
-
-        public Builder withBearing(float bearing) {
-            beaconMapBackground.setBearing(bearing);
-            return this;
         }
 
         public Builder withFirstReferenceLocation(Location location, Point point) {

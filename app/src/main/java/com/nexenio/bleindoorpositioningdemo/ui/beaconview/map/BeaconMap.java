@@ -2,7 +2,6 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.map;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -51,10 +50,7 @@ public class BeaconMap extends BeaconView {
 
     protected List<Location> recentLocations = new ArrayList<>();
 
-    protected Bitmap backgroundImage;
-    protected Location backgroundCenterLocation;
-    protected float backgroundMetersPerPixel;
-    protected float backgroundBearing;
+    protected BeaconMapBackground mapBackground;
 
     public BeaconMap(Context context) {
         super(context);
@@ -95,19 +91,20 @@ public class BeaconMap extends BeaconView {
     protected void drawBackground(Canvas canvas) {
         super.drawBackground(canvas);
 
-        if (backgroundImage == null) {
+        if (mapBackground == null) {
             return;
         }
 
         Matrix matrix = new Matrix();
-        //matrix.postTranslate(backgroundImage.getWidth() / 2, backgroundImage.getHeight() / 2);
-        matrix.postRotate(backgroundBearing);
+        matrix.postRotate((float) mapBackground.getBearing());
+        matrix.postTranslate(-1700, -1350);
 
-        float scale = (float) (backgroundMetersPerPixel * canvasProjection.getMetersPerCanvasUnit());
+        float scale = (float) (mapBackground.getMetersPerPixel() / canvasProjection.getMetersPerCanvasUnit());
+        //float scale = 0.286f;
         matrix.postScale(scale, scale);
 
-        canvas.drawBitmap(backgroundImage, matrix, null);
-        //canvas.drawBitmap(backgroundImage, 0, 0, null);
+        canvas.drawBitmap(mapBackground.getImageBitmap(), matrix, null);
+        //canvas.drawBitmap(mapBackground.getImageBitmap(), 0, 0, null);
     }
 
     @Override
@@ -425,36 +422,12 @@ public class BeaconMap extends BeaconView {
         onPredictedDeviceLocationChanged();
     }
 
-    public Bitmap getBackgroundImage() {
-        return backgroundImage;
+    public BeaconMapBackground getMapBackground() {
+        return mapBackground;
     }
 
-    public void setBackgroundImage(Bitmap backgroundImage) {
-        this.backgroundImage = backgroundImage;
-    }
-
-    public Location getBackgroundCenterLocation() {
-        return backgroundCenterLocation;
-    }
-
-    public void setBackgroundCenterLocation(Location backgroundCenterLocation) {
-        this.backgroundCenterLocation = backgroundCenterLocation;
-    }
-
-    public float getBackgroundMetersPerPixel() {
-        return backgroundMetersPerPixel;
-    }
-
-    public void setBackgroundMetersPerPixel(float backgroundMetersPerPixel) {
-        this.backgroundMetersPerPixel = backgroundMetersPerPixel;
-    }
-
-    public float getBackgroundBearing() {
-        return backgroundBearing;
-    }
-
-    public void setBackgroundBearing(float backgroundBearing) {
-        this.backgroundBearing = backgroundBearing;
+    public void setMapBackground(BeaconMapBackground mapBackground) {
+        this.mapBackground = mapBackground;
     }
 
 }
