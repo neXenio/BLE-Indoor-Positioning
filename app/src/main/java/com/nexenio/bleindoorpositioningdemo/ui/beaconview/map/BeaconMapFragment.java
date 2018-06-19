@@ -39,11 +39,11 @@ public class BeaconMapFragment extends BeaconViewFragment {
         return new LocationListener() {
             @Override
             public void onLocationUpdated(LocationProvider locationProvider, Location location) {
-                if (locationProvider == IndoorPositioning.getInstance()) {
+                if (locationProvider instanceof IndoorPositioning) {
                     beaconMap.setDeviceLocation(location);
                     beaconMap.setPredictedDeviceLocation(IndoorPositioning.getLocationPredictor().getLocation());
                     beaconMap.fitToCurrentLocations();
-                } else if (locationProvider == AndroidLocationProvider.getInstance()) {
+                } else if (locationProvider instanceof AndroidLocationProvider) {
                     // TODO: remove artificial noise
                     //location.setLatitude(location.getLatitude() + Math.random() * 0.0002);
                     //location.setLongitude(location.getLongitude() + Math.random() * 0.0002);
