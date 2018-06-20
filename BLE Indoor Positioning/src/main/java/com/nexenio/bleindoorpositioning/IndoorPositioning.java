@@ -78,7 +78,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         if (usableBeacons.size() < 3) {
             return; // multilateration requires at least 3 beacons
         } else if (usableBeacons.size() > 3) {
-            usableBeacons.sort(Beacon.RssiComparator);
+            Collections.sort(usableBeacons, Beacon.RssiComparator);
             Collections.reverse(usableBeacons);
             for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
                 if (usableBeacons.get(beaconIndex).getFilteredRssi() < -70) {
