@@ -93,7 +93,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
         // The root mean square of multilateration is used to filter out inaccurate locations.
         // Adjust value to allow location updates with higher deviation
-        if (multilateration.getRMS() < ROOT_MEAN_SQUARE_THRESHOLD) {
+        if (multilateration.getRMS() < rootMeanSquareThreshold) {
             locationPredictor.addLocation(location);
             onLocationUpdated(getMeanLocation(2, TimeUnit.SECONDS));
         }
