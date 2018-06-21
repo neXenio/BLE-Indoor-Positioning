@@ -33,6 +33,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
     public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
     private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
+    private int ROOT_MEAN_SQUARE_THRESHOLD = ROOT_MEAN_SQUARE_THRESHOLD_STRICT;
 
     private static IndoorPositioning instance;
 
@@ -92,7 +93,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
         // The root mean square of multilateration is used to filter out inaccurate locations.
         // Adjust value to allow location updates with higher deviation
-        if (multilateration.getRMS() < ROOT_MEAN_SQUARE_THRESHOLD_STRICT) {
+        if (multilateration.getRMS() < ROOT_MEAN_SQUARE_THRESHOLD) {
             locationPredictor.addLocation(location);
             onLocationUpdated(getMeanLocation(2, TimeUnit.SECONDS));
         }
@@ -192,4 +193,11 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         this.usableIndoorPositioningBeaconFilter = usableIndoorPositioningBeaconFilter;
     }
 
+    public void setRootMeanSquareThreshold(int rootMeanSquareThreshold) {
+        IndoorPositioning.getInstance().ROOT_MEAN_SQUARE_THRESHOLD = rootMeanSquareThreshold;
+    }
+
+    public int getRootMeanSquareThreshold() {
+        return IndoorPositioning.getInstance().ROOT_MEAN_SQUARE_THRESHOLD;
+    }
 }
