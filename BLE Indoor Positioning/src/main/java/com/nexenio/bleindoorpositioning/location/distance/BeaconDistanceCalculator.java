@@ -21,6 +21,8 @@ public abstract class BeaconDistanceCalculator {
 
     public static final int SIGNAL_LOSS_AT_ONE_METER = -41;
 
+    private static float pathLossParameter = PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION;
+
     /**
      * Calculates the distance to the specified beacon using the <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
      * path loss model</a>.
@@ -56,7 +58,7 @@ public abstract class BeaconDistanceCalculator {
      * path loss model</a>.
      */
     public static float calculateDistanceTo(Beacon beacon, float rssi) {
-        return calculateDistance(rssi, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION);
+        return calculateDistance(rssi, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), pathLossParameter);
     }
 
     /**
@@ -92,4 +94,11 @@ public abstract class BeaconDistanceCalculator {
         return (float) Math.pow(10, (calibratedRssi - rssi) / (10 * pathLossParameter));
     }
 
+    public static void setPathLossParameter(float pathLossParameter) {
+        BeaconDistanceCalculator.pathLossParameter = pathLossParameter;
+    }
+
+    public static float getPathLossParameter(){
+        return BeaconDistanceCalculator.pathLossParameter;
+    }
 }
