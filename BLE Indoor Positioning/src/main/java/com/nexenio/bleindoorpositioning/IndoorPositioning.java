@@ -34,6 +34,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
     private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
     private int rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_STRICT;
+    private int maxAcceptableRssi = -70;
 
     private static IndoorPositioning instance;
 
@@ -82,7 +83,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
             Collections.sort(usableBeacons, Beacon.RssiComparator);
             Collections.reverse(usableBeacons);
             for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
-                if (usableBeacons.get(beaconIndex).getFilteredRssi() < -70) {
+                if (usableBeacons.get(beaconIndex).getFilteredRssi() < maxAcceptableRssi) {
                     usableBeacons.remove(beaconIndex);
                 }
             }
@@ -199,5 +200,13 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
     public int getRootMeanSquareThreshold() {
         return rootMeanSquareThreshold;
+    }
+
+    public int getMaxAcceptableRssi() {
+        return maxAcceptableRssi;
+    }
+
+    public void setMaxAcceptableRssi(int maxAcceptableRssi) {
+        this.maxAcceptableRssi = maxAcceptableRssi;
     }
 }
