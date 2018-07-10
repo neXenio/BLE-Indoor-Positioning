@@ -33,7 +33,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
     public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
     private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
-    private int rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_STRICT;
+    private double rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_STRICT;
     private int maxAcceptableRssi = -70;
 
     private static IndoorPositioning instance;
@@ -194,11 +194,11 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         this.usableIndoorPositioningBeaconFilter = usableIndoorPositioningBeaconFilter;
     }
 
-    public void setRootMeanSquareThreshold(int rootMeanSquareThreshold) {
+    public void setRootMeanSquareThreshold(double rootMeanSquareThreshold) {
         this.rootMeanSquareThreshold = rootMeanSquareThreshold;
     }
 
-    public int getRootMeanSquareThreshold() {
+    public double getRootMeanSquareThreshold() {
         return rootMeanSquareThreshold;
     }
 
