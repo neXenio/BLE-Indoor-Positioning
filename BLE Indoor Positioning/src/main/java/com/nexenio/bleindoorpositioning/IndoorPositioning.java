@@ -33,7 +33,8 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
     public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
     private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
-    private int rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_STRICT;
+    private double rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_STRICT;
+    private int minimumRssiThreshold = -70;
 
     private static IndoorPositioning instance;
 
@@ -82,7 +83,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
             Collections.sort(usableBeacons, Beacon.RssiComparator);
             Collections.reverse(usableBeacons);
             for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
-                if (usableBeacons.get(beaconIndex).getFilteredRssi() < -70) {
+                if (usableBeacons.get(beaconIndex).getFilteredRssi() < minimumRssiThreshold) {
                     usableBeacons.remove(beaconIndex);
                 }
             }
@@ -193,11 +194,19 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         this.usableIndoorPositioningBeaconFilter = usableIndoorPositioningBeaconFilter;
     }
 
-    public void setRootMeanSquareThreshold(int rootMeanSquareThreshold) {
+    public void setRootMeanSquareThreshold(double rootMeanSquareThreshold) {
         this.rootMeanSquareThreshold = rootMeanSquareThreshold;
     }
 
-    public int getRootMeanSquareThreshold() {
+    public double getRootMeanSquareThreshold() {
         return rootMeanSquareThreshold;
+    }
+
+    public int getMinimumRssiThreshold() {
+        return minimumRssiThreshold;
+    }
+
+    public void setMinimumRssiThreshold(int minimumRssiThreshold) {
+        this.minimumRssiThreshold = minimumRssiThreshold;
     }
 }
