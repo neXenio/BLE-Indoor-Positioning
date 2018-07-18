@@ -96,7 +96,10 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         // Adjust value to allow location updates with higher deviation
         if (multilateration.getRMS() < rootMeanSquareThreshold) {
             locationPredictor.addLocation(location);
-            onLocationUpdated(getMeanLocation(2, TimeUnit.SECONDS));
+            Location meanLocation = getMeanLocation(2, TimeUnit.SECONDS);
+            if(meanLocation != null) {
+                onLocationUpdated(meanLocation);
+            }
         }
 
     }
