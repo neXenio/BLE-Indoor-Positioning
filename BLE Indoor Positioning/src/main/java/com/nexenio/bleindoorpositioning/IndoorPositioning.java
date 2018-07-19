@@ -13,6 +13,8 @@ import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -83,25 +85,30 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
             Collections.sort(usableBeacons, Beacon.RssiComparator);
             Collections.reverse(usableBeacons);
             for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
-                if (usableBeacons.get(beaconIndex).getFilteredRssi() < minimumRssiThreshold) {
+                if (beaconIndex >= 7) {
+                    usableBeacons.remove(beaconIndex);
+                } else if (usableBeacons.get(beaconIndex).getFilteredRssi() < minimumRssiThreshold) {
                     usableBeacons.remove(beaconIndex);
                 }
             }
         }
 
         Multilateration multilateration = new Multilateration(usableBeacons);
-        Location location = multilateration.getLocation();
+        try {
+            Location location = multilateration.getLocation();
 
-        // The root mean square of multilateration is used to filter out inaccurate locations.
-        // Adjust value to allow location updates with higher deviation
-        if (multilateration.getRMS() < rootMeanSquareThreshold) {
-            locationPredictor.addLocation(location);
-            Location meanLocation = getMeanLocation(2, TimeUnit.SECONDS);
-            if (meanLocation != null) {
-                onLocationUpdated(meanLocation);
+            // The root mean square of multilateration is used to filter out inaccurate locations.
+            // Adjust value to allow location updates with higher deviation
+            if (multilateration.getRMS() < rootMeanSquareThreshold) {
+                locationPredictor.addLocation(location);
+                Location meanLocation = getMeanLocation(2, TimeUnit.SECONDS);
+                if (meanLocation != null) {
+                    onLocationUpdated(meanLocation);
+                }
             }
+        } catch (TooManyEvaluationsException e) {
+            // see https://github.com/neXenio/BLE-Indoor-Positioning/issues/73
         }
-
     }
 
     public static <B extends Beacon> List<B> getUsableBeacons(Collection<B> availableBeacons) {
