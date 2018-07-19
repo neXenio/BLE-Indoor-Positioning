@@ -70,8 +70,8 @@ public class Location {
     }
 
     /**
-     * Calculates the distance between the current and the specified location in meters.
-     * Elevation / altitude will be ignored.
+     * Calculates the distance between the current and the specified location in meters. Elevation /
+     * altitude will be ignored.
      *
      * @return distance in meters
      */
@@ -113,7 +113,8 @@ public class Location {
     }
 
     /**
-     * Creates a copy of the current instance and calls {@link #shift(double, double)} on that copy.
+     * Creates a copy of the current instance and calls {@link #shift(double, double)} on that
+     * copy.
      *
      * @param distance in meters
      * @param angle    in degrees (0°-360°)

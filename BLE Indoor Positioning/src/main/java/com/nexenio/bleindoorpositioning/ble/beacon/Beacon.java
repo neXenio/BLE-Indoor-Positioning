@@ -98,8 +98,8 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     /**
-     * Returns an ArrayList of AdvertisingPackets that have been received in the specified time range.
-     * If no packets match, an empty list will be returned.
+     * Returns an ArrayList of AdvertisingPackets that have been received in the specified time
+     * range. If no packets match, an empty list will be returned.
      *
      * @param startTimestamp minimum timestamp, inclusive
      * @param endTimestamp   maximum timestamp, exclusive
