@@ -58,9 +58,10 @@ public abstract class AdvertisingPacketUtil {
     }
 
     /**
-     * Returns an ArrayList of AdvertisingPackets that have been received in the specified time range.
-     * If no packets match, an empty list will be returned. Expects the specified AdvertisingPackets
-     * to be sorted by timestamp in ascending order (i.e. the oldest timestamp first)!
+     * Returns an ArrayList of AdvertisingPackets that have been received in the specified time
+     * range. If no packets match, an empty list will be returned. Expects the specified
+     * AdvertisingPackets to be sorted by timestamp in ascending order (i.e. the oldest timestamp
+     * first)!
      *
      * @param advertisingPackets the packets to filter (sorted by timestamp ascending)
      * @param startTimestamp     minimum timestamp, inclusive

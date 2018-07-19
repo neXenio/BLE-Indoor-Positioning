@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * Stores window of last locations and tries to predict the next
- * location based on average distance and angle during the window
+ * Stores window of last locations and tries to predict the next location based on average distance
+ * and angle during the window
  *
  * Created by leon on 29.01.18.
  */
@@ -29,14 +29,14 @@ public class LocationPredictor implements LocationProvider {
     private boolean shouldUpdatePrediction = true;
 
     /**
-     * The amount of milliseconds that the predictor will 'look into the future'.
-     * A value of 2000 will result in predictions of the location in 2 seconds from now.
+     * The amount of milliseconds that the predictor will 'look into the future'. A value of 2000
+     * will result in predictions of the location in 2 seconds from now.
      */
     private long predictionDuration = TimeUnit.SECONDS.toMillis(1);
 
     /**
-     * The amount of milliseconds that the predictor will 'look into the past'.
-     * A value of 2000 will result in predictions based on locations from the past 2 seconds.
+     * The amount of milliseconds that the predictor will 'look into the past'. A value of 2000 will
+     * result in predictions based on locations from the past 2 seconds.
      */
     private long recentLocationDuration = TimeUnit.SECONDS.toMillis(3);
 
