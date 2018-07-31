@@ -33,6 +33,8 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public static final int ROOT_MEAN_SQUARE_THRESHOLD_MEDIUM = 10;
     public static final int ROOT_MEAN_SQUARE_THRESHOLD_LIGHT = 25;
 
+    private static final int MINIMUM_BEACON_COUNT = 3;
+
     public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
     private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
     private double rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_MEDIUM;
@@ -79,18 +81,18 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private void updateLocation() {
         List<Beacon> usableBeacons = getUsableBeacons(BeaconManager.getInstance().getBeaconMap().values());
 
-        if (usableBeacons.size() < 3) {
+        if (usableBeacons.size() < MINIMUM_BEACON_COUNT) {
             return; // multilateration requires at least 3 beacons
-        } else if (usableBeacons.size() > 3) {
+        } else if (usableBeacons.size() > MINIMUM_BEACON_COUNT) {
             Collections.sort(usableBeacons, Beacon.RssiComparator);
-            Collections.reverse(usableBeacons);
-            for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
-                if (beaconIndex >= 10) {
-                    usableBeacons.remove(beaconIndex);
-                } else if (usableBeacons.get(beaconIndex).getFilteredRssi() < minimumRssiThreshold) {
-                    usableBeacons.remove(beaconIndex);
+            int firstRemovableBeaconIndex = MINIMUM_BEACON_COUNT;
+            for (int beaconIndex = MINIMUM_BEACON_COUNT; beaconIndex < usableBeacons.size(); beaconIndex++) {
+                if (usableBeacons.get(beaconIndex).getFilteredRssi() < minimumRssiThreshold) {
+                    firstRemovableBeaconIndex = beaconIndex;
+                    break;
                 }
             }
+            usableBeacons.subList(firstRemovableBeaconIndex, usableBeacons.size()).clear();
         }
 
         Multilateration multilateration = new Multilateration(usableBeacons);
