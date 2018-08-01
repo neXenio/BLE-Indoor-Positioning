@@ -104,10 +104,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
             // Adjust value to allow location updates with higher deviation
             if (multilateration.getRMS() < rootMeanSquareThreshold) {
                 locationPredictor.addLocation(location);
-                Location meanLocation = getMeanLocation(2, TimeUnit.SECONDS);
-                if (meanLocation != null) {
-                    onLocationUpdated(meanLocation);
-                }
+                onLocationUpdated(location);
             }
         } catch (TooManyEvaluationsException e) {
             // see https://github.com/neXenio/BLE-Indoor-Positioning/issues/73
