@@ -33,7 +33,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public static final int ROOT_MEAN_SQUARE_THRESHOLD_MEDIUM = 10;
     public static final int ROOT_MEAN_SQUARE_THRESHOLD_LIGHT = 25;
 
-    private static final int MINIMUM_BEACON_COUNT = 3;
+    private static final int MINIMUM_BEACON_COUNT = 3; // multilateration requires at least 3 beacons
     private static final int MAXIMUM_BEACON_COUNT = 10;
 
     public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
@@ -83,7 +83,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         List<Beacon> usableBeacons = getUsableBeacons(BeaconManager.getInstance().getBeaconMap().values());
 
         if (usableBeacons.size() < MINIMUM_BEACON_COUNT) {
-            return; // multilateration requires at least 3 beacons
+            return;
         } else if (usableBeacons.size() > MINIMUM_BEACON_COUNT) {
             Collections.sort(usableBeacons, Beacon.RssiComparator);
             int firstRemovableBeaconIndex = MAXIMUM_BEACON_COUNT;
