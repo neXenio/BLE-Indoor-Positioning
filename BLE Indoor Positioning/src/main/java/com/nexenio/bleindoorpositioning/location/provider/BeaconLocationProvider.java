@@ -35,7 +35,8 @@ public abstract class BeaconLocationProvider<B extends Beacon> implements Locati
     }
 
     public boolean hasLocation() {
-        return getLocation() != null && getLocation().hasLatitudeAndLongitude();
+        Location location = getLocation();
+        return location != null && location.hasLatitudeAndLongitude();
     }
 
 }

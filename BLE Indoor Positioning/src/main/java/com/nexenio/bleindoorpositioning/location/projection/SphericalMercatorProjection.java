@@ -20,8 +20,8 @@ public class SphericalMercatorProjection {
     private static final double a6 = 9.9330562000986220e-1;  //a6 = 1-e2
 
     /**
-     * Caution: The conversion used by these simpler 2D methods is not compatible with the
-     * 3D Earth-Centered-Earth-Fixed (ECEF) to location conversion.
+     * Caution: The conversion used by these simpler 2D methods is not compatible with the 3D
+     * Earth-Centered-Earth-Fixed (ECEF) to location conversion.
      */
     public static double yToLatitude(double y) {
         return Math.toDegrees(Math.atan(Math.exp(y / EARTH_RADIUS)) * 2 - Math.PI / 2);
@@ -40,8 +40,8 @@ public class SphericalMercatorProjection {
     }
 
     /**
-     * Convenience method to convert Earth-Centered-Earth-Fixed (ECEF) to Location.
-     * Expects input to be in radians.
+     * Convenience method to convert Earth-Centered-Earth-Fixed (ECEF) to Location. Expects input to
+     * be in radians.
      */
     public static Location ecefToLocation(double[] ecef) {
         double[] geodetic = ecefToGeodetic(ecef);
@@ -49,9 +49,9 @@ public class SphericalMercatorProjection {
     }
 
     /**
-     * Convert Earth-Centered-Earth-Fixed (ECEF) to latitude, longitude, elevation.
-     * Input is a three element array containing x, y, z in meters.
-     * Output array contains latitude and longitude in radians, and elevation in meters.
+     * Convert Earth-Centered-Earth-Fixed (ECEF) to latitude, longitude, elevation. Input is a three
+     * element array containing x, y, z in meters. Output array contains latitude and longitude in
+     * radians, and elevation in meters.
      *
      * @see <a href="http://danceswithcode.net/engineeringnotes/geodetic_to_ecef/geodetic_to_ecef.html">Source</a>
      */
@@ -108,9 +108,9 @@ public class SphericalMercatorProjection {
     }
 
     /**
-     * Convert latitude, longitude, height to Earth-Centered-Earth-Fixed (ECEF).
-     * Input is a three element array containing latitude, longitude (radians) and altitude (in meters).
-     * Returned array contains x, y, z in meters
+     * Convert latitude, longitude, height to Earth-Centered-Earth-Fixed (ECEF). Input is a three
+     * element array containing latitude, longitude (radians) and altitude (in meters). Returned
+     * array contains x, y, z in meters
      *
      * @see <a href="http://danceswithcode.net/engineeringnotes/geodetic_to_ecef/geodetic_to_ecef.html">Source</a>
      */

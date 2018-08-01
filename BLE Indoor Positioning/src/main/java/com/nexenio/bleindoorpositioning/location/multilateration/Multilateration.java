@@ -15,8 +15,7 @@ import java.util.List;
 /**
  * Created by steppschuh on 14.12.17.
  *
- * "The Mathematics Behind a Local Positioning System"
- * http://inside.mines.edu/~whereman/talks/TurgutOzal-11-Trilateration.pdf
+ * "The Mathematics Behind a Local Positioning System" http://inside.mines.edu/~whereman/talks/TurgutOzal-11-Trilateration.pdf
  */
 
 public class Multilateration {
@@ -71,10 +70,11 @@ public class Multilateration {
     }
 
     /**
-     * Returns the maximum square root of the diagonal coefficients of the covariance matrix,
-     * as provided by {@link LeastSquaresOptimizer.Optimum#getSigma(double)}.
+     * Returns the maximum square root of the diagonal coefficients of the covariance matrix, as
+     * provided by {@link LeastSquaresOptimizer.Optimum#getSigma(double)}.
      *
-     * @see <a href="https://commons.apache.org/proper/commons-math/javadocs/api-3.4.1/org/apache/commons/math3/fitting/leastsquares/LeastSquaresProblem.Evaluation.html#getSigma(double)">LeastSquaresProblem.Evaluation Documentation</a>
+     * @see <a href="https://commons.apache.org/proper/commons-math/javadocs/api-3.4.1/org/apache/commons/math3/fitting/leastsquares/LeastSquaresProblem.Evaluation.html#getSigma(double)">LeastSquaresProblem.Evaluation
+     * Documentation</a>
      */
     private static float getDeviation(LeastSquaresOptimizer.Optimum optimum) {
         RealVector standardDeviation = optimum.getSigma(0);

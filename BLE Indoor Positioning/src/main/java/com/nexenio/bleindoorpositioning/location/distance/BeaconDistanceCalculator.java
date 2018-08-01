@@ -32,10 +32,10 @@ public abstract class BeaconDistanceCalculator {
     }
 
     /**
-     * Use this method to remove the elevation delta from the distance between device and beacon. Calculation based on
-     * Pythagoras to calculate distance on the floor (2D) to the beacon, if the distance
-     * is double the elevation delta. The elevation expected refers to the distance above the floor ground,
-     * rather than the altitude above sea level.
+     * Use this method to remove the elevation delta from the distance between device and beacon.
+     * Calculation based on Pythagoras to calculate distance on the floor (2D) to the beacon, if the
+     * distance is double the elevation delta. The elevation expected refers to the distance above
+     * the floor ground, rather than the altitude above sea level.
      */
     public static float calculateDistanceWithoutElevationDeltaToDevice(Beacon beacon, float rssi, double deviceElevation) {
         float distance = calculateDistanceTo(beacon, rssi);
@@ -98,7 +98,7 @@ public abstract class BeaconDistanceCalculator {
         BeaconDistanceCalculator.pathLossParameter = pathLossParameter;
     }
 
-    public static float getPathLossParameter(){
+    public static float getPathLossParameter() {
         return BeaconDistanceCalculator.pathLossParameter;
     }
 }
