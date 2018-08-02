@@ -71,6 +71,10 @@ public abstract class BeaconDistanceCalculator {
      * @param pathLossParameter  the path-loss adjustment parameter
      */
     public static float calculateDistance(float rssi, float calibratedRssi, int calibratedDistance, float pathLossParameter) {
+        return calculateDistance(rssi, getCalibratedRssiAtOneMeter(calibratedRssi, calibratedDistance), pathLossParameter);
+    }
+
+    public static float getCalibratedRssiAtOneMeter(float calibratedRssi, float calibratedDistance) {
         float calibratedRssiAtOneMeter;
         if (calibratedDistance == IBeacon.CALIBRATION_DISTANCE_DEFAULT) {
             calibratedRssiAtOneMeter = calibratedRssi;
@@ -79,7 +83,7 @@ public abstract class BeaconDistanceCalculator {
         } else {
             calibratedRssiAtOneMeter = -62;
         }
-        return calculateDistance(rssi, calibratedRssiAtOneMeter, pathLossParameter);
+        return calibratedRssiAtOneMeter;
     }
 
     /**

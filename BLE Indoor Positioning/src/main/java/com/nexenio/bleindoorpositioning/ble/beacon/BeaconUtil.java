@@ -2,8 +2,12 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
+import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by steppschuh on 24.11.17.
@@ -78,6 +82,88 @@ public abstract class BeaconUtil {
             }
         }
         return closestBeacon;
+    }
+
+    /**
+     * Calculate the rssi for which the calculated distance will be close to the given distance.
+     *
+     * @param beacon   Beacon from which the rssi should be send
+     * @param distance Distance the beacon should be away
+     * @return Estimated rssi for the given distance
+     */
+    public static int calculateRssiForDistance(Beacon beacon, float distance) {
+        return calculateRssi(distance, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), BeaconDistanceCalculator.getPathLossParameter());
+    }
+
+    /**
+     * Calculates distances using the reverse <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
+     * path loss model</a>.
+     *
+     * @param distance           Distance the beacon should be away
+     * @param calibratedRssi     the RSSI measured at the calibration distance
+     * @param calibratedDistance the distance in meters at which the calibrated RSSI was measured
+     * @param pathLossParameter  the path-loss adjustment parameter
+     * @return Estimated rssi for the given distance
+     */
+    public static int calculateRssi(float distance, float calibratedRssi, int calibratedDistance, float pathLossParameter) {
+        return calculateRssi(distance, BeaconDistanceCalculator.getCalibratedRssiAtOneMeter(calibratedRssi, calibratedDistance), pathLossParameter);
+    }
+
+    /**
+     * Calculates distances using the reverse <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
+     * path loss model</a>.
+     *
+     * @param distance          Distance for which a rssi should be estimated
+     * @param calibratedRssi    the RSSI measured at 1m distance
+     * @param pathLossParameter the path-loss adjustment parameter
+     */
+    public static int calculateRssi(float distance, float calibratedRssi, float pathLossParameter) {
+        return (int) ((Math.log(distance) / Math.log(10)) * (10 * pathLossParameter) + calibratedRssi);
+    }
+
+    /**
+     * Please note that if you want a single instance of a beacon instead of adding it to a list you
+     * need to specify the complete type e.g. "IBeacon<IBeaconAdvertisingPacket>".</IBeaconAdvertisingPacket>
+     *
+     * @param beaconClazz            Class token of the specific beacon type
+     * @param advertisingPacketClazz Class token of the specific advertising packet type
+     * @param distance               Distance for which a rssi will be generated
+     * @param <A>                    Specific advertising packet type
+     * @param <B>                    Specific beacon type
+     * @param <CA>                   Class of the specific advertising packet type
+     * @param <CB>                   Class of the specific beacon type
+     * @return Beacon for the specified beacon type with the specified advertising packet type and
+     *         set rssi
+     * @throws ExecutionException If reflections fail
+     */
+    public static <A extends AdvertisingPacket, B extends Beacon<A>, CA extends Class<A>, CB extends Class<B>> B getBeaconsWithAdvertisingPackets(CB beaconClazz, CA advertisingPacketClazz, float distance) throws ExecutionException {
+        try {
+            return getBeaconsWithAdvertisingPackets(beaconClazz.getConstructor(), advertisingPacketClazz.getConstructor(byte[].class), distance);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            throw new ExecutionException(e);
+        }
+    }
+
+    /**
+     * @param beaconConstructor            Constructor of the specific beacon type
+     * @param advertisingPacketConstructor Constructor of the specific advertising packet type
+     * @param distance                     Distance for which a rssi will be generated
+     * @param <A>                          Specific advertising packet type
+     * @param <B>                          Specific beacon type
+     * @param <CA>                         Class of the specific advertising packet type
+     * @param <CB>                         Class of the specific beacon type
+     * @return Beacon for the specified beacon type with the specified advertising packet type and
+     *         set rssi
+     */
+    private static <A extends AdvertisingPacket, B extends Beacon<A>, CA extends Constructor<A>, CB extends Constructor<B>> B getBeaconsWithAdvertisingPackets(CB beaconConstructor, CA advertisingPacketConstructor, float distance) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        B beacon = beaconConstructor.newInstance();
+        A advertisingPacket = advertisingPacketConstructor.newInstance((Object) new byte[30]);
+
+        int rssi = BeaconUtil.calculateRssiForDistance(beacon, distance);
+        advertisingPacket.setRssi(-rssi);
+
+        beacon.addAdvertisingPacket(advertisingPacket);
+        return beacon;
     }
 
     /**
