@@ -47,25 +47,49 @@ public abstract class BeaconUtil {
     }
 
     /**
-     * Gets the smallest distance from the given beacons to the user using a filter.
+     * Gets the smallest distance from the given beacons to the user using the default filter.
+     *
+     * @param beaconList Beacons to evaluate the distance from
+     * @return Distance to the closest beacon; Double.MAX_VALUE if no beacon was given
+     */
+    public static double getSmallestDistance(List<? extends Beacon> beaconList) {
+        Beacon beacon = getClosestBeacon(beaconList);
+        return (beacon == null) ? Double.MAX_VALUE : beacon.getDistance();
+    }
+
+    /**
+     * Gets the smallest distance from the given beacons to the user using a specified filter.
      *
      * @param beaconList Beacons to evaluate the distance from
      * @param filter     Filter for getting the distance of the beacons
      * @return Distance to the closest beacon; Double.MAX_VALUE if no beacon was given
      */
     public static double getSmallestDistance(List<? extends Beacon> beaconList, WindowFilter filter) {
-        double minimumDistance = Double.MAX_VALUE;
-        for (Beacon beacon : beaconList) {
-            float distance = beacon.getDistance(filter);
-            if (distance < minimumDistance) {
-                minimumDistance = distance;
-            }
-        }
-        return minimumDistance;
+        Beacon beacon = getClosestBeacon(beaconList, filter);
+        return (beacon == null) ? Double.MAX_VALUE : beacon.getDistance(filter);
     }
 
     /**
-     * Gets the closest beacon from the given beacons to the user using a filter.
+     * Gets the closest beacon from the given beacons to the user using the default filter.
+     *
+     * @param beaconList Beacons to get the closest one from
+     * @return Closest beacon if list is not empty; null else
+     */
+    public static Beacon getClosestBeacon(List<? extends Beacon> beaconList) {
+        double minimumDistance = Double.MAX_VALUE;
+        Beacon closestBeacon = null;
+        for (Beacon beacon : beaconList) {
+            float distance = beacon.getDistance();
+            if (distance < minimumDistance) {
+                minimumDistance = distance;
+                closestBeacon = beacon;
+            }
+        }
+        return closestBeacon;
+    }
+
+    /**
+     * Gets the closest beacon from the given beacons to the user using a specified filter.
      *
      * @param beaconList Beacons to get the closest one from
      * @param filter     Filter for getting the distance of the beacons
@@ -119,51 +143,6 @@ public abstract class BeaconUtil {
      */
     public static int calculateRssi(float distance, float calibratedRssi, float pathLossParameter) {
         return (int) ((Math.log(distance) / Math.log(10)) * (10 * pathLossParameter) + calibratedRssi);
-    }
-
-    /**
-     * Please note that if you want a single instance of a beacon instead of adding it to a list you
-     * need to specify the complete type e.g. "IBeacon<IBeaconAdvertisingPacket>".</IBeaconAdvertisingPacket>
-     *
-     * @param beaconClazz            Class token of the specific beacon type
-     * @param advertisingPacketClazz Class token of the specific advertising packet type
-     * @param distance               Distance for which a rssi will be generated
-     * @param <A>                    Specific advertising packet type
-     * @param <B>                    Specific beacon type
-     * @param <CA>                   Class of the specific advertising packet type
-     * @param <CB>                   Class of the specific beacon type
-     * @return Beacon for the specified beacon type with the specified advertising packet type and
-     *         set rssi
-     * @throws ExecutionException If reflections fail
-     */
-    public static <A extends AdvertisingPacket, B extends Beacon<A>, CA extends Class<A>, CB extends Class<B>> B getBeaconsWithAdvertisingPackets(CB beaconClazz, CA advertisingPacketClazz, float distance) throws ExecutionException {
-        try {
-            return getBeaconsWithAdvertisingPackets(beaconClazz.getConstructor(), advertisingPacketClazz.getConstructor(byte[].class), distance);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-            throw new ExecutionException(e);
-        }
-    }
-
-    /**
-     * @param beaconConstructor            Constructor of the specific beacon type
-     * @param advertisingPacketConstructor Constructor of the specific advertising packet type
-     * @param distance                     Distance for which a rssi will be generated
-     * @param <A>                          Specific advertising packet type
-     * @param <B>                          Specific beacon type
-     * @param <CA>                         Class of the specific advertising packet type
-     * @param <CB>                         Class of the specific beacon type
-     * @return Beacon for the specified beacon type with the specified advertising packet type and
-     *         set rssi
-     */
-    private static <A extends AdvertisingPacket, B extends Beacon<A>, CA extends Constructor<A>, CB extends Constructor<B>> B getBeaconsWithAdvertisingPackets(CB beaconConstructor, CA advertisingPacketConstructor, float distance) throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        B beacon = beaconConstructor.newInstance();
-        A advertisingPacket = advertisingPacketConstructor.newInstance((Object) new byte[30]);
-
-        int rssi = BeaconUtil.calculateRssiForDistance(beacon, distance);
-        advertisingPacket.setRssi(-rssi);
-
-        beacon.addAdvertisingPacket(advertisingPacket);
-        return beacon;
     }
 
     /**
