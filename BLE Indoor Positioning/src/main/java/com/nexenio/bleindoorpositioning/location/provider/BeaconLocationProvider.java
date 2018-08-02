@@ -23,7 +23,7 @@ public abstract class BeaconLocationProvider<B extends Beacon> implements Locati
     }
 
     protected boolean canUpdateLocation() {
-        return beacon.hasAnyAdvertisingPacket();
+        return true;
     }
 
     @Override

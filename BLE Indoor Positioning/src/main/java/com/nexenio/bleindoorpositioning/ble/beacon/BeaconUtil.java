@@ -1,6 +1,9 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
+
+import java.util.List;
 
 /**
  * Created by steppschuh on 24.11.17.
@@ -15,7 +18,7 @@ public abstract class BeaconUtil {
      * @param transmissionPower the tx power (in dBm) of the beacon
      * @return estimated range in meters
      * @see <a href="https://support.kontakt.io/hc/en-gb/articles/201621521-Transmission-power-Range-and-RSSI">Kontakt.io
-     * Knowledge Base</a>
+     *         Knowledge Base</a>
      */
     public static float getAdvertisingRange(int transmissionPower) {
         if (transmissionPower < -30) {
@@ -37,6 +40,44 @@ public abstract class BeaconUtil {
         } else {
             return getAdvertisingRange(transmissionPower, 4, 70);
         }
+    }
+
+    /**
+     * Gets the smallest distance from the given beacons to the user using a filter.
+     *
+     * @param beaconList Beacons to evaluate the distance from
+     * @param filter     Filter for getting the distance of the beacons
+     * @return Distance to the closest beacon; Double.MAX_VALUE if no beacon was given
+     */
+    public static double getSmallestDistance(List<? extends Beacon> beaconList, WindowFilter filter) {
+        double minimumDistance = Double.MAX_VALUE;
+        for (Beacon beacon : beaconList) {
+            float distance = beacon.getDistance(filter);
+            if (distance < minimumDistance) {
+                minimumDistance = distance;
+            }
+        }
+        return minimumDistance;
+    }
+
+    /**
+     * Gets the closest beacon from the given beacons to the user using a filter.
+     *
+     * @param beaconList Beacons to get the closest one from
+     * @param filter     Filter for getting the distance of the beacons
+     * @return Closest beacon if list is not empty; null else
+     */
+    public static Beacon getClosestBeacon(List<? extends Beacon> beaconList, WindowFilter filter) {
+        double minimumDistance = Double.MAX_VALUE;
+        Beacon closestBeacon = null;
+        for (Beacon beacon : beaconList) {
+            float distance = beacon.getDistance(filter);
+            if (distance < minimumDistance) {
+                minimumDistance = distance;
+                closestBeacon = beacon;
+            }
+        }
+        return closestBeacon;
     }
 
     /**
