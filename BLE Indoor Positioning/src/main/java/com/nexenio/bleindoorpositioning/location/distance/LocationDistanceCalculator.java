@@ -18,8 +18,8 @@ public abstract class LocationDistanceCalculator {
     }
 
     /**
-     * Calculates the distance between two points in latitude and longitude taking
-     * the altitude delta into account. Uses the Haversine method as its base.
+     * Calculates the distance between two points in latitude and longitude taking the altitude
+     * delta into account. Uses the Haversine method as its base.
      *
      * @return Distance in Meters
      * @see <a href="https://stackoverflow.com/a/16794680/1188330">StackOverflow</a>

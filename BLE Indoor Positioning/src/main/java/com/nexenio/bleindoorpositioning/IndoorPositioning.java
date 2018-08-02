@@ -13,6 +13,8 @@ import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,9 +33,12 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public static final int ROOT_MEAN_SQUARE_THRESHOLD_MEDIUM = 10;
     public static final int ROOT_MEAN_SQUARE_THRESHOLD_LIGHT = 25;
 
+    private static final int MINIMUM_BEACON_COUNT = 3; // multilateration requires at least 3 beacons
+    private static final int MAXIMUM_BEACON_COUNT = 10;
+
     public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
     private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
-    private double rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_STRICT;
+    private double rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_MEDIUM;
     private int minimumRssiThreshold = -70;
 
     private static IndoorPositioning instance;
@@ -77,31 +82,33 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private void updateLocation() {
         List<Beacon> usableBeacons = getUsableBeacons(BeaconManager.getInstance().getBeaconMap().values());
 
-        if (usableBeacons.size() < 3) {
-            return; // multilateration requires at least 3 beacons
-        } else if (usableBeacons.size() > 3) {
+        if (usableBeacons.size() < MINIMUM_BEACON_COUNT) {
+            return;
+        } else if (usableBeacons.size() > MINIMUM_BEACON_COUNT) {
             Collections.sort(usableBeacons, Beacon.RssiComparator);
-            Collections.reverse(usableBeacons);
-            for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
+            int firstRemovableBeaconIndex = MAXIMUM_BEACON_COUNT;
+            for (int beaconIndex = MINIMUM_BEACON_COUNT; beaconIndex < MAXIMUM_BEACON_COUNT; beaconIndex++) {
                 if (usableBeacons.get(beaconIndex).getFilteredRssi() < minimumRssiThreshold) {
-                    usableBeacons.remove(beaconIndex);
+                    firstRemovableBeaconIndex = beaconIndex;
+                    break;
                 }
             }
+            usableBeacons.subList(firstRemovableBeaconIndex, usableBeacons.size()).clear();
         }
 
         Multilateration multilateration = new Multilateration(usableBeacons);
-        Location location = multilateration.getLocation();
+        try {
+            Location location = multilateration.getLocation();
 
-        // The root mean square of multilateration is used to filter out inaccurate locations.
-        // Adjust value to allow location updates with higher deviation
-        if (multilateration.getRMS() < rootMeanSquareThreshold) {
-            locationPredictor.addLocation(location);
-            Location meanLocation = getMeanLocation(2, TimeUnit.SECONDS);
-            if(meanLocation != null) {
-                onLocationUpdated(meanLocation);
+            // The root mean square of multilateration is used to filter out inaccurate locations.
+            // Adjust value to allow location updates with higher deviation
+            if (multilateration.getRMS() < rootMeanSquareThreshold) {
+                locationPredictor.addLocation(location);
+                onLocationUpdated(location);
             }
+        } catch (TooManyEvaluationsException e) {
+            // see https://github.com/neXenio/BLE-Indoor-Positioning/issues/73
         }
-
     }
 
     public static <B extends Beacon> List<B> getUsableBeacons(Collection<B> availableBeacons) {
