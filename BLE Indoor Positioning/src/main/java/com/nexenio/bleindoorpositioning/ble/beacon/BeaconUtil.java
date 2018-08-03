@@ -1,6 +1,13 @@
 package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
+import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by steppschuh on 24.11.17.
@@ -15,7 +22,7 @@ public abstract class BeaconUtil {
      * @param transmissionPower the tx power (in dBm) of the beacon
      * @return estimated range in meters
      * @see <a href="https://support.kontakt.io/hc/en-gb/articles/201621521-Transmission-power-Range-and-RSSI">Kontakt.io
-     * Knowledge Base</a>
+     *         Knowledge Base</a>
      */
     public static float getAdvertisingRange(int transmissionPower) {
         if (transmissionPower < -30) {
@@ -37,6 +44,105 @@ public abstract class BeaconUtil {
         } else {
             return getAdvertisingRange(transmissionPower, 4, 70);
         }
+    }
+
+    /**
+     * Gets the smallest distance from the given beacons to the user using the default filter.
+     *
+     * @param beaconList Beacons to evaluate the distance from
+     * @return Distance to the closest beacon; Double.MAX_VALUE if no beacon was given
+     */
+    public static double getSmallestDistance(List<? extends Beacon> beaconList) {
+        Beacon beacon = getClosestBeacon(beaconList);
+        return (beacon == null) ? Double.MAX_VALUE : beacon.getDistance();
+    }
+
+    /**
+     * Gets the smallest distance from the given beacons to the user using a specified filter.
+     *
+     * @param beaconList Beacons to evaluate the distance from
+     * @param filter     Filter for getting the distance of the beacons
+     * @return Distance to the closest beacon; Double.MAX_VALUE if no beacon was given
+     */
+    public static double getSmallestDistance(List<? extends Beacon> beaconList, WindowFilter filter) {
+        Beacon beacon = getClosestBeacon(beaconList, filter);
+        return (beacon == null) ? Double.MAX_VALUE : beacon.getDistance(filter);
+    }
+
+    /**
+     * Gets the closest beacon from the given beacons to the user using the default filter.
+     *
+     * @param beaconList Beacons to get the closest one from
+     * @return Closest beacon if list is not empty; null else
+     */
+    public static Beacon getClosestBeacon(List<? extends Beacon> beaconList) {
+        double minimumDistance = Double.MAX_VALUE;
+        Beacon closestBeacon = null;
+        for (Beacon beacon : beaconList) {
+            float distance = beacon.getDistance();
+            if (distance < minimumDistance) {
+                minimumDistance = distance;
+                closestBeacon = beacon;
+            }
+        }
+        return closestBeacon;
+    }
+
+    /**
+     * Gets the closest beacon from the given beacons to the user using a specified filter.
+     *
+     * @param beaconList Beacons to get the closest one from
+     * @param filter     Filter for getting the distance of the beacons
+     * @return Closest beacon if list is not empty; null else
+     */
+    public static Beacon getClosestBeacon(List<? extends Beacon> beaconList, WindowFilter filter) {
+        double minimumDistance = Double.MAX_VALUE;
+        Beacon closestBeacon = null;
+        for (Beacon beacon : beaconList) {
+            float distance = beacon.getDistance(filter);
+            if (distance < minimumDistance) {
+                minimumDistance = distance;
+                closestBeacon = beacon;
+            }
+        }
+        return closestBeacon;
+    }
+
+    /**
+     * Calculate the rssi for which the calculated distance will be close to the given distance.
+     *
+     * @param beacon   Beacon from which the rssi should be send
+     * @param distance Distance the beacon should be away
+     * @return Estimated rssi for the given distance
+     */
+    public static int calculateRssiForDistance(Beacon beacon, float distance) {
+        return calculateRssi(distance, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), BeaconDistanceCalculator.getPathLossParameter());
+    }
+
+    /**
+     * Calculates distances using the reverse <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
+     * path loss model</a>.
+     *
+     * @param distance           Distance the beacon should be away
+     * @param calibratedRssi     the RSSI measured at the calibration distance
+     * @param calibratedDistance the distance in meters at which the calibrated RSSI was measured
+     * @param pathLossParameter  the path-loss adjustment parameter
+     * @return Estimated rssi for the given distance
+     */
+    public static int calculateRssi(float distance, float calibratedRssi, int calibratedDistance, float pathLossParameter) {
+        return calculateRssi(distance, BeaconDistanceCalculator.getCalibratedRssiAtOneMeter(calibratedRssi, calibratedDistance), pathLossParameter);
+    }
+
+    /**
+     * Calculates distances using the reverse <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
+     * path loss model</a>.
+     *
+     * @param distance          Distance for which a rssi should be estimated
+     * @param calibratedRssi    the RSSI measured at 1m distance
+     * @param pathLossParameter the path-loss adjustment parameter
+     */
+    public static int calculateRssi(float distance, float calibratedRssi, float pathLossParameter) {
+        return (int) ((Math.log(distance) / Math.log(10)) * (10 * pathLossParameter) + calibratedRssi);
     }
 
     /**
