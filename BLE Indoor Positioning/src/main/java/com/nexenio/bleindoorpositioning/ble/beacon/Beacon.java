@@ -109,7 +109,8 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     }
 
     public ArrayList<P> getAdvertisingPacketsFromLast(long amount, TimeUnit timeUnit) {
-        return getAdvertisingPacketsBetween(System.currentTimeMillis() - timeUnit.toMillis(amount), System.currentTimeMillis());
+        long currentTimeMillis = System.currentTimeMillis();
+        return getAdvertisingPacketsBetween(currentTimeMillis - timeUnit.toMillis(amount), currentTimeMillis);
     }
 
     public ArrayList<P> getAdvertisingPacketsSince(long timestamp) {
