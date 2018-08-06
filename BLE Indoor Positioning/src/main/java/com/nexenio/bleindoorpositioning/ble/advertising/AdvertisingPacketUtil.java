@@ -134,7 +134,7 @@ public abstract class AdvertisingPacketUtil {
                 listIterator = advertisingPackets.listIterator(advertisingPackets.size());
                 while (listIterator.hasPrevious()) {
                     if (listIterator.previous().getTimestamp() < endTimestamp) {
-                        endIndex = listIterator.nextIndex();
+                        endIndex = listIterator.nextIndex() + 1;
                         break;
                     }
                 }
