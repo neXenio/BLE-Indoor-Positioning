@@ -11,12 +11,11 @@ public class BeaconCreator<B extends Beacon> extends AbstractBeaconCreator<B> {
     }
 
     @Override
-    public AdvertisingPacket getAdvertisingPacketForBeaconClass(Class<B> beaconClass) throws InstantiationException {
-        String beaconClassName = beaconClass.getSimpleName();
-        if (beaconClassName.equals(IBeacon.class.getSimpleName())) {
+    public AdvertisingPacket createAdvertisingPacketForBeaconClass(Class<B> beaconClass) throws InstantiationException {
+        if (beaconClass == IBeacon.class) {
             return new IBeaconAdvertisingPacket(new byte[30]);
         }
-        throw new InstantiationException("No registered advertising packet for beacon class " + beaconClassName);
+        throw new InstantiationException("No registered advertising packet for beacon class " + beaconClass.getSimpleName());
     }
 
 }

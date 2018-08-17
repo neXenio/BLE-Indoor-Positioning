@@ -23,7 +23,7 @@ public abstract class AbstractBeaconCreator<B extends Beacon> {
      * Please note that if you want a single instance of a beacon instead of adding it to a list you
      * need to specify the complete type e.g. {@code IBeacon<IBeaconAdvertisingPacket>}.
      *
-     * @param distance Distance for which a rssi will be generated
+     * @param distance Distance for which a rssi will be calculated
      * @return Beacon for the specified beacon type with the specified advertising packet type and
      *         set rssi
      * @throws ExecutionException If reflections fail
@@ -32,7 +32,7 @@ public abstract class AbstractBeaconCreator<B extends Beacon> {
     public B createBeaconWithAdvertisingPacket(float distance) throws ExecutionException {
         try {
             B beacon = beaconClass.newInstance();
-            AdvertisingPacket advertisingPacket = getAdvertisingPacketForBeaconClass(beaconClass);
+            AdvertisingPacket advertisingPacket = createAdvertisingPacketForBeaconClass(beaconClass);
             int rssi = BeaconUtil.calculateRssiForDistance(beacon, distance);
             advertisingPacket.setRssi(-rssi);
             beacon.addAdvertisingPacket(advertisingPacket);
@@ -49,8 +49,8 @@ public abstract class AbstractBeaconCreator<B extends Beacon> {
      * @param beaconClass Class of the beacon type for which the matching advertising packet should
      *                    be created
      * @return Advertising packet matching the given beacon class
-     * @throws InstantiationException if no matching advertising packet could be found
+     * @throws InstantiationException if no matching advertising packet could be created
      */
-    public abstract AdvertisingPacket getAdvertisingPacketForBeaconClass(Class<B> beaconClass) throws InstantiationException;
+    public abstract AdvertisingPacket createAdvertisingPacketForBeaconClass(Class<B> beaconClass) throws InstantiationException;
 
 }
