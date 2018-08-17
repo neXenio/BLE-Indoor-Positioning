@@ -114,7 +114,7 @@ public abstract class AdvertisingPacketUtil {
 
         // find the index of the last advertising packet with a timestamp
         // smaller than the specified endTimestamp
-        int endIndex = advertisingPackets.size() - 1;
+        int endIndex = advertisingPackets.size();
         if (endTimestamp < latestAdvertisingPacket.getTimestamp()) {
             // figure out if the end timestamp is before or after the midst advertising packet
             ListIterator<P> listIterator;
