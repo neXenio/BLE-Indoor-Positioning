@@ -134,14 +134,14 @@ public abstract class AdvertisingPacketUtil {
                 listIterator = advertisingPackets.listIterator(advertisingPackets.size());
                 while (listIterator.hasPrevious()) {
                     if (listIterator.previous().getTimestamp() < endTimestamp) {
-                        endIndex = listIterator.nextIndex();
+                        endIndex = listIterator.nextIndex() + 1;
                         break;
                     }
                 }
             }
         }
 
-        return new ArrayList<>(advertisingPackets.subList(startIndex, endIndex + 1));
+        return new ArrayList<>(advertisingPackets.subList(startIndex, endIndex));
     }
 
 }
