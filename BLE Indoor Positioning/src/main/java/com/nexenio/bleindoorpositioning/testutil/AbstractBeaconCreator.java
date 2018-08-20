@@ -23,7 +23,7 @@ public abstract class AbstractBeaconCreator<B extends Beacon> {
      * Please note that if you want a single instance of a beacon instead of adding it to a list you
      * need to specify the complete type e.g. {@code IBeacon<IBeaconAdvertisingPacket>}.
      *
-     * @param distance Distance for which a rssi will be calculated
+     * @param distance Distance for which an rssi will be calculated
      * @return Beacon for the specified beacon type with the specified advertising packet type and
      *         set rssi
      * @throws ExecutionException If reflections fail
