@@ -117,7 +117,7 @@ public class BeaconTest {
     }
 
     @Test
-    public void getAdvertisingPacketsBefore() {
+    public void getAdvertisingPacketsBefore_packetsWithSmallerTimestamp_returnsCorrectPackets() {
         long maximumTimestamp = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(3);
         List<IBeaconAdvertisingPacket> advertisingPackets = iBeacon.getAdvertisingPacketsBefore(maximumTimestamp);
         assertFalse(advertisingPackets.isEmpty());
