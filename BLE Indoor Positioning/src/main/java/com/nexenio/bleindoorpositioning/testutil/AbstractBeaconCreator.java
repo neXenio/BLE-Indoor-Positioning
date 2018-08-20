@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioning.testUtil;
+package com.nexenio.bleindoorpositioning.testutil;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;

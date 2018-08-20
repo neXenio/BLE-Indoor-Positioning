@@ -2,7 +2,7 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
-import com.nexenio.bleindoorpositioning.testUtil.AbstractBeaconCreator;
+import com.nexenio.bleindoorpositioning.testutil.AbstractBeaconCreator;
 
 public class BeaconCreator<B extends Beacon> extends AbstractBeaconCreator<B> {
 
