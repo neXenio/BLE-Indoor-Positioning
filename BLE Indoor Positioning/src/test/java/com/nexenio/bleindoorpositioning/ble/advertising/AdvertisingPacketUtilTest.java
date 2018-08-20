@@ -8,13 +8,17 @@ import net.steppschuh.markdowngenerator.table.Table;
 import net.steppschuh.markdowngenerator.table.TableRow;
 import net.steppschuh.markdowngenerator.text.TextBuilder;
 
-import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AdvertisingPacketUtilTest {
 
@@ -22,24 +26,121 @@ public class AdvertisingPacketUtilTest {
 
     private ArrayList<IBeaconAdvertisingPacket> advertisingPackets;
 
-    @Before
-    public void setUp() {
-        advertisingPackets = new ArrayList<>();
-        IBeaconAdvertisingPacket advertisingPacket;
+    @Test
+    public void getAdvertisingPacketsBetween_startIndexIsCalculatedInFirstHalf_returnsCorrectList() {
+        long latestTimestamp = System.currentTimeMillis();
+        int numberOfPackets = 2;
+        advertisingPackets = getAdvertisingPackets(1, numberOfPackets, latestTimestamp);
 
-        int packetsFrequency = 10; // in Hertz
-        long packetsCount = TimeUnit.MILLISECONDS.toSeconds(Beacon.MAXIMUM_PACKET_AGE) * packetsFrequency; // number of packets to add
+        IBeaconAdvertisingPacket secondToLastPacket = advertisingPackets.get(numberOfPackets - 2);
+
+        long startTimestamp = secondToLastPacket.timestamp;
+        long endTimestamp = latestTimestamp - 1;
+
+        List<IBeaconAdvertisingPacket> packagesBetween = AdvertisingPacketUtil.getAdvertisingPacketsBetween(advertisingPackets, startTimestamp, endTimestamp);
+
+        for (AdvertisingPacket advertisingPacket : packagesBetween) {
+            assertTrue("Timestamp is smaller than our start timestamp", advertisingPacket.timestamp >= startTimestamp);
+            assertTrue("Timestamp is greater than end timestamp", advertisingPacket.timestamp <= endTimestamp);
+        }
+
+        assertEquals("Incorrect number of packages returned", 1, packagesBetween.size());
+    }
+
+    @Test
+    public void getAdvertisingPacketsBetween_startIndexIsCalculatedInSecondHalf_returnsCorrectList() {
+        long latestTimestamp = System.currentTimeMillis();
+        int numberOfPackets = 3;
+        advertisingPackets = getAdvertisingPackets(1, numberOfPackets, latestTimestamp);
+
+        IBeaconAdvertisingPacket secondToLastPacket = advertisingPackets.get(numberOfPackets - 2);
+
+        long startTimestamp = secondToLastPacket.timestamp;
+        long endTimestamp = latestTimestamp - 1;
+
+        List<IBeaconAdvertisingPacket> packagesBetween = AdvertisingPacketUtil.getAdvertisingPacketsBetween(advertisingPackets, startTimestamp, endTimestamp);
+
+        for (AdvertisingPacket advertisingPacket : packagesBetween) {
+            assertTrue("Timestamp is smaller than our start timestamp", advertisingPacket.timestamp >= startTimestamp);
+            assertTrue("Timestamp is greater than end timestamp", advertisingPacket.timestamp <= endTimestamp);
+        }
+
+        assertEquals("Incorrect number of packages returned", 1, packagesBetween.size());
+    }
+
+    /**
+     * @see <a href="https://github.com/neXenio/BLE-Indoor-Positioning/issues/120">Bug resulting
+     *         in incorrect list</a>
+     */
+    @Test
+    public void getAdvertisingPacketsBetween_endIndexIsCalculatedInFirstHalf_returnsCorrectList() {
+        long latestTimestamp = System.currentTimeMillis();
+        int numberOfPackets = 2;
+        advertisingPackets = getAdvertisingPackets(1, numberOfPackets, latestTimestamp);
+
+        IBeaconAdvertisingPacket secondToLastPacket = advertisingPackets.get(numberOfPackets - 2);
+
+        long startTimestamp = secondToLastPacket.timestamp;
+        long endTimestamp = latestTimestamp - 1;
+
+        List<IBeaconAdvertisingPacket> packagesBetween = AdvertisingPacketUtil.getAdvertisingPacketsBetween(advertisingPackets, startTimestamp, endTimestamp);
+
+        for (AdvertisingPacket advertisingPacket : packagesBetween) {
+            assertTrue("Timestamp is smaller than our start timestamp", advertisingPacket.timestamp >= startTimestamp);
+            assertTrue("Timestamp is greater than end timestamp", advertisingPacket.timestamp <= endTimestamp);
+        }
+
+        assertEquals("Incorrect number of packages returned", 1, packagesBetween.size());
+    }
+
+    @Test
+    public void getAdvertisingPacketsBetween_endIndexIsCalculatedInSecondHalf_returnsCorrectList() {
+        long latestTimestamp = System.currentTimeMillis();
+        int numberOfPackets = 3;
+        advertisingPackets = getAdvertisingPackets(1, numberOfPackets, latestTimestamp);
+
+        IBeaconAdvertisingPacket secondToLastPacket = advertisingPackets.get(numberOfPackets - 2);
+
+        long startTimestamp = secondToLastPacket.timestamp;
+        long endTimestamp = latestTimestamp - 1;
+
+        List<IBeaconAdvertisingPacket> packagesBetween = AdvertisingPacketUtil.getAdvertisingPacketsBetween(advertisingPackets, startTimestamp, endTimestamp);
+
+        for (AdvertisingPacket advertisingPacket : packagesBetween) {
+            assertTrue("Timestamp is smaller than our start timestamp", advertisingPacket.timestamp >= startTimestamp);
+            assertTrue("Timestamp is greater than end timestamp", advertisingPacket.timestamp <= endTimestamp);
+        }
+
+        assertEquals("Incorrect number of packages returned", 1, packagesBetween.size());
+    }
+
+    public List<IBeaconAdvertisingPacket> getAdvertisingPackets() {
+        return getAdvertisingPackets(10, 1000, System.currentTimeMillis());
+    }
+
+    /**
+     * @param packetsFrequency Frequency in which packets timestamp should be created (in Hertz)
+     * @param packetsCount     Number of packets to return
+     * @return List of advertising packets
+     */
+    public ArrayList<IBeaconAdvertisingPacket> getAdvertisingPackets(int packetsFrequency, int packetsCount, long latestPacketTimestamp) {
+        ArrayList<IBeaconAdvertisingPacket> advertisingPackets = new ArrayList<>();
+
         int timestampDelta = (int) TimeUnit.SECONDS.toMillis(1) / packetsFrequency;
-        long latestPacketTimestamp = System.currentTimeMillis();
         long oldestPacketTimestamp = latestPacketTimestamp - ((packetsCount - 1) * timestampDelta);
 
         for (int packetIndex = 0; packetIndex < packetsCount; packetIndex++) {
-            advertisingPacket = new IBeaconAdvertisingPacket(BeaconTest.IBEACON_ADVERTISING_DATA);
+            IBeaconAdvertisingPacket advertisingPacket = new IBeaconAdvertisingPacket(BeaconTest.IBEACON_ADVERTISING_DATA);
             advertisingPacket.setTimestamp(oldestPacketTimestamp + (packetIndex * timestampDelta));
             advertisingPackets.add(advertisingPacket);
         }
+
+        return advertisingPackets;
     }
 
+    // Benchmarking
+
+    @Ignore
     @Test
     public void getAdvertisingPacketsBenchmark() {
         MarkdownBuilder markdownBuilder = new TextBuilder()
@@ -51,6 +152,10 @@ public class AdvertisingPacketUtilTest {
                 .append(MEASUREMENTS_COUNT).append(" times.");
 
         System.out.println(markdownBuilder);
+
+        int packetsFrequency = 10;
+        int packetCount = (int) TimeUnit.MILLISECONDS.toSeconds(Beacon.MAXIMUM_PACKET_AGE) * packetsFrequency;
+        advertisingPackets = getAdvertisingPackets(packetsFrequency, packetCount, System.currentTimeMillis());
 
         getAdvertisingPacketsBetweenBenchmark();
         getLatestAdvertisingPacketsBenchmark();
@@ -156,16 +261,6 @@ public class AdvertisingPacketUtilTest {
         System.out.println(markdownBuilder);
     }
 
-    private static void getLatestAdvertisingPackets(ArrayList<IBeaconAdvertisingPacket> advertisingPackets, long duration, boolean useReferenceImplementation) {
-        long endTimestamp = advertisingPackets.get(advertisingPackets.size() - 1).getTimestamp() + 1;
-        long startTimestamp = endTimestamp - duration;
-        if (useReferenceImplementation) {
-            getAdvertisingPacketsBetweenReference(advertisingPackets, startTimestamp, endTimestamp);
-        } else {
-            getAdvertisingPacketsBetween(advertisingPackets, startTimestamp, endTimestamp);
-        }
-    }
-
     private static String getReadableDuration(long nanoseconds) {
         float milliseconds = (float) nanoseconds / 1000000;
         return String.format(Locale.US, "%.5f", milliseconds) + "ms";
@@ -185,9 +280,19 @@ public class AdvertisingPacketUtilTest {
                 .build();
     }
 
+    private static void getLatestAdvertisingPackets(ArrayList<IBeaconAdvertisingPacket> advertisingPackets, long duration, boolean useReferenceImplementation) {
+        long endTimestamp = advertisingPackets.get(advertisingPackets.size() - 1).getTimestamp() + 1;
+        long startTimestamp = endTimestamp - duration;
+        if (useReferenceImplementation) {
+            getAdvertisingPacketsBetweenReference(advertisingPackets, startTimestamp, endTimestamp);
+        } else {
+            getAdvertisingPacketsBetween(advertisingPackets, startTimestamp, endTimestamp);
+        }
+    }
+
     /**
      * The new implementation that you want to test against the reference implementation.
-     *
+     * <p>
      * Currently a very unperformant implementation that iterates over all packets.
      */
     private static ArrayList<IBeaconAdvertisingPacket> getAdvertisingPacketsBetween(ArrayList<IBeaconAdvertisingPacket> advertisingPackets, long startTimestamp, long endTimestamp) {
