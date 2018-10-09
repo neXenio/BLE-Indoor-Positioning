@@ -81,7 +81,7 @@ public class SphericalMercatorProjectionTest {
         double[] expectedGeodetic = new double[]{
                 LocationTest.SOCCER_FIELD_CENTER.getLatitude(),
                 LocationTest.SOCCER_FIELD_CENTER.getLongitude(),
-                LocationTest.SOCCER_FIELD_CENTER.getElevation()
+                LocationTest.SOCCER_FIELD_CENTER.getAltitude()
         };
         double[] ecefArray = new double[]{3786292.474596871, 890822.9600122868, 5037857.368752121}; // SOCCER_FIELD_CENTER
         double[] actualGeodetic = SphericalMercatorProjection.ecefToGeodetic(ecefArray);
