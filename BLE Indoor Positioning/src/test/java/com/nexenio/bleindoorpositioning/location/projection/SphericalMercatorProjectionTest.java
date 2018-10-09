@@ -13,33 +13,33 @@ import static org.junit.Assert.assertEquals;
 public class SphericalMercatorProjectionTest {
 
     @Test
-    public void latitudeToY() throws Exception {
+    public void latitudeToY() {
         double expectedY = 6894701.008722784;
         double actualY = SphericalMercatorProjection.latitudeToY(LocationTest.BERLIN.getLatitude());
         assertEquals(expectedY, actualY, 0.00001);
     }
 
     @Test
-    public void longitudeToX() throws Exception {
+    public void longitudeToX() {
         double expectedX = 1492232.6533872557;
         double actualX = SphericalMercatorProjection.longitudeToX(LocationTest.BERLIN.getLongitude());
         assertEquals(expectedX, actualX, 0.00001);
     }
 
     @Test
-    public void yToLatitude() throws Exception {
+    public void yToLatitude() {
         double actualLatitude = SphericalMercatorProjection.yToLatitude(6894701.008722784);
         assertEquals(LocationTest.BERLIN.getLatitude(), actualLatitude, 0.00001);
     }
 
     @Test
-    public void xToLongitude() throws Exception {
+    public void xToLongitude() {
         double actualLongitude = SphericalMercatorProjection.xToLongitude(1492232.6533872557);
         assertEquals(LocationTest.BERLIN.getLongitude(), actualLongitude, 0.00001);
     }
 
     @Test
-    public void conversion() throws Exception {
+    public void conversion() {
         double expectedLatitude = LocationTest.BERLIN.getLatitude();
         double y = SphericalMercatorProjection.latitudeToY(expectedLatitude);
         double actualLatitude = SphericalMercatorProjection.yToLatitude(y);
@@ -52,7 +52,7 @@ public class SphericalMercatorProjectionTest {
     }
 
     @Test
-    public void conversionWithElevation() throws Exception {
+    public void conversionWithElevation() {
         Location expectedLocation = LocationTest.BERLIN;
         expectedLocation.setElevation(2);
         double[] ecef = SphericalMercatorProjection.locationToEcef(expectedLocation);
@@ -62,12 +62,12 @@ public class SphericalMercatorProjectionTest {
     }
 
     @Test
-    public void geodeticToEcef_location_accurateEcef() throws Exception {
+    public void geodeticToEcef_location_accurateEcef() {
         double[] expectedCenter = new double[]{3786292.474596871, 890822.9600122868, 5037857.368752121}; // SOCCER_FIELD_CENTER
         double[] geodetic = new double[]{
                 Math.toRadians(LocationTest.SOCCER_FIELD_CENTER.getLatitude()),
                 Math.toRadians(LocationTest.SOCCER_FIELD_CENTER.getLongitude()),
-                Math.toRadians(LocationTest.SOCCER_FIELD_CENTER.getElevation())
+                Math.toRadians(LocationTest.SOCCER_FIELD_CENTER.getAltitude())
         };
         double[] actualCenter = SphericalMercatorProjection.geodeticToEcef(geodetic);
 
@@ -77,7 +77,7 @@ public class SphericalMercatorProjectionTest {
     }
 
     @Test
-    public void ecefToGeodetic_ecefArray_accurateGeodetic() throws Exception {
+    public void ecefToGeodetic_ecefArray_accurateGeodetic() {
         double[] expectedGeodetic = new double[]{
                 LocationTest.SOCCER_FIELD_CENTER.getLatitude(),
                 LocationTest.SOCCER_FIELD_CENTER.getLongitude(),
