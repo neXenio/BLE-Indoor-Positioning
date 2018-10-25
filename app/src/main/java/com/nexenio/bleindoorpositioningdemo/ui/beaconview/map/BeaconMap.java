@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Created by steppschuh on 16.11.17.
@@ -100,16 +101,23 @@ public class BeaconMap extends BeaconView {
             return;
         }
 
-        Matrix matrix = new Matrix();
-        matrix.postRotate((float) mapBackground.getBearing());
-        matrix.postTranslate(-1700, -1350);
+        // TODO: avoid allocations
+        Matrix bitmapMatrix = new Matrix();
 
+        // scale based on ratio of background scale to projection scale
         float scale = (float) (mapBackground.getMetersPerPixel() / canvasProjection.getMetersPerCanvasUnit());
-        //float scale = 0.286f;
-        matrix.postScale(scale, scale);
+        bitmapMatrix.postScale(scale, scale);
 
-        canvas.drawBitmap(mapBackground.getImageBitmap(), matrix, null);
-        //canvas.drawBitmap(mapBackground.getImageBitmap(), 0, 0, null);
+        // translate based on offset
+        bitmapMatrix.postTranslate(
+                canvasProjection.getXFromLocation(mapBackground.getTopLeftLocation()),
+                canvasProjection.getYFromLocation(mapBackground.getTopLeftLocation())
+        );
+
+        // rotate based on bearing
+        bitmapMatrix.postRotate((float) mapBackground.getBearing());
+
+        canvas.drawBitmap(mapBackground.getImageBitmap(), bitmapMatrix, null);
     }
 
     @Override

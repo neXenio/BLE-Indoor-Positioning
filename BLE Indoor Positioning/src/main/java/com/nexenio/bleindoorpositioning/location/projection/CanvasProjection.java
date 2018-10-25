@@ -109,7 +109,7 @@ public class CanvasProjection {
             projectedCanvasHeight = projectedMinimumWidth / canvasAspectRatio;
         }
 
-        // get the distances that the diagonals represent on order to
+        // get the distances that the diagonals represent in order to
         // get the meters per canvas- & projection unit
         double canvasDiagonal = Math.sqrt((canvasWidth * canvasWidth) + (canvasHeight * canvasHeight));
         double projectedCanvasDiagonal = Math.sqrt((projectedCanvasWidth * projectedCanvasWidth) + (projectedCanvasHeight * projectedCanvasHeight));
