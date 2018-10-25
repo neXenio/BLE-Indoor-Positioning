@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.6.0"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.7.5"
     }
 }
 
@@ -28,8 +28,8 @@ dependencies {
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
-def releaseVersionCode = 12
-def releaseVersionName = "0.3.6"
+def releaseVersionCode = 13
+def releaseVersionName = "0.3.7"
 
 def projectName = 'BLE Indoor Positioning'
 def projectDescription = 'Java library for indoor positioing using bluetooth beacons'
