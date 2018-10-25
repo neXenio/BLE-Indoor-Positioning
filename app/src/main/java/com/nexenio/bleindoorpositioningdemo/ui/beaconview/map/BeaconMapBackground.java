@@ -31,48 +31,48 @@ public class BeaconMapBackground {
         bottomRightPoint = new Point(imageBitmap.getWidth(), imageBitmap.getHeight());
     }
 
-    public Location getLocation(Point point) {
+    public Location getLocation(@NonNull Point point) {
         return getLocation(point, topLeftLocation, topLeftPoint, metersPerPixel, bearing);
     }
 
-    public Point getPoint(Location location) {
+    public Point getPoint(@NonNull Location location) {
         return getPoint(location, topLeftLocation, topLeftPoint, metersPerPixel, bearing);
     }
 
-    public static float getMetersPerPixel(Location firstReferenceLocation, Point firstReferencePoint, Location secondReferenceLocation, Point secondReferencePoint) {
+    public static float getMetersPerPixel(@NonNull Location firstReferenceLocation, @NonNull Point firstReferencePoint, @NonNull Location secondReferenceLocation, @NonNull Point secondReferencePoint) {
         double distanceInPixels = getPixelDistance(firstReferencePoint, secondReferencePoint);
         double distanceInMeters = firstReferenceLocation.getDistanceTo(secondReferenceLocation);
         return (float) (distanceInMeters / distanceInPixels);
     }
 
-    public static double getBearing(Location firstReferenceLocation, Point firstReferencePoint, Location secondReferenceLocation, Point secondReferencePoint) {
+    public static double getBearing(@NonNull Location firstReferenceLocation, @NonNull Point firstReferencePoint, @NonNull Location secondReferenceLocation, @NonNull Point secondReferencePoint) {
         double locationBearing = getBearing(firstReferenceLocation, secondReferenceLocation);
         double pointBearing = getBearing(firstReferencePoint, secondReferencePoint);
         return ((locationBearing - pointBearing) + 360) % 360;
     }
 
-    public static double getBearing(Point firstPoint, Point secondPoint) {
+    public static double getBearing(@NonNull Point firstPoint, @NonNull Point secondPoint) {
         double angle = Math.atan2(secondPoint.y - firstPoint.y, secondPoint.x - firstPoint.x) * 180 / Math.PI;
         return (angle + 90) % 360;
     }
 
-    public static double getBearing(Location firstLocation, Location secondLocation) {
+    public static double getBearing(@NonNull Location firstLocation, @NonNull Location secondLocation) {
         return firstLocation.getAngleTo(secondLocation);
     }
 
-    public static double getPixelDistance(Point firstPoint, Point secondPoint) {
+    public static double getPixelDistance(@NonNull Point firstPoint, @NonNull Point secondPoint) {
         int deltaX = Math.abs(secondPoint.x - firstPoint.x);
         int deltaY = Math.abs(secondPoint.y - firstPoint.y);
         return Math.sqrt((deltaX * deltaX) + (deltaY * deltaY));
     }
 
-    public static Location getLocation(Point point, Location referenceLocation, Point referencePoint, double metersPerPixel, double backgroundBearing) {
+    public static Location getLocation(@NonNull Point point, @NonNull Location referenceLocation, @NonNull Point referencePoint, double metersPerPixel, double backgroundBearing) {
         double distance = metersPerPixel * getPixelDistance(referencePoint, point);
         double bearing = (getBearing(referencePoint, point) + backgroundBearing + 360) % 360;
         return referenceLocation.getShiftedLocation(distance, bearing);
     }
 
-    public static Point getPoint(Location location, Location referenceLocation, Point referencePoint, double metersPerPixel, double backgroundBearing) {
+    public static Point getPoint(@NonNull Location location, @NonNull Location referenceLocation, @NonNull Point referencePoint, double metersPerPixel, double backgroundBearing) {
         double distanceInMeters = location.getDistanceTo(referenceLocation);
         double distanceInPixels = distanceInMeters / metersPerPixel;
         double locationBearing = getBearing(referenceLocation, location);
@@ -80,7 +80,7 @@ public class BeaconMapBackground {
         return getShiftedPoint(referencePoint, distanceInPixels, bearing);
     }
 
-    public static Point getShiftedPoint(Point referencePoint, double distanceInPixels, double bearing) {
+    public static Point getShiftedPoint(@NonNull Point referencePoint, double distanceInPixels, double bearing) {
         double angleInRadians = Math.toRadians(bearing + 90);
         return new Point(
                 (int) (referencePoint.x - (distanceInPixels * Math.cos(angleInRadians))),
@@ -112,7 +112,7 @@ public class BeaconMapBackground {
         return topLeftLocation;
     }
 
-    public void setTopLeftLocation(Location topLeftLocation) {
+    public void setTopLeftLocation(@NonNull Location topLeftLocation) {
         this.topLeftLocation = topLeftLocation;
         projection.setTopLeftLocation(topLeftLocation);
     }
@@ -121,7 +121,7 @@ public class BeaconMapBackground {
         return bottomRightLocation;
     }
 
-    public void setBottomRightLocation(Location bottomRightLocation) {
+    public void setBottomRightLocation(@NonNull Location bottomRightLocation) {
         this.bottomRightLocation = bottomRightLocation;
         projection.setBottomRightLocation(bottomRightLocation);
     }
@@ -130,7 +130,7 @@ public class BeaconMapBackground {
         return topLeftPoint;
     }
 
-    public void setTopLeftPoint(Point topLeftPoint) {
+    public void setTopLeftPoint(@NonNull Point topLeftPoint) {
         this.topLeftPoint = topLeftPoint;
     }
 
@@ -138,7 +138,7 @@ public class BeaconMapBackground {
         return bottomRightPoint;
     }
 
-    public void setBottomRightPoint(Point bottomRightPoint) {
+    public void setBottomRightPoint(@NonNull Point bottomRightPoint) {
         this.bottomRightPoint = bottomRightPoint;
     }
 
@@ -163,13 +163,13 @@ public class BeaconMapBackground {
             return builder;
         }
 
-        public Builder withFirstReferenceLocation(Location location, Point point) {
+        public Builder withFirstReferenceLocation(@NonNull Location location, @NonNull Point point) {
             firstReferenceLocation = location;
             firstReferencePoint = point;
             return this;
         }
 
-        public Builder withSecondReferenceLocation(Location location, Point point) {
+        public Builder withSecondReferenceLocation(@NonNull Location location, @NonNull Point point) {
             secondReferenceLocation = location;
             secondReferencePoint = point;
             return this;
