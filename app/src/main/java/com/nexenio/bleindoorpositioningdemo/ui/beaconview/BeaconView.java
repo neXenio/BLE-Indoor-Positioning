@@ -104,7 +104,7 @@ public abstract class BeaconView extends View {
         deviceRangePaint.setAlpha(25);
 
         backgroundPaint = new Paint();
-        backgroundPaint.setColor(Color.GREEN);
+        backgroundPaint.setColor(Color.WHITE);
         backgroundPaint.setStyle(Paint.Style.FILL);
     }
 

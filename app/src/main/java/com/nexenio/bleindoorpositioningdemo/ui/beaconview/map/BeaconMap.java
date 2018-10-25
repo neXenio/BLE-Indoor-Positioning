@@ -10,6 +10,7 @@ import android.graphics.PointF;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
+import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
@@ -68,12 +69,14 @@ public class BeaconMap extends BeaconView {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    @CallSuper
     @Override
     public void initialize() {
         super.initialize();
         canvasProjection = new CanvasProjection();
     }
 
+    @CallSuper
     @Override
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
@@ -81,12 +84,14 @@ public class BeaconMap extends BeaconView {
         canvasProjection.setCanvasHeight(canvasHeight);
     }
 
+    @CallSuper
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         drawLegend(canvas);
     }
 
+    @CallSuper
     @Override
     protected void drawBackground(Canvas canvas) {
         super.drawBackground(canvas);
