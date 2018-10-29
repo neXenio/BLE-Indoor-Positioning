@@ -85,7 +85,7 @@ public class ColorUtil {
     @ColorInt
     public static int getBeaconColor(int beaconIndex) {
         int colorIndex = 18 + (beaconIndex * 2);
-        colorIndex = Math.floorMod(colorIndex, MATERIAL_DESIGN_COLOR_RESOURCE_IDS.length);
+        colorIndex = colorIndex % MATERIAL_DESIGN_COLOR_RESOURCE_IDS.length;
         return getInstance().materialDesignDarkColors[colorIndex];
     }
 

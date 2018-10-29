@@ -42,6 +42,9 @@ public class BeaconMapBackground {
     public static float getMetersPerPixel(@NonNull Location firstReferenceLocation, @NonNull Point firstReferencePoint, @NonNull Location secondReferenceLocation, @NonNull Point secondReferencePoint) {
         double distanceInPixels = getPixelDistance(firstReferencePoint, secondReferencePoint);
         double distanceInMeters = firstReferenceLocation.getDistanceTo(secondReferenceLocation);
+        if (distanceInPixels == 0) {
+            throw new IllegalArgumentException("Reference points must be distinct.");
+        }
         return (float) (distanceInMeters / distanceInPixels);
     }
 

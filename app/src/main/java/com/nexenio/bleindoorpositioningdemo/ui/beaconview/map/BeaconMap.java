@@ -107,12 +107,6 @@ public class BeaconMap extends BeaconView {
         matrixScaleFactor = (float) (mapBackground.getMetersPerPixel() / canvasProjection.getMetersPerCanvasUnit());
         matrixTranslationPoint = getPointFromLocation(mapBackground.getTopLeftLocation());
 
-        //matrixTranslationPoint.x -= canvasProjection.getOffsetOriginWidth();
-        //matrixTranslationPoint.y -= canvasProjection.getOffsetOriginHeight();
-
-        //matrixTranslationPoint.x += (canvasProjection.getCanvasWidth() - canvasProjection.getOffsetOriginWidth()) / 2;
-        //matrixTranslationPoint.y += (canvasProjection.getCanvasHeight() - canvasProjection.getOffsetOriginHeight()) / 2;
-
         matrixRotationDegrees = (float) mapBackground.getBearing();
 
         backgroundMatrix = new Matrix();
