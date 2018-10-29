@@ -209,11 +209,6 @@ public class BeaconMapBackgroundTest {
         assertPointEquals(new Point(50, 100), shiftedPoint, 0);
     }
 
-    public static void assertPointEquals(Point expectedPoint, Point actualPoint, double delta) {
-        double distance = BeaconMapBackground.getPixelDistance(expectedPoint, actualPoint);
-        assertEquals("Distance from expected point: " + expectedPoint + " to actual point: " + actualPoint + " is " + distance, 0, distance, delta);
-    }
-
     @Test
     public void getTopLeftLocation() {
         Location topLeftLocation = new Location(52.512653658536856, 13.390293996004692);
@@ -234,6 +229,11 @@ public class BeaconMapBackgroundTest {
     @Test
     public void getBottomRightPoint() {
         assertPointEquals(new Point(backgroundImage.getWidth(), backgroundImage.getHeight()), beaconMapBackground.getBottomRightPoint(), 0);
+    }
+
+    private static void assertPointEquals(Point expectedPoint, Point actualPoint, double delta) {
+        double distance = BeaconMapBackground.getPixelDistance(expectedPoint, actualPoint);
+        assertEquals("Distance from expected point: " + expectedPoint + " to actual point: " + actualPoint + " is " + distance, 0, distance, delta);
     }
 
 }
