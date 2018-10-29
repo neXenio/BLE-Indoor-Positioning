@@ -13,7 +13,7 @@ public class CanvasProjection {
     private Location topLeftLocation;
     private Location bottomRightLocation;
 
-    private float paddingFactor = 0.1f;
+    private float paddingFactor = 0f;
 
     private float canvasWidth;
     private float canvasHeight;
@@ -204,10 +204,12 @@ public class CanvasProjection {
     }
 
     public double getMetersPerProjectionUnit() {
+        updateMappingIfRequired();
         return metersPerProjectionUnit;
     }
 
     public double getMetersPerCanvasUnit() {
+        updateMappingIfRequired();
         return metersPerCanvasUnit;
     }
 

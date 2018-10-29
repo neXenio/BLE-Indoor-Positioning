@@ -235,4 +235,5 @@ public class BeaconMapBackgroundTest {
     public void getBottomRightPoint() {
         assertPointEquals(new Point(backgroundImage.getWidth(), backgroundImage.getHeight()), beaconMapBackground.getBottomRightPoint(), 0);
     }
+
 }

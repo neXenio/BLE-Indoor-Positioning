@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 /**
  * Created by steppschuh on 16.11.17.
@@ -53,6 +52,10 @@ public class BeaconMap extends BeaconView {
     protected List<Location> recentLocations = new ArrayList<>();
 
     protected BeaconMapBackground mapBackground;
+    protected Matrix backgroundMatrix;
+    protected float matrixScaleFactor;
+    protected PointF matrixTranslationPoint;
+    protected float matrixRotationDegrees;
 
     public BeaconMap(Context context) {
         super(context);
@@ -101,23 +104,23 @@ public class BeaconMap extends BeaconView {
             return;
         }
 
-        // TODO: avoid allocations
-        Matrix bitmapMatrix = new Matrix();
+        matrixScaleFactor = (float) (mapBackground.getMetersPerPixel() / canvasProjection.getMetersPerCanvasUnit());
+        matrixTranslationPoint = getPointFromLocation(mapBackground.getTopLeftLocation());
 
-        // scale based on ratio of background scale to projection scale
-        float scale = (float) (mapBackground.getMetersPerPixel() / canvasProjection.getMetersPerCanvasUnit());
-        bitmapMatrix.postScale(scale, scale);
+        //matrixTranslationPoint.x -= canvasProjection.getOffsetOriginWidth();
+        //matrixTranslationPoint.y -= canvasProjection.getOffsetOriginHeight();
 
-        // translate based on offset
-        bitmapMatrix.postTranslate(
-                canvasProjection.getXFromLocation(mapBackground.getTopLeftLocation()),
-                canvasProjection.getYFromLocation(mapBackground.getTopLeftLocation())
-        );
+        //matrixTranslationPoint.x += (canvasProjection.getCanvasWidth() - canvasProjection.getOffsetOriginWidth()) / 2;
+        //matrixTranslationPoint.y += (canvasProjection.getCanvasHeight() - canvasProjection.getOffsetOriginHeight()) / 2;
 
-        // rotate based on bearing
-        bitmapMatrix.postRotate((float) mapBackground.getBearing());
+        matrixRotationDegrees = (float) mapBackground.getBearing();
 
-        canvas.drawBitmap(mapBackground.getImageBitmap(), bitmapMatrix, null);
+        backgroundMatrix = new Matrix();
+        backgroundMatrix.postScale(matrixScaleFactor, matrixScaleFactor);
+        backgroundMatrix.postTranslate(matrixTranslationPoint.x, matrixTranslationPoint.y);
+        backgroundMatrix.postRotate(matrixRotationDegrees);
+
+        canvas.drawBitmap(mapBackground.getImageBitmap(), backgroundMatrix, null);
     }
 
     @Override
