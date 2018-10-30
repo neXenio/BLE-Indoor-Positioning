@@ -114,7 +114,7 @@ public class AdvertisingPacketUtilTest {
         assertEquals("Incorrect number of packages returned", 1, packagesBetween.size());
     }
 
-    public List<IBeaconAdvertisingPacket> getAdvertisingPackets() {
+    private List<IBeaconAdvertisingPacket> getAdvertisingPackets() {
         return getAdvertisingPackets(10, 1000, System.currentTimeMillis());
     }
 
@@ -123,7 +123,7 @@ public class AdvertisingPacketUtilTest {
      * @param packetsCount     Number of packets to return
      * @return List of advertising packets
      */
-    public ArrayList<IBeaconAdvertisingPacket> getAdvertisingPackets(int packetsFrequency, int packetsCount, long latestPacketTimestamp) {
+    private ArrayList<IBeaconAdvertisingPacket> getAdvertisingPackets(int packetsFrequency, int packetsCount, long latestPacketTimestamp) {
         ArrayList<IBeaconAdvertisingPacket> advertisingPackets = new ArrayList<>();
 
         int timestampDelta = (int) TimeUnit.SECONDS.toMillis(1) / packetsFrequency;

@@ -96,7 +96,6 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
         return getProximityUuid(getProximityUuidBytes(data)).equals(referenceUuid);
     }
 
-
     public static byte[] getFlagsBytes(byte[] data) {
         return Arrays.copyOfRange(data, 0, 3);
     }

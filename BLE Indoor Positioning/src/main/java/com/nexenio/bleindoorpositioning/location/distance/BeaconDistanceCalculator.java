@@ -19,6 +19,7 @@ public abstract class BeaconDistanceCalculator {
     public static final float PATH_LOSS_PARAMETER_INDOOR = 1.7f;
     public static final float PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION = 3f;
 
+    public static final int CALIBRATED_RSSI_AT_ONE_METER = -62;
     public static final int SIGNAL_LOSS_AT_ONE_METER = -41;
 
     private static float pathLossParameter = PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION;
@@ -81,7 +82,7 @@ public abstract class BeaconDistanceCalculator {
         } else if (calibratedDistance == Eddystone.CALIBRATION_DISTANCE_DEFAULT) {
             calibratedRssiAtOneMeter = calibratedRssi + SIGNAL_LOSS_AT_ONE_METER;
         } else {
-            calibratedRssiAtOneMeter = -62;
+            calibratedRssiAtOneMeter = CALIBRATED_RSSI_AT_ONE_METER;
         }
         return calibratedRssiAtOneMeter;
     }
