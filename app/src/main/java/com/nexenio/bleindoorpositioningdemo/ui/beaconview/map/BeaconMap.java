@@ -4,11 +4,13 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
+import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
@@ -49,6 +51,12 @@ public class BeaconMap extends BeaconView {
 
     protected List<Location> recentLocations = new ArrayList<>();
 
+    protected BeaconMapBackground mapBackground;
+    protected Matrix backgroundMatrix;
+    protected float matrixScaleFactor;
+    protected PointF matrixTranslationPoint;
+    protected float matrixRotationDegrees;
+
     public BeaconMap(Context context) {
         super(context);
     }
@@ -65,12 +73,14 @@ public class BeaconMap extends BeaconView {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    @CallSuper
     @Override
     public void initialize() {
         super.initialize();
         canvasProjection = new CanvasProjection();
     }
 
+    @CallSuper
     @Override
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
@@ -78,10 +88,33 @@ public class BeaconMap extends BeaconView {
         canvasProjection.setCanvasHeight(canvasHeight);
     }
 
+    @CallSuper
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         drawLegend(canvas);
+    }
+
+    @CallSuper
+    @Override
+    protected void drawBackground(Canvas canvas) {
+        super.drawBackground(canvas);
+
+        if (mapBackground == null) {
+            return;
+        }
+
+        matrixScaleFactor = (float) (mapBackground.getMetersPerPixel() / canvasProjection.getMetersPerCanvasUnit());
+        matrixTranslationPoint = getPointFromLocation(mapBackground.getTopLeftLocation());
+
+        matrixRotationDegrees = (float) mapBackground.getBearing();
+
+        backgroundMatrix = new Matrix();
+        backgroundMatrix.postScale(matrixScaleFactor, matrixScaleFactor);
+        backgroundMatrix.postTranslate(matrixTranslationPoint.x, matrixTranslationPoint.y);
+        backgroundMatrix.postRotate(matrixRotationDegrees);
+
+        canvas.drawBitmap(mapBackground.getImageBitmap(), backgroundMatrix, null);
     }
 
     @Override
@@ -398,4 +431,13 @@ public class BeaconMap extends BeaconView {
         this.predictedDeviceLocation = predictedDeviceLocation;
         onPredictedDeviceLocationChanged();
     }
+
+    public BeaconMapBackground getMapBackground() {
+        return mapBackground;
+    }
+
+    public void setMapBackground(BeaconMapBackground mapBackground) {
+        this.mapBackground = mapBackground;
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.location;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -13,6 +14,10 @@ public class LocationUtil {
     public static Location calculateMeanLocationFromLast(List<Location> locationList, long amount, TimeUnit timeUnit) {
         List<Location> matchingLocations = getLocationsFromLast(locationList, amount, timeUnit);
         return calculateMeanLocation(matchingLocations);
+    }
+
+    public static Location calculateMeanLocation(Location... locations) {
+        return calculateMeanLocation(Arrays.asList(locations));
     }
 
     public static Location calculateMeanLocation(List<Location> locationList) {

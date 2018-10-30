@@ -1,6 +1,9 @@
 package com.nexenio.bleindoorpositioningdemo.ui.beaconview.map;
 
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.CallSuper;
 import android.view.LayoutInflater;
@@ -65,6 +68,24 @@ public class BeaconMapFragment extends BeaconViewFragment {
         View inflatedView = super.onCreateView(inflater, container, savedInstanceState);
         beaconMap = inflatedView.findViewById(R.id.beaconMap);
         beaconMap.setBeacons(getBeacons());
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;
+        Bitmap backgroundImage = BitmapFactory.decodeResource(getResources(), R.drawable.map_view_background, options);
+
+        Location firstReferenceLocation = new Location(52.51239236816364, 13.390579996297987);
+        Location secondReferenceLocation = new Location(52.51240825552749, 13.390821867681456);
+
+        Point firstReferencePoint = new Point(953, 1830);
+        Point secondReferencePoint = new Point(1926, 1830);
+
+        BeaconMapBackground beaconMapBackground = BeaconMapBackground.Builder.from(backgroundImage)
+                .withFirstReferenceLocation(firstReferenceLocation, firstReferencePoint)
+                .withSecondReferenceLocation(secondReferenceLocation, secondReferencePoint)
+                .build();
+
+        beaconMap.setMapBackground(beaconMapBackground);
+
         return inflatedView;
     }
 

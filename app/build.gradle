@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.nexenio.bleindoorpositioning"
-        minSdkVersion 24
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -19,6 +19,11 @@ android {
     android {
         lintOptions {
             abortOnError false
+        }
+        testOptions {
+            unitTests {
+                includeAndroidResources = true
+            }
         }
     }
 }
@@ -37,6 +42,8 @@ dependencies {
     implementation "com.polidea.rxandroidble:rxandroidble:1.4.3"
 
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    testImplementation "com.android.support.test:runner:1.0.2"
+    testImplementation "com.android.support.test:rules:1.0.2"
+    testImplementation 'org.robolectric:robolectric:4.0-beta-1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 }

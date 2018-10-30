@@ -38,7 +38,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
     public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
     private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
-    private double rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_MEDIUM;
+    private double rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_LIGHT;
     private int minimumRssiThreshold = -70;
 
     private static IndoorPositioning instance;
@@ -86,8 +86,9 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
             return;
         } else if (usableBeacons.size() > MINIMUM_BEACON_COUNT) {
             Collections.sort(usableBeacons, Beacon.RssiComparator);
-            int firstRemovableBeaconIndex = MAXIMUM_BEACON_COUNT;
-            for (int beaconIndex = MINIMUM_BEACON_COUNT; beaconIndex < MAXIMUM_BEACON_COUNT; beaconIndex++) {
+            int maximumBeaconIndex = Math.min(MAXIMUM_BEACON_COUNT, usableBeacons.size());
+            int firstRemovableBeaconIndex = maximumBeaconIndex;
+            for (int beaconIndex = MINIMUM_BEACON_COUNT; beaconIndex < maximumBeaconIndex; beaconIndex++) {
                 if (usableBeacons.get(beaconIndex).getFilteredRssi() < minimumRssiThreshold) {
                     firstRemovableBeaconIndex = beaconIndex;
                     break;
