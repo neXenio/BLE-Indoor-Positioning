@@ -21,7 +21,7 @@ public abstract class BeaconDistanceCalculator {
 
     public static final int SIGNAL_LOSS_AT_ONE_METER = -41;
 
-    private static float pathLossParameter = PATH_LOSS_PARAMETER_INDOOR;
+    private static float pathLossParameter = PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION;
 
     /**
      * Calculates the distance to the specified beacon using the <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
