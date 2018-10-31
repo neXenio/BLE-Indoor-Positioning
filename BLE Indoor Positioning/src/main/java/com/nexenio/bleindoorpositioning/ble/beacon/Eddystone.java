@@ -21,4 +21,9 @@ public class Eddystone<P extends EddystoneAdvertisingPacket> extends Beacon<P> {
         return new EddystoneLocationProvider<>(this);
     }
 
+    @Override
+    public void applyPropertiesFromAdvertisingPacket(P advertisingPacket) {
+        super.applyPropertiesFromAdvertisingPacket(advertisingPacket);
+        setCalibratedRssi(advertisingPacket.getMeasuredPowerByte());
+    }
 }
