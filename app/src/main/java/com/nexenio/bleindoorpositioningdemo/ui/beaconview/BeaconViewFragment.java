@@ -19,7 +19,9 @@ import com.nexenio.bleindoorpositioning.ble.advertising.IndoorPositioningAdverti
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
+import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.EddystoneBeaconFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioningdemo.R;
@@ -38,7 +40,8 @@ public abstract class BeaconViewFragment extends Fragment {
 
     // TODO: Remove legacy uuid once all beacons are updated
     // protected IBeaconFilter uuidFilter = new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID);
-    protected IBeaconFilter uuidFilter = new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID, UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01"));
+//    protected IBeaconFilter uuidFilter = new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID, UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01"));
+    protected EddystoneBeaconFilter uuidFilter = new EddystoneBeaconFilter();
 
     protected CoordinatorLayout coordinatorLayout;
 
@@ -116,7 +119,7 @@ public abstract class BeaconViewFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    public IBeaconFilter getUuidFilter() {
+    public EddystoneBeaconFilter getUuidFilter() {
         return uuidFilter;
     }
 
@@ -141,7 +144,7 @@ public abstract class BeaconViewFragment extends Fragment {
         return beacons;
     }
 
-    public void setUuidFilter(IBeaconFilter uuidFilter) {
+    public void setUuidFilter(EddystoneBeaconFilter uuidFilter) {
         this.uuidFilter = uuidFilter;
     }
 }
