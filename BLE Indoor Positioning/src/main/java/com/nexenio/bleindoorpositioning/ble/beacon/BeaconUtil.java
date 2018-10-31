@@ -4,10 +4,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by steppschuh on 24.11.17.
@@ -22,7 +19,7 @@ public abstract class BeaconUtil {
      * @param transmissionPower the tx power (in dBm) of the beacon
      * @return estimated range in meters
      * @see <a href="https://support.kontakt.io/hc/en-gb/articles/201621521-Transmission-power-Range-and-RSSI">Kontakt.io
-     *         Knowledge Base</a>
+     * Knowledge Base</a>
      */
     public static float getAdvertisingRange(int transmissionPower) {
         if (transmissionPower < -30) {
@@ -76,16 +73,10 @@ public abstract class BeaconUtil {
      * @return Closest beacon if list is not empty; null else
      */
     public static Beacon getClosestBeacon(List<? extends Beacon> beaconList) {
-        double minimumDistance = Double.MAX_VALUE;
-        Beacon closestBeacon = null;
-        for (Beacon beacon : beaconList) {
-            float distance = beacon.getDistance();
-            if (distance < minimumDistance) {
-                minimumDistance = distance;
-                closestBeacon = beacon;
-            }
+        if (beaconList.isEmpty()) {
+            return null;
         }
-        return closestBeacon;
+        return getClosestBeacon(beaconList, beaconList.get(0).createSuggestedWindowFilter());
     }
 
     /**
