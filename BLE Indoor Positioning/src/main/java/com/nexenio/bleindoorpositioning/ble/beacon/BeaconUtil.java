@@ -109,7 +109,7 @@ public abstract class BeaconUtil {
     }
 
     /**
-     * Calculate the rssi for which the calculated distance will be close to the given distance.
+     * Calculate the RSSI for which the calculated distance will be close to the given distance.
      *
      * @param beacon   Beacon from which the rssi should be send
      * @param distance Distance the beacon should be away
@@ -120,7 +120,7 @@ public abstract class BeaconUtil {
     }
 
     /**
-     * Calculates distances using the reverse <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
+     * Calculates the RSSI using the reverse <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
      * path loss model</a>.
      *
      * @param distance           Distance the beacon should be away
@@ -134,7 +134,7 @@ public abstract class BeaconUtil {
     }
 
     /**
-     * Calculates distances using the reverse <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
+     * Calculates the RSSI using the reverse <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
      * path loss model</a>.
      *
      * @param distance          Distance for which a rssi should be estimated
