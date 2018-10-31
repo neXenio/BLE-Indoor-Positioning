@@ -32,7 +32,6 @@ public abstract class AbstractBeaconCreator<B extends Beacon> {
     public B createBeaconWithAdvertisingPacket(float distance) throws ExecutionException {
         try {
             B beacon = beaconClass.newInstance();
-            beacon.setCalibratedRssi(-50);
             AdvertisingPacket advertisingPacket = createAdvertisingPacketForBeaconClass(beaconClass);
             int rssi = BeaconUtil.calculateRssiForDistance(beacon, distance);
             advertisingPacket.setRssi(rssi);
