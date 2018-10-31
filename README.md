@@ -12,7 +12,8 @@ This repo contains a [Java library][package_core] that is capable of estimating 
 
 #### Gradle
 
-Release artefacts are available through [Bintray][bintray]. 
+*Bintray releases are currently having issues, please use JitPack for now.*
+Release artefacts are available through [Bintray][bintray].
 
 ```groovy
 dependencies {
