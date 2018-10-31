@@ -8,8 +8,8 @@ import java.util.UUID;
  */
 
 public class IndoorPositioningAdvertisingPacket extends IBeaconAdvertisingPacket {
-
-    public final static UUID INDOOR_POSITIONING_UUID = UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291");
+//    public final static UUID INDOOR_POSITIONING_UUID = UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291");
+    public final static UUID INDOOR_POSITIONING_UUID = UUID.fromString("9114d61a-67d1-11e8-adc0-fa7ae01bbebc");
 
     public IndoorPositioningAdvertisingPacket(byte[] data) {
         super(data);
@@ -18,5 +18,4 @@ public class IndoorPositioningAdvertisingPacket extends IBeaconAdvertisingPacket
     public static boolean meetsSpecification(byte[] data) {
         return dataMatchesUuid(data, INDOOR_POSITIONING_UUID) && IBeaconAdvertisingPacket.meetsSpecification(data);
     }
-
 }
