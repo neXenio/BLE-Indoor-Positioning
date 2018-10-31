@@ -35,7 +35,7 @@ public abstract class AbstractBeaconCreator<B extends Beacon> {
             beacon.setCalibratedRssi(-50);
             AdvertisingPacket advertisingPacket = createAdvertisingPacketForBeaconClass(beaconClass);
             int rssi = BeaconUtil.calculateRssiForDistance(beacon, distance);
-            advertisingPacket.setRssi(-rssi);
+            advertisingPacket.setRssi(rssi);
             beacon.addAdvertisingPacket(advertisingPacket);
             return beacon;
         } catch (IllegalAccessException | InstantiationException e) {
