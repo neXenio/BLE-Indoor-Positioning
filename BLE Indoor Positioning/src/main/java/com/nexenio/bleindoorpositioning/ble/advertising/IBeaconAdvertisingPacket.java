@@ -3,7 +3,8 @@ package com.nexenio.bleindoorpositioning.ble.advertising;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 
-import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -70,9 +71,15 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
         if (data == null || data.length < 29) {
             return false;
         }
+
+        // In order to support advertising packets from manufacturers that
+        // adjusted the data type, we'll ignore this for now.
+        // See: https://github.com/neXenio/BLE-Indoor-Positioning/issues/79
+        /*
         if (getTypeBytes(data) != EXPECTED_TYPE) {
             return false;
         }
+        */
         if (!Arrays.equals(getFlagsBytes(data), EXPECTED_FLAGS)) {
             return false;
         }
@@ -88,7 +95,6 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
         }
         return getProximityUuid(getProximityUuidBytes(data)).equals(referenceUuid);
     }
-
 
     public static byte[] getFlagsBytes(byte[] data) {
         return Arrays.copyOfRange(data, 0, 3);
@@ -131,11 +137,22 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
     }
 
     public static int getMajor(byte[] majorBytes) {
-        return new BigInteger(majorBytes).intValue();
+        return getInt(majorBytes);
     }
 
     public static int getMinor(byte[] minorBytes) {
-        return new BigInteger(minorBytes).intValue();
+        return getInt(minorBytes);
+    }
+
+    /**
+     * According to the iBeacon specification, minor and major are unsigned integer values between 0
+     * and 65535 (2 bytes each).
+     *
+     * @param data the minor or major bytes (2 bytes)
+     * @return integer between 0 and 65535
+     */
+    private static int getInt(byte[] data) {
+        return ByteBuffer.wrap(new byte[]{data[1], data[0], 0, 0}).order(ByteOrder.LITTLE_ENDIAN).getInt();
     }
 
     /*
@@ -265,7 +282,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
 
     public int getMinor() {
         if (minor == 0) {
-            minor = getMajor(getMinorBytes());
+            minor = getMinor(getMinorBytes());
         }
         return minor;
     }

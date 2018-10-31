@@ -4,11 +4,13 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
+import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
@@ -35,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BeaconMap extends BeaconView {
 
-    protected ValueAnimator deviceAccuracyAnimator;
+    protected ValueAnimator deviceRadiusAnimator;
 
     protected Location topLeftLocation;
     protected Location bottomRightLocation;
@@ -48,6 +50,14 @@ public class BeaconMap extends BeaconView {
     protected LocationAnimator predictedDeviceLocationAnimator;
 
     protected List<Location> recentLocations = new ArrayList<>();
+
+    protected BeaconMapBackground mapBackground;
+    protected Matrix backgroundMatrix;
+    protected float matrixScaleFactor;
+    protected PointF matrixTranslationPoint;
+    protected float matrixRotationDegrees;
+
+    protected Paint historyFillPaint;
 
     public BeaconMap(Context context) {
         super(context);
@@ -65,12 +75,15 @@ public class BeaconMap extends BeaconView {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    @CallSuper
     @Override
     public void initialize() {
         super.initialize();
         canvasProjection = new CanvasProjection();
+        historyFillPaint = new Paint(secondaryFillPaint);
     }
 
+    @CallSuper
     @Override
     protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
         super.onSizeChanged(width, height, oldWidth, oldHeight);
@@ -78,10 +91,33 @@ public class BeaconMap extends BeaconView {
         canvasProjection.setCanvasHeight(canvasHeight);
     }
 
+    @CallSuper
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         drawLegend(canvas);
+    }
+
+    @CallSuper
+    @Override
+    protected void drawBackground(Canvas canvas) {
+        super.drawBackground(canvas);
+
+        if (mapBackground == null) {
+            return;
+        }
+
+        matrixScaleFactor = (float) (mapBackground.getMetersPerPixel() / canvasProjection.getMetersPerCanvasUnit());
+        matrixTranslationPoint = getPointFromLocation(mapBackground.getTopLeftLocation());
+
+        matrixRotationDegrees = (float) mapBackground.getBearing();
+
+        backgroundMatrix = new Matrix();
+        backgroundMatrix.postScale(matrixScaleFactor, matrixScaleFactor);
+        backgroundMatrix.postTranslate(matrixTranslationPoint.x, matrixTranslationPoint.y);
+        backgroundMatrix.postRotate(matrixRotationDegrees);
+
+        canvas.drawBitmap(mapBackground.getImageBitmap(), backgroundMatrix, null);
     }
 
     @Override
@@ -89,39 +125,42 @@ public class BeaconMap extends BeaconView {
         drawDeviceHistory(canvas);
         drawDevicePrediction(canvas);
 
-        PointF deviceCenter = (deviceLocationAnimator == null) ? canvasCenter : getPointFromLocation(deviceLocationAnimator.getLocation());
+        if (deviceLocationAnimator == null) {
+            return;
+        }
 
-        float deviceAdvertisingRange = 20; // in meters TODO: get real value based on tx power
-        float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(deviceAdvertisingRange);
+        PointF deviceCenter = getPointFromLocation(deviceLocationAnimator.getLocation());
 
-        // TODO use this for accuracy visualization
-        float animationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
+        float locationAccuracy = (float) deviceLocationAnimator.getLocation().getAccuracy();
+        float deviceAccuracyRadius = (float) canvasProjection.getCanvasUnitsFromMeters(locationAccuracy);
+
+        float animationValue = (deviceRadiusAnimator == null) ? 0 : (float) deviceRadiusAnimator.getAnimatedValue();
         float strokeRadius = (pixelsPerDip * 10) + (pixelsPerDip * 2 * animationValue);
 
-        //canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, deviceRangePaint);
-        canvas.drawCircle(deviceCenter.x, deviceCenter.y, advertisingRadius, deviceRangePaint);
+        canvas.drawCircle(deviceCenter.x, deviceCenter.y, deviceAccuracyRadius, deviceRangePaint);
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, whiteFillPaint);
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, strokeRadius, secondaryStrokePaint);
         canvas.drawCircle(deviceCenter.x, deviceCenter.y, pixelsPerDip * 8, secondaryFillPaint);
     }
 
     protected void drawDeviceHistory(Canvas canvas) {
-        float accuracy = 1; // in meters TODO: get real value
-        float advertisingRadius = (float) canvasProjection.getCanvasUnitsFromMeters(accuracy);
-        Paint historyFillPaint = new Paint(secondaryFillPaint);
+        PointF deviceCenter;
+        float heatmapRadius = (float) canvasProjection.getCanvasUnitsFromMeters(1);
+        float recencyScore;
+        int alpha;
 
         for (Location location : recentLocations) {
             if (location == null || !location.hasLatitudeAndLongitude()) {
                 continue;
             }
-            PointF deviceCenter = getPointFromLocation(location);
-            float recencyScore = getRecencyScore(location.getTimestamp(), TimeUnit.SECONDS.toMillis(10));
-            int alpha = (int) (255 * 0.25 * recencyScore);
+            deviceCenter = getPointFromLocation(location);
+            recencyScore = getRecencyScore(location.getTimestamp(), TimeUnit.SECONDS.toMillis(10));
+            alpha = (int) (255 * 0.25 * recencyScore);
             historyFillPaint.setAlpha(alpha);
-            RadialGradient gradient = new RadialGradient(deviceCenter.x, deviceCenter.y, advertisingRadius,
+            RadialGradient gradient = new RadialGradient(deviceCenter.x, deviceCenter.y, heatmapRadius,
                     new int[]{secondaryFillPaint.getColor(), Color.TRANSPARENT}, null, Shader.TileMode.CLAMP);
             historyFillPaint.setShader(gradient);
-            canvas.drawCircle(deviceCenter.x, deviceCenter.y, advertisingRadius, historyFillPaint);
+            canvas.drawCircle(deviceCenter.x, deviceCenter.y, heatmapRadius, historyFillPaint);
         }
     }
 
@@ -186,7 +225,7 @@ public class BeaconMap extends BeaconView {
         AdvertisingPacket latestAdvertisingPacket = beacon.getLatestAdvertisingPacket();
         long timeSinceLastAdvertisement = latestAdvertisingPacket != null ? System.currentTimeMillis() - latestAdvertisingPacket.getTimestamp() : 0;
 
-        float animationValue = (deviceAccuracyAnimator == null) ? 0 : (float) deviceAccuracyAnimator.getAnimatedValue();
+        float animationValue = (deviceRadiusAnimator == null) ? 0 : (float) deviceRadiusAnimator.getAnimatedValue();
         animationValue *= Math.max(0, 1 - (timeSinceLastAdvertisement / 1000));
         float beaconRadius = pixelsPerDip * 8;
         float strokeRadius = beaconRadius + (pixelsPerDip * 2) + (pixelsPerDip * 2 * animationValue);
@@ -355,20 +394,20 @@ public class BeaconMap extends BeaconView {
     }
 
     protected void startDeviceRadiusAnimation() {
-        if (deviceAccuracyAnimator != null && deviceAccuracyAnimator.isRunning()) {
+        if (deviceRadiusAnimator != null && deviceRadiusAnimator.isRunning()) {
             return;
         }
-        deviceAccuracyAnimator = ValueAnimator.ofFloat(0, 1);
-        deviceAccuracyAnimator.setDuration(LocationAnimator.ANIMATION_DURATION_LONG);
-        deviceAccuracyAnimator.setRepeatCount(1);
-        deviceAccuracyAnimator.setRepeatMode(ValueAnimator.REVERSE);
-        deviceAccuracyAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        deviceRadiusAnimator = ValueAnimator.ofFloat(0, 1);
+        deviceRadiusAnimator.setDuration(LocationAnimator.ANIMATION_DURATION_LONG);
+        deviceRadiusAnimator.setRepeatCount(1);
+        deviceRadiusAnimator.setRepeatMode(ValueAnimator.REVERSE);
+        deviceRadiusAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 invalidate();
             }
         });
-        deviceAccuracyAnimator.start();
+        deviceRadiusAnimator.start();
     }
 
     /**
@@ -398,4 +437,13 @@ public class BeaconMap extends BeaconView {
         this.predictedDeviceLocation = predictedDeviceLocation;
         onPredictedDeviceLocationChanged();
     }
+
+    public BeaconMapBackground getMapBackground() {
+        return mapBackground;
+    }
+
+    public void setMapBackground(BeaconMapBackground mapBackground) {
+        this.mapBackground = mapBackground;
+    }
+
 }

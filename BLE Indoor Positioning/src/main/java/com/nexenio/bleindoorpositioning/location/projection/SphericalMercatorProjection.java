@@ -11,17 +11,17 @@ import com.nexenio.bleindoorpositioning.location.Location;
 public class SphericalMercatorProjection {
 
     public static final double EARTH_RADIUS = 6378137.0; // in meters on the equator (WGS-84 semi-major axis)
-    private static final double e2 = 6.6943799901377997e-3;  //WGS-84 first eccentricity squared
-    private static final double a1 = 4.2697672707157535e+4;  //a1 = a*e2
-    private static final double a2 = 1.8230912546075455e+9;  //a2 = a1*a1
-    private static final double a3 = 1.4291722289812413e+2;  //a3 = a1*e2/2
-    private static final double a4 = 4.5577281365188637e+9;  //a4 = 2.5*a2
-    private static final double a5 = 4.2840589930055659e+4;  //a5 = a1+a3
-    private static final double a6 = 9.9330562000986220e-1;  //a6 = 1-e2
+    private static final double E2 = 6.6943799901377997e-3;  //WGS-84 first eccentricity squared
+    private static final double A1 = 4.2697672707157535e+4;  //A1 = a*E2
+    private static final double A2 = 1.8230912546075455e+9;  //A2 = A1*A1
+    private static final double A3 = 1.4291722289812413e+2;  //A3 = A1*E2/2
+    private static final double A4 = 4.5577281365188637e+9;  //A4 = 2.5*A2
+    private static final double A5 = 4.2840589930055659e+4;  //A5 = A1+A3
+    private static final double A6 = 9.9330562000986220e-1;  //A6 = 1-E2
 
     /**
-     * Caution: The conversion used by these simpler 2D methods is not compatible with the
-     * 3D Earth-Centered-Earth-Fixed (ECEF) to location conversion.
+     * Caution: The conversion used by these simpler 2D methods is not compatible with the 3D
+     * Earth-Centered-Earth-Fixed (ECEF) to location conversion.
      */
     public static double yToLatitude(double y) {
         return Math.toDegrees(Math.atan(Math.exp(y / EARTH_RADIUS)) * 2 - Math.PI / 2);
@@ -40,8 +40,8 @@ public class SphericalMercatorProjection {
     }
 
     /**
-     * Convenience method to convert Earth-Centered-Earth-Fixed (ECEF) to Location.
-     * Expects input to be in radians.
+     * Convenience method to convert Earth-Centered-Earth-Fixed (ECEF) to Location. Expects input to
+     * be in radians.
      */
     public static Location ecefToLocation(double[] ecef) {
         double[] geodetic = ecefToGeodetic(ecef);
@@ -49,9 +49,9 @@ public class SphericalMercatorProjection {
     }
 
     /**
-     * Convert Earth-Centered-Earth-Fixed (ECEF) to latitude, longitude, elevation.
-     * Input is a three element array containing x, y, z in meters.
-     * Output array contains latitude and longitude in radians, and elevation in meters.
+     * Convert Earth-Centered-Earth-Fixed (ECEF) to latitude, longitude, elevation. Input is a three
+     * element array containing x, y, z in meters. Output array contains latitude and longitude in
+     * radians, and elevation in meters.
      *
      * @see <a href="http://danceswithcode.net/engineeringnotes/geodetic_to_ecef/geodetic_to_ecef.html">Source</a>
      */
@@ -69,22 +69,22 @@ public class SphericalMercatorProjection {
         geodetic[1] = Math.atan2(y, x);       // Longitude
         s2 = z * z / r2;
         c2 = w2 / r2;
-        u = a2 / r;
-        v = a3 - a4 / r;
+        u = A2 / r;
+        v = A3 - A4 / r;
         if (c2 > 0.3) {
-            s = (zp / r) * (1.0 + c2 * (a1 + u + s2 * v) / r);
+            s = (zp / r) * (1.0 + c2 * (A1 + u + s2 * v) / r);
             geodetic[0] = Math.asin(s);
             ss = s * s;
             c = Math.sqrt(1.0 - ss);
         } else {
-            c = (w / r) * (1.0 - s2 * (a5 - u - c2 * v) / r);
+            c = (w / r) * (1.0 - s2 * (A5 - u - c2 * v) / r);
             geodetic[0] = Math.acos(c);
             ss = 1.0 - c * c;
             s = Math.sqrt(ss);
         }
-        g = 1.0 - e2 * ss;
+        g = 1.0 - E2 * ss;
         rg = EARTH_RADIUS / Math.sqrt(g);
-        rf = a6 * rg;
+        rf = A6 * rg;
         u = w - rg * c;
         v = zp - rf * s;
         f = c * u + s * v;
@@ -108,9 +108,9 @@ public class SphericalMercatorProjection {
     }
 
     /**
-     * Convert latitude, longitude, height to Earth-Centered-Earth-Fixed (ECEF).
-     * Input is a three element array containing latitude, longitude (radians) and altitude (in meters).
-     * Returned array contains x, y, z in meters
+     * Convert latitude, longitude, height to Earth-Centered-Earth-Fixed (ECEF). Input is a three
+     * element array containing latitude, longitude (radians) and altitude (in meters). Returned
+     * array contains x, y, z in meters
      *
      * @see <a href="http://danceswithcode.net/engineeringnotes/geodetic_to_ecef/geodetic_to_ecef.html">Source</a>
      */
@@ -119,10 +119,10 @@ public class SphericalMercatorProjection {
         double latitude = geodetic[0];
         double longitude = geodetic[1];
         double altitude = geodetic[2];
-        double n = EARTH_RADIUS / Math.sqrt(1 - e2 * Math.sin(latitude) * Math.sin(latitude));
+        double n = EARTH_RADIUS / Math.sqrt(1 - E2 * Math.sin(latitude) * Math.sin(latitude));
         ecef[0] = (n + altitude) * Math.cos(latitude) * Math.cos(longitude);
         ecef[1] = (n + altitude) * Math.cos(latitude) * Math.sin(longitude);
-        ecef[2] = (n * (1 - e2) + altitude) * Math.sin(latitude);
+        ecef[2] = (n * (1 - E2) + altitude) * Math.sin(latitude);
         return ecef;
     }
 

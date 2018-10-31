@@ -1,6 +1,7 @@
 package com.nexenio.bleindoorpositioning.location;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -15,25 +16,33 @@ public class LocationUtil {
         return calculateMeanLocation(matchingLocations);
     }
 
+    public static Location calculateMeanLocation(Location... locations) {
+        return calculateMeanLocation(Arrays.asList(locations));
+    }
+
     public static Location calculateMeanLocation(List<Location> locationList) {
         if (locationList.size() < 1) {
             return null;
         } else {
-            Location meanLocation = new Location();
             double latitudeSum = 0;
             double longitudeSum = 0;
             double altitudeSum = 0;
             double elevationSum = 0;
+            double accuracySum = 0;
             for (Location location : locationList) {
                 latitudeSum += location.getLatitude();
                 longitudeSum += location.getLongitude();
                 altitudeSum += location.getAltitude();
                 elevationSum += location.getElevation();
+                accuracySum += location.getAccuracy();
             }
-            meanLocation.setLatitude(latitudeSum / locationList.size());
-            meanLocation.setLongitude(longitudeSum / locationList.size());
-            meanLocation.setAltitude(altitudeSum / locationList.size());
-            meanLocation.setElevation(elevationSum / locationList.size());
+            Location meanLocation = new Location(
+                    latitudeSum / locationList.size(),
+                    longitudeSum / locationList.size(),
+                    altitudeSum / locationList.size(),
+                    elevationSum / locationList.size()
+            );
+            meanLocation.setAccuracy(accuracySum / locationList.size());
             return meanLocation;
         }
     }

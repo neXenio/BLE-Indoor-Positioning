@@ -22,9 +22,7 @@ public abstract class BeaconLocationProvider<B extends Beacon> implements Locati
         return location == null;
     }
 
-    protected boolean canUpdateLocation() {
-        return beacon.hasAnyAdvertisingPacket();
-    }
+    protected abstract boolean canUpdateLocation();
 
     @Override
     public Location getLocation() {
@@ -35,7 +33,8 @@ public abstract class BeaconLocationProvider<B extends Beacon> implements Locati
     }
 
     public boolean hasLocation() {
-        return getLocation() != null && getLocation().hasLatitudeAndLongitude();
+        Location location = getLocation();
+        return location != null && location.hasLatitudeAndLongitude();
     }
 
 }

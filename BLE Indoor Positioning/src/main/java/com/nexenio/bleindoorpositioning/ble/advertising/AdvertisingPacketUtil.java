@@ -58,9 +58,10 @@ public abstract class AdvertisingPacketUtil {
     }
 
     /**
-     * Returns an ArrayList of AdvertisingPackets that have been received in the specified time range.
-     * If no packets match, an empty list will be returned. Expects the specified AdvertisingPackets
-     * to be sorted by timestamp in ascending order (i.e. the oldest timestamp first)!
+     * Returns an ArrayList of AdvertisingPackets that have been received in the specified time
+     * range. If no packets match, an empty list will be returned. Expects the specified
+     * AdvertisingPackets to be sorted by timestamp in ascending order (i.e. the oldest timestamp
+     * first)!
      *
      * @param advertisingPackets the packets to filter (sorted by timestamp ascending)
      * @param startTimestamp     minimum timestamp, inclusive
@@ -113,7 +114,7 @@ public abstract class AdvertisingPacketUtil {
 
         // find the index of the last advertising packet with a timestamp
         // smaller than the specified endTimestamp
-        int endIndex = advertisingPackets.size() - 1;
+        int endIndex = advertisingPackets.size();
         if (endTimestamp < latestAdvertisingPacket.getTimestamp()) {
             // figure out if the end timestamp is before or after the midst advertising packet
             ListIterator<P> listIterator;
@@ -133,14 +134,14 @@ public abstract class AdvertisingPacketUtil {
                 listIterator = advertisingPackets.listIterator(advertisingPackets.size());
                 while (listIterator.hasPrevious()) {
                     if (listIterator.previous().getTimestamp() < endTimestamp) {
-                        endIndex = listIterator.nextIndex();
+                        endIndex = listIterator.nextIndex() + 1;
                         break;
                     }
                 }
             }
         }
 
-        return new ArrayList<>(advertisingPackets.subList(startIndex, endIndex + 1));
+        return new ArrayList<>(advertisingPackets.subList(startIndex, endIndex));
     }
 
 }

@@ -3,10 +3,8 @@ package com.nexenio.bleindoorpositioning;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
-import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.GenericBeaconFilter;
-import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
 import com.nexenio.bleindoorpositioning.location.LocationPredictor;
@@ -15,12 +13,13 @@ import com.nexenio.bleindoorpositioning.location.distance.DistanceUtil;
 import com.nexenio.bleindoorpositioning.location.multilateration.Multilateration;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class IndoorPositioning implements LocationProvider, BeaconUpdateListener {
@@ -34,27 +33,36 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public static final int ROOT_MEAN_SQUARE_THRESHOLD_MEDIUM = 10;
     public static final int ROOT_MEAN_SQUARE_THRESHOLD_LIGHT = 25;
 
-    public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
-    // set maximum distance to new location
-    private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
+    private static final int MINIMUM_BEACON_COUNT = 3; // multilateration requires at least 3 beacons
+    private static final int MAXIMUM_BEACON_COUNT = 10;
 
-    private static IndoorPositioning instance;
+    public static final double MAXIMUM_MOVEMENT_SPEED_NOT_SET = -1;
+    private double maximumMovementSpeed = MAXIMUM_MOVEMENT_SPEED_NOT_SET;
+    private double rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_LIGHT;
+    private int minimumRssiThreshold = -70;
+
+    private static volatile IndoorPositioning instance;
 
     private Location lastKnownLocation;
     private long maximumLocationUpdateInterval = UPDATE_INTERVAL_MEDIUM;
     private Set<LocationListener> locationListeners = new HashSet<>();
-    private BeaconFilter indoorPositioningBeaconFilter = createIndoorPositioningBeaconFilter();
+    private BeaconFilter indoorPositioningBeaconFilter = null;
     private GenericBeaconFilter usableIndoorPositioningBeaconFilter = createUsableIndoorPositioningBeaconFilter();
+
     private LocationPredictor locationPredictor = new LocationPredictor();
 
-    private IndoorPositioning() {
 
+    private IndoorPositioning() {
+        BeaconManager.registerBeaconUpdateListener(this);
     }
 
     public static IndoorPositioning getInstance() {
         if (instance == null) {
-            instance = new IndoorPositioning();
-            BeaconManager.registerBeaconUpdateListener(instance);
+            synchronized (IndoorPositioning.class) {
+                if (instance == null) {
+                    instance = new IndoorPositioning();
+                }
+            }
         }
         return instance;
     }
@@ -78,28 +86,34 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private void updateLocation() {
         List<Beacon> usableBeacons = getUsableBeacons(BeaconManager.getInstance().getBeaconMap().values());
 
-        if (usableBeacons.size() < 3) {
-            return; // multilateration requires at least 3 beacons
-        } else if (usableBeacons.size() > 3) {
-            usableBeacons.sort(Beacon.RssiComparator);
-            Collections.reverse(usableBeacons);
-            for (int beaconIndex = usableBeacons.size() - 1; beaconIndex >= 3; beaconIndex--) {
-                if (usableBeacons.get(beaconIndex).getFilteredRssi() < -70) {
-                    usableBeacons.remove(beaconIndex);
+        if (usableBeacons.size() < MINIMUM_BEACON_COUNT) {
+            return;
+        } else if (usableBeacons.size() > MINIMUM_BEACON_COUNT) {
+            Collections.sort(usableBeacons, Beacon.RssiComparator);
+            int maximumBeaconIndex = Math.min(MAXIMUM_BEACON_COUNT, usableBeacons.size());
+            int firstRemovableBeaconIndex = maximumBeaconIndex;
+            for (int beaconIndex = MINIMUM_BEACON_COUNT; beaconIndex < maximumBeaconIndex; beaconIndex++) {
+                if (usableBeacons.get(beaconIndex).getFilteredRssi() < minimumRssiThreshold) {
+                    firstRemovableBeaconIndex = beaconIndex;
+                    break;
                 }
             }
+            usableBeacons.subList(firstRemovableBeaconIndex, usableBeacons.size()).clear();
         }
 
         Multilateration multilateration = new Multilateration(usableBeacons);
-        Location location = multilateration.getLocation();
+        try {
+            Location location = multilateration.getLocation();
 
-        // The root mean square of multilateration is used to filter out inaccurate locations.
-        // Adjust value to allow location updates with higher deviation
-        if (multilateration.getRMS() < ROOT_MEAN_SQUARE_THRESHOLD_STRICT) {
-            locationPredictor.addLocation(location);
-            onLocationUpdated(getMeanLocation(2, TimeUnit.SECONDS));
+            // The root mean square of multilateration is used to filter out inaccurate locations.
+            // Adjust value to allow location updates with higher deviation
+            if (multilateration.getRMS() < rootMeanSquareThreshold) {
+                locationPredictor.addLocation(location);
+                onLocationUpdated(location);
+            }
+        } catch (TooManyEvaluationsException e) {
+            // see https://github.com/neXenio/BLE-Indoor-Positioning/issues/73
         }
-
     }
 
     public static <B extends Beacon> List<B> getUsableBeacons(Collection<B> availableBeacons) {
@@ -131,31 +145,12 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         return getInstance().locationListeners.remove(locationListener);
     }
 
-    public static IBeaconFilter createIndoorPositioningBeaconFilter() {
-        return new IBeaconFilter() {
-
-            private UUID legacyUuid = UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01");
-            private UUID indoorPositioningUuid = UUID.fromString("03253fdd-55cb-44c2-a1eb-80c8355f8291");
-
-            @Override
-            public boolean matches(IBeacon beacon) {
-                if (legacyUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                if (indoorPositioningUuid.equals(beacon.getProximityUuid())) {
-                    return true;
-                }
-                return false;
-            }
-        };
-    }
-
     public static GenericBeaconFilter<? extends Beacon> createUsableIndoorPositioningBeaconFilter() {
         return new GenericBeaconFilter<Beacon>() {
 
             @Override
             public boolean matches(Beacon beacon) {
-                if (!getInstance().indoorPositioningBeaconFilter.matches(beacon)) {
+                if (getInstance().indoorPositioningBeaconFilter != null && !getInstance().indoorPositioningBeaconFilter.matches(beacon)) {
                     return false;
                 }
                 if (!beacon.hasLocation()) {
@@ -173,6 +168,10 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     /*
         Getter & Setter
      */
+
+    public double getMaximumMovementSpeed() {
+        return maximumMovementSpeed;
+    }
 
     public void setMaximumMovementSpeed(double maximumMovementSpeed) {
         this.maximumMovementSpeed = maximumMovementSpeed;
@@ -194,4 +193,35 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         this.locationPredictor = locationPredictor;
     }
 
+    public BeaconFilter getIndoorPositioningBeaconFilter() {
+        return indoorPositioningBeaconFilter;
+    }
+
+    public void setIndoorPositioningBeaconFilter(BeaconFilter indoorPositioningBeaconFilter) {
+        this.indoorPositioningBeaconFilter = indoorPositioningBeaconFilter;
+    }
+
+    public GenericBeaconFilter getUsableIndoorPositioningBeaconFilter() {
+        return usableIndoorPositioningBeaconFilter;
+    }
+
+    public void setUsableIndoorPositioningBeaconFilter(GenericBeaconFilter usableIndoorPositioningBeaconFilter) {
+        this.usableIndoorPositioningBeaconFilter = usableIndoorPositioningBeaconFilter;
+    }
+
+    public void setRootMeanSquareThreshold(double rootMeanSquareThreshold) {
+        this.rootMeanSquareThreshold = rootMeanSquareThreshold;
+    }
+
+    public double getRootMeanSquareThreshold() {
+        return rootMeanSquareThreshold;
+    }
+
+    public int getMinimumRssiThreshold() {
+        return minimumRssiThreshold;
+    }
+
+    public void setMinimumRssiThreshold(int minimumRssiThreshold) {
+        this.minimumRssiThreshold = minimumRssiThreshold;
+    }
 }

@@ -4,6 +4,7 @@ import com.nexenio.bleindoorpositioning.location.distance.LocationDistanceCalcul
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Locale;
 
 /*
     decimal
@@ -26,20 +27,26 @@ import java.net.URISyntaxException;
 
 public class Location {
 
-    public static double VALUE_NOT_SET = 0;
+    public static final double VALUE_NOT_SET = 0;
 
     private double latitude = VALUE_NOT_SET;
     private double longitude = VALUE_NOT_SET;
 
     /**
-     * The altitude describes the distance to the sea level.
+     * The altitude describes the distance to the sea level in meters.
      */
     private double altitude = VALUE_NOT_SET;
 
     /**
-     * The elevation describes the relative height to the floor.
+     * The elevation describes the relative height to the floor in meters.
      */
     private double elevation = VALUE_NOT_SET;
+
+    /**
+     * The estimated accuracy of the location in meters (imagine a circle with this radius around
+     * the location).
+     */
+    private double accuracy = VALUE_NOT_SET;
 
     private long timestamp;
 
@@ -66,12 +73,13 @@ public class Location {
 
     public Location(Location location) {
         this(location.latitude, location.longitude, location.altitude, location.elevation);
+        this.accuracy = location.accuracy;
         this.timestamp = location.timestamp;
     }
 
     /**
-     * Calculates the distance between the current and the specified location in meters.
-     * Elevation / altitude will be ignored.
+     * Calculates the distance between the current and the specified location in meters. Elevation /
+     * altitude will be ignored.
      *
      * @return distance in meters
      */
@@ -113,7 +121,8 @@ public class Location {
     }
 
     /**
-     * Creates a copy of the current instance and calls {@link #shift(double, double)} on that copy.
+     * Creates a copy of the current instance and calls {@link #shift(double, double)} on that
+     * copy.
      *
      * @param distance in meters
      * @param angle    in degrees (0°-360°)
@@ -144,6 +153,10 @@ public class Location {
         return elevation != VALUE_NOT_SET && !Double.isNaN(elevation);
     }
 
+    public boolean hasAccuracy() {
+        return accuracy != VALUE_NOT_SET && !Double.isNaN(accuracy);
+    }
+
     public URI generateGoogleMapsUri() {
         try {
             return new URI("https://www.google.com/maps/search/?api=1&query=" +
@@ -159,13 +172,16 @@ public class Location {
             return "Empty location";
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("Latitude: ").append(latitude).append(" ");
-        sb.append("Longitude: ").append(longitude).append(" ");
+        sb.append("Latitude: ").append(latitude);
+        sb.append(" Longitude: ").append(longitude);
         if (hasAltitude()) {
-            sb.append("Altitude: ").append(altitude).append(" ");
+            sb.append(" Altitude: ").append(String.format(Locale.US, "%.2f", altitude)).append("m");
         }
         if (hasElevation()) {
-            sb.append("Elevation: ").append(elevation).append(" ");
+            sb.append(" Elevation: ").append(String.format(Locale.US, "%.2f", elevation)).append("m");
+        }
+        if (hasAccuracy()) {
+            sb.append(" Accuracy: ").append(String.format(Locale.US, "%.2f", accuracy)).append("m");
         }
         return sb.toString();
     }
@@ -198,7 +214,7 @@ public class Location {
             angle += 360;
         }
 
-        return angle;   // note that the angle can be '-0.0'
+        return angle; // note that the angle can be '-0.0'
     }
 
     /*
@@ -247,4 +263,11 @@ public class Location {
         this.elevation = elevation;
     }
 
+    public double getAccuracy() {
+        return accuracy;
+    }
+
+    public void setAccuracy(double accuracy) {
+        this.accuracy = accuracy;
+    }
 }

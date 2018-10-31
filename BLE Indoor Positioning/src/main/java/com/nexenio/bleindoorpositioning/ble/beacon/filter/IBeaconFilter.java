@@ -2,6 +2,9 @@ package com.nexenio.bleindoorpositioning.ble.beacon.filter;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -10,7 +13,7 @@ import java.util.UUID;
 
 public class IBeaconFilter<B extends IBeacon> extends GenericBeaconFilter<B> {
 
-    protected UUID proximityUuid;
+    protected final List<UUID> proximityUuids = new ArrayList<>();
     protected int major;
     protected int minor;
 
@@ -18,13 +21,34 @@ public class IBeaconFilter<B extends IBeacon> extends GenericBeaconFilter<B> {
     protected boolean matchMajor;
     protected boolean matchMinor;
 
+    public IBeaconFilter() {
+    }
+
+    public IBeaconFilter(UUID... proximityUuids) {
+        this(Arrays.asList(proximityUuids));
+    }
+
+    public IBeaconFilter(List<UUID> proximityUuids) {
+        this.proximityUuids.addAll(proximityUuids);
+        matchProximityUuid = true;
+    }
+
     @Override
     public boolean matches(B beacon) {
         if (!super.matches(beacon)) {
             return false;
         }
         if (matchProximityUuid) {
-            if (!proximityUuid.equals(beacon.getProximityUuid())) {
+            boolean uuidMatches = false;
+            synchronized (proximityUuids) {
+                for (UUID proximityUuid : proximityUuids) {
+                    if (proximityUuid.equals(beacon.getProximityUuid())) {
+                        uuidMatches = true;
+                        break;
+                    }
+                }
+            }
+            if (!uuidMatches) {
                 return false;
             }
         }
@@ -45,13 +69,20 @@ public class IBeaconFilter<B extends IBeacon> extends GenericBeaconFilter<B> {
         Getter & Setter
      */
 
-    public UUID getProximityUuid() {
-        return proximityUuid;
+    public List<UUID> getProximityUuids() {
+        return proximityUuids;
     }
 
-    public void setProximityUuid(UUID proximityUuid) {
-        this.proximityUuid = proximityUuid;
-        matchProximityUuid = true;
+    public void setProximityUuids(UUID... proximityUuids) {
+        setProximityUuids(Arrays.asList(proximityUuids));
+    }
+
+    public void setProximityUuids(List<UUID> proximityUuids) {
+        synchronized (this.proximityUuids) {
+            this.proximityUuids.clear();
+            this.proximityUuids.addAll(proximityUuids);
+            matchProximityUuid = true;
+        }
     }
 
     public int getMajor() {
