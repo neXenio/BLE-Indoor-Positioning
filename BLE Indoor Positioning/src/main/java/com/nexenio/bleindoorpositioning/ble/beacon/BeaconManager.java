@@ -36,7 +36,6 @@ public class BeaconManager {
 
     private static final WindowFilter meanFilter = new MeanFilter(15, TimeUnit.SECONDS);
 
-
     private BeaconManager() {
 
     }
