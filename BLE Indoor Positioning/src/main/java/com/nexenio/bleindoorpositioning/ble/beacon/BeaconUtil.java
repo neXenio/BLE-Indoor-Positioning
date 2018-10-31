@@ -140,7 +140,7 @@ public abstract class BeaconUtil {
      */
     public static int calculateRssi(float distance, float calibratedRssi, float pathLossParameter) {
         if (distance < 0) {
-            throw new ArithmeticException("Distance must be greater than 0");
+            throw new IllegalArgumentException("Distance must be greater than 0");
         }
         return (int) (calibratedRssi - ((Math.log(distance) / Math.log(10)) * (10 * pathLossParameter)));
     }

@@ -115,7 +115,7 @@ public class BeaconUtilTest {
 
     @Test
     public void calculateRssi_negativeDistance_throwsException() {
-        exception.expect(ArithmeticException.class);
+        exception.expect(IllegalArgumentException.class);
         BeaconUtil.calculateRssi(-1, -35, 2F);
     }
 
