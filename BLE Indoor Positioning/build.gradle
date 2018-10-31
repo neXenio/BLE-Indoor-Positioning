@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.7.3"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.8.1"
     }
 }
 
@@ -148,7 +148,7 @@ release {
 }
 
 // deploy artifacts when releasing
-//afterReleaseBuild.dependsOn bintrayUpload
+afterReleaseBuild.dependsOn bintrayUpload
 
 jacocoTestReport {
     reports {
