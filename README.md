@@ -12,12 +12,11 @@ This repo contains a [Java library][package_core] that is capable of estimating 
 
 #### Gradle
 
-*Bintray releases are currently having issues, please use JitPack for now.*
 Release artefacts are available through [Bintray][bintray].
 
 ```groovy
 dependencies {
-    compile 'com.nexenio.bleindoorpositioning:core:0.3.8'
+    compile 'com.nexenio.bleindoorpositioning:core:0.3.0'
 }
 ```
 
@@ -40,7 +39,7 @@ dependencies {
 <dependency>
   <groupId>com.nexenio.bleindoorpositioning</groupId>
   <artifactId>core</artifactId>
-  <version>0.3.8</version>
+  <version>0.3.0</version>
 </dependency>
 ```
 
