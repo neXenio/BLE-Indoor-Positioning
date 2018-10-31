@@ -133,7 +133,10 @@ public abstract class BeaconUtil {
      * @param pathLossParameter the path-loss adjustment parameter
      */
     public static int calculateRssi(float distance, float calibratedRssi, float pathLossParameter) {
-        return (int) ((Math.log(distance) / Math.log(10)) * (10 * pathLossParameter) + calibratedRssi);
+        if (distance < 0) {
+            throw new IllegalArgumentException("Distance must be greater than 0");
+        }
+        return (int) (calibratedRssi - ((Math.log(distance) / Math.log(10)) * (10 * pathLossParameter)));
     }
 
     /**
