@@ -4,10 +4,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by steppschuh on 24.11.17.
@@ -142,7 +139,10 @@ public abstract class BeaconUtil {
      * @param pathLossParameter the path-loss adjustment parameter
      */
     public static int calculateRssi(float distance, float calibratedRssi, float pathLossParameter) {
-        return (int) ((Math.log(distance) / Math.log(10)) * (10 * pathLossParameter) + calibratedRssi);
+        if (distance < 0) {
+            throw new ArithmeticException("Distance must be greater than 0");
+        }
+        return (int) (calibratedRssi - ((Math.log(distance) / Math.log(10)) * (10 * pathLossParameter)));
     }
 
     /**
