@@ -24,12 +24,14 @@ public class LocationAnimator implements LocationProvider {
 
     private ValueAnimator latitudeAnimator;
     private ValueAnimator longitudeAnimator;
+    private ValueAnimator accuracyAnimator;
     private Animator.AnimatorListener animatorListener;
     private ValueAnimator.AnimatorUpdateListener animatorUpdateListener;
     private long animationDuration = ANIMATION_DURATION_LONG;
 
     private double latitudeDelta;
     private double longitudeDelta;
+    private double accuracyDelta;
 
     private LocationListener locationListener;
 
@@ -39,6 +41,7 @@ public class LocationAnimator implements LocationProvider {
         this.currentLocation = new Location(originLocation);
         latitudeDelta = targetLocation.getLatitude() - originLocation.getLatitude();
         longitudeDelta = targetLocation.getLongitude() - originLocation.getLongitude();
+        accuracyDelta = targetLocation.getAccuracy() - originLocation.getAccuracy();
         setupAnimators();
     }
 
@@ -52,6 +55,7 @@ public class LocationAnimator implements LocationProvider {
         animatorUpdateListener = createAnimatorUpdateListener();
         latitudeAnimator = createAnimator();
         longitudeAnimator = createAnimator();
+        accuracyAnimator = createAnimator();
     }
 
     private ValueAnimator createAnimator() {
@@ -97,6 +101,8 @@ public class LocationAnimator implements LocationProvider {
                     currentLocation.setLatitude(originLocation.getLatitude() + (latitudeDelta * value));
                 } else if (valueAnimator == longitudeAnimator) {
                     currentLocation.setLongitude(originLocation.getLongitude() + (longitudeDelta * value));
+                } else if (valueAnimator == accuracyAnimator) {
+                    currentLocation.setAccuracy(originLocation.getAccuracy() + (accuracyDelta * value));
                 }
                 onCurrentLocationUpdated();
             }
@@ -106,11 +112,13 @@ public class LocationAnimator implements LocationProvider {
     public void start() {
         latitudeAnimator.start();
         longitudeAnimator.start();
+        accuracyAnimator.start();
     }
 
     public void cancel() {
         latitudeAnimator.cancel();
         longitudeAnimator.cancel();
+        accuracyAnimator.cancel();
     }
 
     private void onCurrentLocationUpdated() {
@@ -158,6 +166,14 @@ public class LocationAnimator implements LocationProvider {
 
     public void setLongitudeAnimator(ValueAnimator longitudeAnimator) {
         this.longitudeAnimator = longitudeAnimator;
+    }
+
+    public ValueAnimator getAccuracyAnimator() {
+        return accuracyAnimator;
+    }
+
+    public void setAccuracyAnimator(ValueAnimator accuracyAnimator) {
+        this.accuracyAnimator = accuracyAnimator;
     }
 
     public long getAnimationDuration() {

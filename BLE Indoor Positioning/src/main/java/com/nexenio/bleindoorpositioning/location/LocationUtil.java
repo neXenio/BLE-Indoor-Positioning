@@ -29,16 +29,19 @@ public class LocationUtil {
             double longitudeSum = 0;
             double altitudeSum = 0;
             double elevationSum = 0;
+            double accuracySum = 0;
             for (Location location : locationList) {
                 latitudeSum += location.getLatitude();
                 longitudeSum += location.getLongitude();
                 altitudeSum += location.getAltitude();
                 elevationSum += location.getElevation();
+                accuracySum += location.getAccuracy();
             }
             meanLocation.setLatitude(latitudeSum / locationList.size());
             meanLocation.setLongitude(longitudeSum / locationList.size());
             meanLocation.setAltitude(altitudeSum / locationList.size());
             meanLocation.setElevation(elevationSum / locationList.size());
+            meanLocation.setAccuracy(accuracySum / locationList.size());
             return meanLocation;
         }
     }
