@@ -3,7 +3,10 @@ package com.nexenio.bleindoorpositioning.ble.advertising;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.UUID;
 
 /**
  * For advertising packets as specified in Googles <a href="https://github.com/google/eddystone/blob/master/protocol-specification.md">Protocol
@@ -11,13 +14,14 @@ import java.util.Arrays;
  */
 
 public class EddystoneAdvertisingPacket extends AdvertisingPacket {
-
     private static final byte[] EXPECTED_FLAGS = {0x02, 0x01, 0x06};
     private static final byte[] EXPECTED_EDDYSTONE_UUID = {0x03, 0x03, (byte) 0xAA, (byte) 0xFE};
 
     private byte[] flagsBytes;
     private byte[] eddystoneUuidBytes;
     private byte[] frameBytes;
+
+    private byte measuredPowerByte;
 
 
     public EddystoneAdvertisingPacket(byte[] data) {
@@ -47,17 +51,18 @@ public class EddystoneAdvertisingPacket extends AdvertisingPacket {
         }
         return true;
     }
-
     public static byte[] getFlags(byte[] data) {
         return Arrays.copyOfRange(data, 0, 3);
     }
-
     public static byte[] getEddystoneUuid(byte[] data) {
         return Arrays.copyOfRange(data, 3, 3 + 4);
     }
-
     public static byte[] getFrameBytes(byte[] data) {
         return Arrays.copyOfRange(data, 7, data.length);
+    }
+
+    public static byte getMeasuredPowerBytes(byte[] data) {
+        return data[1];
     }
 
     /*
@@ -70,7 +75,6 @@ public class EddystoneAdvertisingPacket extends AdvertisingPacket {
         }
         return flagsBytes;
     }
-
     public void setFlagsBytes(byte[] flagsBytes) {
         this.flagsBytes = flagsBytes;
     }
@@ -81,7 +85,6 @@ public class EddystoneAdvertisingPacket extends AdvertisingPacket {
         }
         return eddystoneUuidBytes;
     }
-
     public void setEddystoneUuidBytes(byte[] eddystoneUuidBytes) {
         this.eddystoneUuidBytes = eddystoneUuidBytes;
     }
@@ -92,8 +95,18 @@ public class EddystoneAdvertisingPacket extends AdvertisingPacket {
         }
         return frameBytes;
     }
-
     public void setFrameBytes(byte[] frameBytes) {
         this.frameBytes = frameBytes;
     }
+
+    public byte getMeasuredPowerByte() {
+        if (measuredPowerByte == 0) {
+            measuredPowerByte = getMeasuredPowerBytes(data);
+        }
+        return measuredPowerByte;
+    }
+    public void setMeasuredPowerByte(byte measuredPowerByte) {
+        this.measuredPowerByte = measuredPowerByte;
+    }
+
 }
