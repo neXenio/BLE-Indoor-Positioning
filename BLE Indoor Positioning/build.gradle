@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.6.0"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.7.5"
     }
 }
 
@@ -21,14 +21,15 @@ apply plugin: 'jacoco'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.lemmingapex.trilateration:trilateration:1.0.2'
+    testCompile 'net.steppschuh.markdowngenerator:markdowngenerator:1.3.0.0'
     testImplementation 'junit:junit:4.12'
 }
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
-def releaseVersionCode = 6
-def releaseVersionName = "0.3.0"
+def releaseVersionCode = 14
+def releaseVersionName = "0.3.8"
 
 def projectName = 'BLE Indoor Positioning'
 def projectDescription = 'Java library for indoor positioing using bluetooth beacons'

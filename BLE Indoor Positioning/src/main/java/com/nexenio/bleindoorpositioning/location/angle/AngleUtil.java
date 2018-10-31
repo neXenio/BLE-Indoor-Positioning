@@ -11,12 +11,11 @@ import java.util.List;
 public final class AngleUtil {
 
     /**
-     * Calculates the mean by converting all angles to corresponding points on the
-     * unit circle (i.e. alpha to (cos(alpha), sin(alpha))).
+     * Calculates the mean by converting all angles to corresponding points on the unit circle (i.e.
+     * alpha to (cos(alpha), sin(alpha))).
      *
-     * Caution: circular mean is NOT the arithmetic mean
-     * Example: the arithmetic mean of the three angles 0°, 0° and 90° is (0+0+90)/3 = 30°,
-     * but the vector mean is 26.565°
+     * Caution: circular mean is NOT the arithmetic mean Example: the arithmetic mean of the three
+     * angles 0°, 0° and 90° is (0+0+90)/3 = 30°, but the vector mean is 26.565°
      *
      * @see <a href="https://en.wikipedia.org/wiki/Mean_of_circular_quantities">Circle Mean</a>
      */
@@ -37,8 +36,8 @@ public final class AngleUtil {
     }
 
     /**
-     * Calculates the mean by converting all angles to corresponding points on the
-     * unit circle (i.e. alpha to (cos(alpha), sin(alpha))).
+     * Calculates the mean by converting all angles to corresponding points on the unit circle (i.e.
+     * alpha to (cos(alpha), sin(alpha))).
      *
      * @see <a href="https://en.wikipedia.org/wiki/Mean_of_circular_quantities">Circle Mean</a>
      */

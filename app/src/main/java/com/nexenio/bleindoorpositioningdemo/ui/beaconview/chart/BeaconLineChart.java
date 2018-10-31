@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
@@ -30,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class BeaconLineChart extends BeaconChart {
 
     public static final long MINIMUM_WINDOW_LENGTH_FREQUENCY = TimeUnit.SECONDS.toMillis(10);
+    public static final long MINIMUM_WINDOW_LENGTH_VARIANCE = TimeUnit.SECONDS.toMillis(10);
 
     protected long windowLength = WindowFilter.DEFAULT_DURATION;
 
@@ -177,6 +179,12 @@ public class BeaconLineChart extends BeaconChart {
                 yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, -100);
                 break;
             }
+            case VALUE_TYPE_RSSI_FILTERED: {
+                yAxisLabel = getContext().getString(R.string.axis_label_rssi_filtered);
+                yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 0);
+                yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, -100);
+                break;
+            }
             case VALUE_TYPE_DISTANCE: {
                 yAxisLabel = getContext().getString(R.string.axis_label_distance);
                 yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 25);
@@ -186,6 +194,12 @@ public class BeaconLineChart extends BeaconChart {
             case VALUE_TYPE_FREQUENCY: {
                 yAxisLabel = getContext().getString(R.string.axis_label_frequency);
                 yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 10);
+                yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, 0);
+                break;
+            }
+            case VALUE_TYPE_VARIANCE: {
+                yAxisLabel = getContext().getString(R.string.axis_label_variance);
+                yAxisMaximumAnimator = startValueAnimator(yAxisMaximumAnimator, 100);
                 yAxisMinimumAnimator = startValueAnimator(yAxisMinimumAnimator, 0);
                 break;
             }
@@ -383,13 +397,15 @@ public class BeaconLineChart extends BeaconChart {
     protected float processReturnValue(Beacon beacon, AdvertisingPacket advertisingPacket, float rssi) {
         switch (valueType) {
             case VALUE_TYPE_RSSI: {
+                return advertisingPacket.getRssi();
+            }
+            case VALUE_TYPE_RSSI_FILTERED: {
                 return rssi;
             }
             case VALUE_TYPE_DISTANCE: {
                 return BeaconDistanceCalculator.calculateDistanceTo(beacon, rssi);
             }
             case VALUE_TYPE_FREQUENCY: {
-                // make sure that the window size is at least 10 seconds when we're looking for the frequency
                 long windowLength = Math.max(this.windowLength, MINIMUM_WINDOW_LENGTH_FREQUENCY);
                 List<AdvertisingPacket> recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
                         advertisingPacket.getTimestamp() - windowLength,
@@ -397,6 +413,15 @@ public class BeaconLineChart extends BeaconChart {
                 );
                 // convert frequency from milliseconds to seconds to receive Hertz
                 return TimeUnit.SECONDS.toMillis(1) * (recentAdvertisingPackets.size() / (float) windowLength);
+            }
+            case VALUE_TYPE_VARIANCE: {
+                long windowLength = Math.max(this.windowLength, MINIMUM_WINDOW_LENGTH_VARIANCE);
+                List<AdvertisingPacket> recentAdvertisingPackets = beacon.getAdvertisingPacketsBetween(
+                        advertisingPacket.getTimestamp() - windowLength,
+                        advertisingPacket.getTimestamp()
+                );
+                int[] recentRssis = AdvertisingPacketUtil.getRssisFromAdvertisingPackets(recentAdvertisingPackets);
+                return AdvertisingPacketUtil.calculateVariance(recentRssis);
             }
         }
         return 0;

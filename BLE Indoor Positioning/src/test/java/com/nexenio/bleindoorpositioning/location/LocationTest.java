@@ -28,6 +28,23 @@ public class LocationTest {
     public static final int DISTANCE_NYC_BERLIN = 6385 * 1000;
 
     @Test
+    public void constructor_location_setsAllFields() {
+        Location originalLocation = new Location(52.5200066, 13.404954);
+        originalLocation.setElevation(2.5);
+        originalLocation.setAltitude(123);
+        originalLocation.setAccuracy(5);
+
+        Location newLocation = new Location(originalLocation);
+        assertEquals(originalLocation.getLatitude(), newLocation.getLatitude(), 0.1);
+        assertEquals(originalLocation.getLongitude(), newLocation.getLongitude(), 0.1);
+        assertEquals(originalLocation.getAltitude(), newLocation.getAltitude(), 0.1);
+        assertEquals(originalLocation.getElevation(), newLocation.getElevation(), 0.1);
+        assertEquals(originalLocation.getAccuracy(), newLocation.getAccuracy(), 0.1);
+        assertEquals(originalLocation.getTimestamp(), newLocation.getTimestamp(), 0.1);
+        assertEquals(originalLocation.generateGoogleMapsUri(), newLocation.generateGoogleMapsUri());
+    }
+
+    @Test
     public void getAngleTo_validLocations_correctAngles() throws Exception {
         // expected values were taken from <a href="http://www.igismap.com/map-tool/bearing-angle">here</a>.
         double angle;

@@ -7,6 +7,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BeaconManager {
 
-    private static BeaconManager instance;
+    private static volatile BeaconManager instance;
 
     private BeaconFactory beaconFactory = new BeaconFactory();
 
@@ -27,7 +28,7 @@ public class BeaconManager {
 
     private Map<String, Beacon> beaconMap = new LinkedHashMap<>();
 
-    private Set<BeaconUpdateListener> beaconUpdateListeners = new HashSet<>();
+    private final Set<BeaconUpdateListener> beaconUpdateListeners = new HashSet<>();
 
     private long inactivityDuration = TimeUnit.MINUTES.toMillis(3);
 
@@ -41,7 +42,11 @@ public class BeaconManager {
 
     public static BeaconManager getInstance() {
         if (instance == null) {
-            instance = new BeaconManager();
+            synchronized (BeaconManager.class) {
+                if (instance == null) {
+                    instance = new BeaconManager();
+                }
+            }
         }
         return instance;
     }
@@ -97,17 +102,27 @@ public class BeaconManager {
     }
 
     private void notifyBeaconUpdateListeners(Beacon beacon) {
-        for (BeaconUpdateListener beaconUpdateListener : beaconUpdateListeners) {
-            beaconUpdateListener.onBeaconUpdated(beacon);
+        synchronized (beaconUpdateListeners) {
+            for (BeaconUpdateListener beaconUpdateListener : beaconUpdateListeners) {
+                try {
+                    beaconUpdateListener.onBeaconUpdated(beacon);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
     public static boolean registerBeaconUpdateListener(BeaconUpdateListener beaconUpdateListener) {
-        return getInstance().beaconUpdateListeners.add(beaconUpdateListener);
+        synchronized (getInstance().beaconUpdateListeners) {
+            return getInstance().beaconUpdateListeners.add(beaconUpdateListener);
+        }
     }
 
     public static boolean unregisterBeaconUpdateListener(BeaconUpdateListener beaconUpdateListener) {
-        return getInstance().beaconUpdateListeners.remove(beaconUpdateListener);
+        synchronized (getInstance().beaconUpdateListeners) {
+            return getInstance().beaconUpdateListeners.remove(beaconUpdateListener);
+        }
     }
 
     public static String getBeaconKey(String macAddress, AdvertisingPacket advertisingPacket) {
@@ -143,7 +158,8 @@ public class BeaconManager {
         BeaconManager instance = getInstance();
         AdvertisingPacket latestAdvertisingPacket;
         List<String> inactiveBeaconKeys = new ArrayList<>();
-        for (Map.Entry<String, Beacon> beaconEntry : instance.beaconMap.entrySet()) {
+        for (Iterator<Map.Entry<String, Beacon>> beaconMapIterator = instance.beaconMap.entrySet().iterator(); beaconMapIterator.hasNext(); ) {
+            Map.Entry<String, Beacon> beaconEntry = beaconMapIterator.next();
             latestAdvertisingPacket = beaconEntry.getValue().getLatestAdvertisingPacket();
             if (latestAdvertisingPacket == null || latestAdvertisingPacket.getTimestamp() < minimumAdvertisingTimestamp) {
                 inactiveBeaconKeys.add(beaconEntry.getKey());

@@ -8,8 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A factory that can create instances of {@link Beacon}s based on a
- * specified {@link AdvertisingPacket}.
+ * A factory that can create instances of {@link Beacon}s based on a specified {@link
+ * AdvertisingPacket}.
  *
  * You may extend this factory by using the {@link #addBeaconClass(Class, Class)} method.
  */
@@ -27,8 +27,8 @@ public class BeaconFactory {
     }
 
     /**
-     * Will create a new instance of a class extending {@link Beacon} that matches
-     * the specified {@link AdvertisingPacket}.
+     * Will create a new instance of a class extending {@link Beacon} that matches the specified
+     * {@link AdvertisingPacket}.
      *
      * @param advertisingPacket one of the advertising packets that the desired beacon advertised
      */

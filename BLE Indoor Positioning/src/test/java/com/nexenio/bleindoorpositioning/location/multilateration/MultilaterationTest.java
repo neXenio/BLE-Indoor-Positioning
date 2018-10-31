@@ -43,21 +43,24 @@ public class MultilaterationTest {
 
     @Test
     public void findOptimum_realLocations_matchingOptimum() throws Exception {
-        double[] expectedCenter = new double[]{6893722.565857311, 1473817.181344815}; // SOCCER_FIELD_CENTER
+        double[] expectedCenter = new double[]{3786292.474596871, 890822.9600122868, 5037857.368752121}; // SOCCER_FIELD_CENTER
+
         double[][] positions = new double[][]{
-                {6893765.004164174, 1473724.674847966}, // SOCCER_FIELD_TOP_LEFT
-                {6893789.51604695, 1473894.4370714256}, // SOCCER_FIELD_TOP_RIGHT
-                {6893679.213163125, 1473911.580273008}, // SOCCER_FIELD_BOTTOM_RIGHT
-                {6893654.335773319, 1473740.259576677} // SOCCER_FIELD_BOTTOM_LEFT
+                {3786285.539289399, 890763.3735945863, 5037873.011713729},  // SOCCER_FIELD_TOP_LEFT
+                {3786249.7802358735, 890861.384850748, 5037882.492256797},  // SOCCER_FIELD_TOP_RIGHT
+                {3786335.051375847, 890784.6461780358, 5037832.312756101},  // SOCCER_FIELD_BOTTOM_LEFT
+                {3786298.9489194616, 890883.3452167381, 5037841.928865821}  // SOCCER_FIELD_BOTTOM_RIGHT
+
         };
-        double distance = 125.095963; // distance from soccer field center to any edge
+        double distance = 62.384073723011014; // distance from soccer field center to any edge
         double[] distances = new double[]{distance, distance, distance, distance};
 
         LeastSquaresOptimizer.Optimum optimum = Multilateration.findOptimum(positions, distances);
         double[] actualCenter = optimum.getPoint().toArray();
 
-        assertEquals(expectedCenter[0], actualCenter[0], 5);
-        assertEquals(expectedCenter[1], actualCenter[1], 5);
+        assertEquals(expectedCenter[0], actualCenter[0], 1);
+        assertEquals(expectedCenter[1], actualCenter[1], 1);
+        assertEquals(expectedCenter[2], actualCenter[2], 1);
 
         Location actualCenterLocation = Multilateration.getLocation(optimum);
         double error = actualCenterLocation.getDistanceTo(LocationTest.SOCCER_FIELD_CENTER);

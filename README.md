@@ -4,6 +4,8 @@
 
 This repo contains a [Java library][package_core] that is capable of estimating locations based on advertising packets received from Bluetooth beacons. It also contains an [Android app][package_app] that uses this library to visualize beacon and location data.
 
+![Demo App Screen Recording](https://raw.githubusercontent.com/wiki/neXenio/BLE-Indoor-Positioning/images/demo-app/demo_app.gif)
+
 # Usage
 
 ## Integration
@@ -14,7 +16,7 @@ Release artefacts are available through [Bintray][bintray].
 
 ```groovy
 dependencies {
-    compile 'com.nexenio.bleindoorpositioning:core:0.2.0'
+    compile 'com.nexenio.bleindoorpositioning:core:0.3.8'
 }
 ```
 
@@ -37,7 +39,7 @@ dependencies {
 <dependency>
   <groupId>com.nexenio.bleindoorpositioning</groupId>
   <artifactId>core</artifactId>
-  <version>0.2.0</version>
+  <version>0.3.8</version>
 </dependency>
 ```
 

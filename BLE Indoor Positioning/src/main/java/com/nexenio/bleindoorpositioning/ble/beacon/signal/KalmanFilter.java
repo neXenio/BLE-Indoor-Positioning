@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
 public class KalmanFilter extends WindowFilter {
 
     /**
-     * We use a low value for the process noise (i.e. 0.008).
-     * We assume that most of the noise is caused by the measurements.
+     * We use a low value for the process noise (i.e. 0.008). We assume that most of the noise is
+     * caused by the measurements.
      **/
     private static float PROCESS_NOISE_DEFAULT = 0.008f;
 

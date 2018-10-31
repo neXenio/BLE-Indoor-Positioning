@@ -10,10 +10,19 @@ import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 
 public abstract class BeaconDistanceCalculator {
 
+    /**
+     * Different Path Loss Exponent parameters for different environments.
+     *
+     * @see <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model"></a>
+     */
     public static final float PATH_LOSS_PARAMETER_OPEN_SPACE = 2;
     public static final float PATH_LOSS_PARAMETER_INDOOR = 1.7f;
+    public static final float PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION = 3f;
 
+    public static final int CALIBRATED_RSSI_AT_ONE_METER = -62;
     public static final int SIGNAL_LOSS_AT_ONE_METER = -41;
+
+    private static float pathLossParameter = PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION;
 
     /**
      * Calculates the distance to the specified beacon using the <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
@@ -24,18 +33,22 @@ public abstract class BeaconDistanceCalculator {
     }
 
     /**
-     * Use this method to remove the altitude from the distance to the beacon. Calculation based on
-     * Pythagoras with altitude to calculate more accurate distance to the beacon, if the distance
-     * is double the altitude. The altitude expected refers to the distance above the floor ground,
-     * rather than the altitude above sea level.
+     * Use this method to remove the elevation delta from the distance between device and beacon.
+     * Calculation based on Pythagoras to calculate distance on the floor (2D) to the beacon, if the
+     * distance is double the elevation delta. The elevation expected refers to the distance above
+     * the floor ground, rather than the altitude above sea level.
      */
-    public static float calculateDistanceWithoutAltitudeDeltaToFloor(Beacon beacon, float rssi) {
-        double altitude = beacon.getLocation().getAltitude();
+    public static float calculateDistanceWithoutElevationDeltaToDevice(Beacon beacon, float rssi, double deviceElevation) {
         float distance = calculateDistanceTo(beacon, rssi);
-        // distance should be double of the altitude to make pythagoras meaningful
-        if (altitude > 0 && distance > (altitude * 2)) {
-            double delta = Math.pow(distance, 2) - Math.pow(altitude, 2);
-            return (float) Math.sqrt(delta);
+        if (beacon.hasLocation() && beacon.getLocation().hasElevation()) {
+            double elevationDelta = Math.abs(beacon.getLocation().getElevation() - deviceElevation);
+            // distance should be double of the elevationDelta to make pythagoras meaningful
+            if (elevationDelta > 0 && distance > (elevationDelta * 2)) {
+                double delta = Math.pow(distance, 2) - Math.pow(elevationDelta, 2);
+                return (float) Math.sqrt(delta);
+            } else {
+                return distance;
+            }
         } else {
             return distance;
         }
@@ -46,7 +59,7 @@ public abstract class BeaconDistanceCalculator {
      * path loss model</a>.
      */
     public static float calculateDistanceTo(Beacon beacon, float rssi) {
-        return calculateDistance(rssi, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), PATH_LOSS_PARAMETER_INDOOR);
+        return calculateDistance(rssi, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), pathLossParameter);
     }
 
     /**
@@ -59,15 +72,19 @@ public abstract class BeaconDistanceCalculator {
      * @param pathLossParameter  the path-loss adjustment parameter
      */
     public static float calculateDistance(float rssi, float calibratedRssi, int calibratedDistance, float pathLossParameter) {
+        return calculateDistance(rssi, getCalibratedRssiAtOneMeter(calibratedRssi, calibratedDistance), pathLossParameter);
+    }
+
+    public static float getCalibratedRssiAtOneMeter(float calibratedRssi, float calibratedDistance) {
         float calibratedRssiAtOneMeter;
         if (calibratedDistance == IBeacon.CALIBRATION_DISTANCE_DEFAULT) {
             calibratedRssiAtOneMeter = calibratedRssi;
         } else if (calibratedDistance == Eddystone.CALIBRATION_DISTANCE_DEFAULT) {
             calibratedRssiAtOneMeter = calibratedRssi + SIGNAL_LOSS_AT_ONE_METER;
         } else {
-            calibratedRssiAtOneMeter = -62;
+            calibratedRssiAtOneMeter = CALIBRATED_RSSI_AT_ONE_METER;
         }
-        return calculateDistance(rssi, calibratedRssiAtOneMeter, pathLossParameter);
+        return calibratedRssiAtOneMeter;
     }
 
     /**
@@ -82,4 +99,11 @@ public abstract class BeaconDistanceCalculator {
         return (float) Math.pow(10, (calibratedRssi - rssi) / (10 * pathLossParameter));
     }
 
+    public static void setPathLossParameter(float pathLossParameter) {
+        BeaconDistanceCalculator.pathLossParameter = pathLossParameter;
+    }
+
+    public static float getPathLossParameter() {
+        return BeaconDistanceCalculator.pathLossParameter;
+    }
 }
