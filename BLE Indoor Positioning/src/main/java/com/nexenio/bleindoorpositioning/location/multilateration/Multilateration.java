@@ -66,7 +66,9 @@ public class Multilateration {
 
     public static Location getLocation(LeastSquaresOptimizer.Optimum optimum) {
         double[] centroid = optimum.getPoint().toArray();
-        return SphericalMercatorProjection.ecefToLocation(centroid);
+        Location location = SphericalMercatorProjection.ecefToLocation(centroid);
+        location.setAccuracy(Math.sqrt(optimum.getRMS())); // TODO: evaluate if this is meaningful
+        return location;
     }
 
     /**

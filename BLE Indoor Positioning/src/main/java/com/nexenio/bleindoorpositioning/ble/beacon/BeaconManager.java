@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BeaconManager {
 
-    private static BeaconManager instance;
+    private static volatile BeaconManager instance;
 
     private BeaconFactory beaconFactory = new BeaconFactory();
 
@@ -42,7 +42,11 @@ public class BeaconManager {
 
     public static BeaconManager getInstance() {
         if (instance == null) {
-            instance = new BeaconManager();
+            synchronized (BeaconManager.class) {
+                if (instance == null) {
+                    instance = new BeaconManager();
+                }
+            }
         }
         return instance;
     }

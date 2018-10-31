@@ -41,7 +41,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private double rootMeanSquareThreshold = ROOT_MEAN_SQUARE_THRESHOLD_LIGHT;
     private int minimumRssiThreshold = -70;
 
-    private static IndoorPositioning instance;
+    private static volatile IndoorPositioning instance;
 
     private Location lastKnownLocation;
     private long maximumLocationUpdateInterval = UPDATE_INTERVAL_MEDIUM;
@@ -51,14 +51,18 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
     private LocationPredictor locationPredictor = new LocationPredictor();
 
-    private IndoorPositioning() {
 
+    private IndoorPositioning() {
+        BeaconManager.registerBeaconUpdateListener(this);
     }
 
     public static IndoorPositioning getInstance() {
         if (instance == null) {
-            instance = new IndoorPositioning();
-            BeaconManager.registerBeaconUpdateListener(instance);
+            synchronized (IndoorPositioning.class) {
+                if (instance == null) {
+                    instance = new IndoorPositioning();
+                }
+            }
         }
         return instance;
     }
