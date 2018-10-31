@@ -222,8 +222,13 @@ public class BluetoothClient {
         }
         return new IBeaconLocationProvider<IBeacon>(iBeacon) {
             @Override
-            public void updateLocation() {
+            protected void updateLocation() {
                 this.location = beaconLocation;
+            }
+
+            @Override
+            protected boolean canUpdateLocation() {
+                return true;
             }
         };
     }

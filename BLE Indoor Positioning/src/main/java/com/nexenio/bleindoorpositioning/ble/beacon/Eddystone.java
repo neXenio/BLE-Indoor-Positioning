@@ -18,7 +18,17 @@ public class Eddystone<P extends EddystoneAdvertisingPacket> extends Beacon<P> {
 
     @Override
     public BeaconLocationProvider<Eddystone<P>> createLocationProvider() {
-        return new EddystoneLocationProvider<>(this);
+        return new EddystoneLocationProvider<Eddystone<P>>(this) {
+            @Override
+            protected void updateLocation() {
+                // nope
+            }
+
+            @Override
+            protected boolean canUpdateLocation() {
+                return false;
+            }
+        };
     }
 
 }
