@@ -137,19 +137,22 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
     }
 
     public static int getMajor(byte[] majorBytes) {
-        return getUnsignedInt(majorBytes);
+        return getInt(majorBytes);
     }
 
     public static int getMinor(byte[] minorBytes) {
-        return getUnsignedInt(minorBytes);
+        return getInt(minorBytes);
     }
 
-    public static int getUnsignedInt(byte[] data) {
-        if (data.length == 2) {
-            return ByteBuffer.wrap(new byte[]{data[1], data[0], 0, 0}).order(ByteOrder.LITTLE_ENDIAN).getInt();
-        } else {
-            return ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getInt();
-        }
+    /**
+     * According to the iBeacon specification, minor and major are unsigned integer values between 0
+     * and 65535 (2 bytes each).
+     *
+     * @param data the minor or major bytes (2 bytes)
+     * @return integer between 0 and 65535
+     */
+    private static int getInt(byte[] data) {
+        return ByteBuffer.wrap(new byte[]{data[1], data[0], 0, 0}).order(ByteOrder.LITTLE_ENDIAN).getInt();
     }
 
     /*
