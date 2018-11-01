@@ -4,15 +4,22 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class BeaconUtilTest {
+
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
     private BeaconCreator<IBeacon> beaconCreator = new BeaconCreator<>(IBeacon.class);
 
@@ -52,7 +59,7 @@ public class BeaconUtilTest {
     @Test
     public void getClosestBeacon_noBeacon_returnsNull() {
         Beacon beacon = BeaconUtil.getClosestBeacon(new ArrayList<Beacon<AdvertisingPacket>>(), new KalmanFilter());
-        assertEquals("Beacon should not be initialized", null, beacon);
+        assertNull("Beacon should not be initialized", beacon);
     }
 
     @Test
@@ -83,6 +90,33 @@ public class BeaconUtilTest {
 
         IBeacon<IBeaconAdvertisingPacket> actualBeacon = (IBeacon) BeaconUtil.getClosestBeacon(beacons, new KalmanFilter(2, TimeUnit.SECONDS));
         assertEquals("Did not return the closest beacon", expectedBeacon, actualBeacon);
+    }
+
+    @Test
+    public void calculateRssi_distanceSmallerOne_returnsRssiGreaterThanCalibrated() {
+        float calibratedRssi = -35;
+        float actualRssi = BeaconUtil.calculateRssi(0.5F, -35, 2F);
+        assertTrue(calibratedRssi < actualRssi);
+    }
+
+    @Test
+    public void calculateRssi_distanceGreaterOne_returnsRssiSmallerThanCalibrated() {
+        float calibratedRssi = -35;
+        float actualRssi = BeaconUtil.calculateRssi(10, -35, 2F);
+        assertTrue(calibratedRssi > actualRssi);
+    }
+
+    @Test
+    public void calculateRssi_distanceEqualOne_returnsRssiEqualThanCalibrated() {
+        float calibratedRssi = -35;
+        float actualRssi = BeaconUtil.calculateRssi(1, -35, 2F);
+        assertEquals(calibratedRssi, actualRssi, 0.1);
+    }
+
+    @Test
+    public void calculateRssi_negativeDistance_throwsException() {
+        exception.expect(IllegalArgumentException.class);
+        BeaconUtil.calculateRssi(-1, -35, 2F);
     }
 
 }

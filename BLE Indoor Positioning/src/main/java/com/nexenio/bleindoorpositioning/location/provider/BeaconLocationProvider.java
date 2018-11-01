@@ -22,9 +22,7 @@ public abstract class BeaconLocationProvider<B extends Beacon> implements Locati
         return location == null;
     }
 
-    protected boolean canUpdateLocation() {
-        return true;
-    }
+    protected abstract boolean canUpdateLocation();
 
     @Override
     public Location getLocation() {

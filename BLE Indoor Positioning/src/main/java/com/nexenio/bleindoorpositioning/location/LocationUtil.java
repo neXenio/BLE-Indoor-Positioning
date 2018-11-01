@@ -24,7 +24,6 @@ public class LocationUtil {
         if (locationList.size() < 1) {
             return null;
         } else {
-            Location meanLocation = new Location();
             double latitudeSum = 0;
             double longitudeSum = 0;
             double altitudeSum = 0;
@@ -37,10 +36,12 @@ public class LocationUtil {
                 elevationSum += location.getElevation();
                 accuracySum += location.getAccuracy();
             }
-            meanLocation.setLatitude(latitudeSum / locationList.size());
-            meanLocation.setLongitude(longitudeSum / locationList.size());
-            meanLocation.setAltitude(altitudeSum / locationList.size());
-            meanLocation.setElevation(elevationSum / locationList.size());
+            Location meanLocation = new Location(
+                    latitudeSum / locationList.size(),
+                    longitudeSum / locationList.size(),
+                    altitudeSum / locationList.size(),
+                    elevationSum / locationList.size()
+            );
             meanLocation.setAccuracy(accuracySum / locationList.size());
             return meanLocation;
         }
