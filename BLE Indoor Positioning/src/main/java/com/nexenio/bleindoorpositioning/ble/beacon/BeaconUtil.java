@@ -2,7 +2,7 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
-import com.nexenio.bleindoorpositioning.location.distance.PathLossBeaconDistanceCalculator;
+import com.nexenio.bleindoorpositioning.ble.beacon.distance.PathLossBeaconDistanceCalculator;
 
 import java.util.List;
 

@@ -17,8 +17,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculatorManager;
-import com.nexenio.bleindoorpositioning.location.distance.PathLossBeaconDistanceCalculator;
+import com.nexenio.bleindoorpositioning.ble.beacon.distance.BeaconDistanceCalculatorManager;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 

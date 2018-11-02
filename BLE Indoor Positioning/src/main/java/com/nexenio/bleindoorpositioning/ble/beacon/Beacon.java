@@ -8,8 +8,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.signal.KalmanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.RssiFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculatorManager;
-import com.nexenio.bleindoorpositioning.location.distance.PathLossBeaconDistanceCalculator;
+import com.nexenio.bleindoorpositioning.ble.beacon.distance.BeaconDistanceCalculatorManager;
 import com.nexenio.bleindoorpositioning.location.provider.BeaconLocationProvider;
 import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 

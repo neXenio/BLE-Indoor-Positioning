@@ -2,6 +2,7 @@ package com.nexenio.bleindoorpositioning.location.distance;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.distance.PathLossBeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationTest;
 import com.nexenio.bleindoorpositioning.location.provider.IBeaconLocationProvider;
