@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioning.ble.beacon.distance;
+package com.nexenio.bleindoorpositioning.ble.beacon.distance.benchmark;
 
 import org.junit.Test;
 

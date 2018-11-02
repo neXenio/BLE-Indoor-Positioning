@@ -107,7 +107,7 @@ public abstract class BeaconUtil {
      * @return Estimated rssi for the given distance
      */
     public static int calculateRssiForDistance(Beacon beacon, float distance) {
-        return calculateRssi(distance, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), PathLossBeaconDistanceCalculator.getPathLossParameter());
+        return calculateRssi(distance, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), PathLossBeaconDistanceCalculator.PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION);
     }
 
     /**

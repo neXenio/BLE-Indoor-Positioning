@@ -1,4 +1,4 @@
-package com.nexenio.bleindoorpositioning.location.distance;
+package com.nexenio.bleindoorpositioning.ble.beacon.distance;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
