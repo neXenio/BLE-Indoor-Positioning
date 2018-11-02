@@ -68,7 +68,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
     }
 
     public static boolean meetsSpecification(byte[] data) {
-        if (data == null || data.length < 29) {
+        if (data == null || data.length < 30) {
             return false;
         }
 

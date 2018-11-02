@@ -8,9 +8,11 @@ public class BeaconInfo {
 
     private String manufacturer;
 
-    private int advertizingFrequency;
+    private int advertisingFrequency;
 
     private int transmissionPower;
+
+    private byte[] manufacturerData;
 
     public BeaconInfo() {
     }
@@ -39,12 +41,12 @@ public class BeaconInfo {
         this.manufacturer = manufacturer;
     }
 
-    public int getAdvertizingFrequency() {
-        return advertizingFrequency;
+    public int getAdvertisingFrequency() {
+        return advertisingFrequency;
     }
 
-    public void setAdvertizingFrequency(int advertizingFrequency) {
-        this.advertizingFrequency = advertizingFrequency;
+    public void setAdvertisingFrequency(int advertisingFrequency) {
+        this.advertisingFrequency = advertisingFrequency;
     }
 
     public int getTransmissionPower() {
@@ -55,4 +57,11 @@ public class BeaconInfo {
         this.transmissionPower = transmissionPower;
     }
 
+    public byte[] getManufacturerData() {
+        return manufacturerData;
+    }
+
+    public void setManufacturerData(byte[] manufacturerData) {
+        this.manufacturerData = manufacturerData;
+    }
 }
