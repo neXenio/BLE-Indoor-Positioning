@@ -29,6 +29,21 @@
 
     <!-- Record -->
     <string name="title_record">Record</string>
+    <string name="record_general_info">General Info</string>
+    <string name="record_device_info">Device Info</string>
+    <string name="record_beacon_info">Beacon Info</string>
+    <string name="record_notes">Notes</string>
+    <string name="record_notes_help">An optional comment</string>
+    <string name="record_name">Name</string>
+    <string name="record_manufacturer">Manufacturer</string>
+    <string name="record_model">Model</string>
+    <string name="record_os_version">OS Version</string>
+    <string name="record_transmission_power">TX Power</string>
+    <string name="record_transmission_power_help">The transmission power in dBm (e.g. -20)</string>
+    <string name="record_advertising_frequency">Advertising Frequency</string>
+    <string name="record_advertising_frequency_help">Advertising frequency in Hz (e.g. 10)</string>
+    <string name="record_distance">Distance</string>
+    <string name="record_distance_help">The measured distance in meters (e.g. 3)</string>
 
     <!-- Filter -->
     <string name="title_filter">Filter</string>
@@ -59,6 +74,5 @@
     <string name="error_location_disabled">Location services disabled</string>
     <string name="error_bluetooth_disabled">Bluetooth disabled</string>
     <string name="action_enable">Enable</string>
-    <string name="title_activity_recording">RecordingActivity</string>
 
 </resources>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              style="@style/RecordingContentContainer">
+
+    <TextView
+            android:text="@string/record_beacon_info"
+            style="@style/DefaultHeadingText"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:hint="@string/record_name"
+            style="@style/DefaultTextInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/recordDeviceNameEditText"
+                style="@style/DefaultTextInputEditText"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:hint="@string/record_model"
+            style="@style/DefaultTextInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/recordDeviceModelEditText"
+                style="@style/DefaultTextInputEditText"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:hint="@string/record_manufacturer"
+            style="@style/DefaultTextInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/recordDeviceManufacturerEditText"
+                style="@style/DefaultTextInputEditText"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:hint="@string/record_transmission_power"
+            app:helperText="@string/record_transmission_power_help"
+            style="@style/DefaultTextInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/recordBeaconTransmissionPowerEditText"
+                android:inputType="numberSigned"
+                style="@style/DefaultTextInputEditText"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:hint="@string/record_advertising_frequency"
+            app:helperText="@string/record_advertising_frequency_help"
+            style="@style/DefaultTextInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/recordBeaconAdvertisingFrequencyEditText"
+                android:inputType="number"
+                style="@style/DefaultTextInputEditText"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>
