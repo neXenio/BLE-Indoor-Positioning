@@ -2,7 +2,7 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.map;
 
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.projection.CanvasProjection;
