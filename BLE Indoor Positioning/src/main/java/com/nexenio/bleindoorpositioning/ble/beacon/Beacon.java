@@ -34,6 +34,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     protected int transmissionPower; // in dBm
     protected float distance; // in m
     protected boolean shouldUpdateDistance = true;
+    protected boolean trim = true;
     protected final ArrayList<P> advertisingPackets = new ArrayList<>();
     protected BeaconLocationProvider<? extends Beacon> locationProvider;
 
@@ -138,7 +139,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public void trimAdvertisingPackets() {
         synchronized (advertisingPackets) {
-            if (!hasAnyAdvertisingPacket()) {
+            if (!hasAnyAdvertisingPacket() || !trim) {
                 return;
             }
             List<P> removableAdvertisingPackets = new ArrayList<>();
@@ -290,4 +291,13 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     public void setLocationProvider(BeaconLocationProvider<? extends Beacon> locationProvider) {
         this.locationProvider = locationProvider;
     }
+
+    public boolean shouldTrim() {
+        return trim;
+    }
+
+    public void setTrim(boolean trim) {
+        this.trim = trim;
+    }
+
 }

@@ -17,10 +17,10 @@ public class BeaconDistanceCalculatorBenchmark {
 
     private BeaconInfo beaconInfo;
 
-    public BeaconDistanceCalculatorBenchmark(BeaconDistanceCalculator beaconDistanceCalculator, RssiMeasurements rssiMeasurements, BeaconInfo beaconInfo) {
+    public BeaconDistanceCalculatorBenchmark(BeaconDistanceCalculator beaconDistanceCalculator, RssiMeasurements rssiMeasurements) {
         this.beaconDistanceCalculator = beaconDistanceCalculator;
         this.rssiMeasurements = rssiMeasurements;
-        this.beaconInfo = beaconInfo;
+        this.beaconInfo = rssiMeasurements.getBeaconInfo();
     }
 
     protected float calculateDistance() {
@@ -35,8 +35,10 @@ public class BeaconDistanceCalculatorBenchmark {
             throw new IllegalArgumentException("No advertising packets were created");
         }
         beacon.applyPropertiesFromAdvertisingPacket(advertisingPackets.get(0));
+        // Maximum package age is defined in beacon with 60s
+        // can lead to only keeping the latest advertising packet
+        beacon.setTrim(false);
         for (IBeaconAdvertisingPacket advertisingPacket : advertisingPackets) {
-            // TODO: Maximum package age is defined in beacon with 60s
             beacon.addAdvertisingPacket(advertisingPacket);
         }
         return beacon;
@@ -52,6 +54,7 @@ public class BeaconDistanceCalculatorBenchmark {
             IBeaconAdvertisingPacket advertisingPacket = new IBeaconAdvertisingPacket(manufacturerData);
             advertisingPacket.setMeasuredPowerByte((byte) beaconTransmissionPower);
             advertisingPacket.setRssi(rssi);
+            advertisingPackets.add(advertisingPacket);
         }
         return advertisingPackets;
     }
