@@ -16,11 +16,13 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -53,63 +55,7 @@ public class BeaconDistanceCalculatorBenchmarkTest {
         List<RssiMeasurements> rssiMeasurementsList = new ArrayList<>();
         rssiMeasurementsList.add(rssiMeasurements);
 
-        createBenchmark(beaconDistanceCalculators, rssiMeasurementsList);
-    }
-
-    public void createBenchmark(List<BeaconDistanceCalculator> beaconDistanceCalculators, List<RssiMeasurements> rssiMeasurements) {
-        Map<BeaconDistanceCalculator, Float> scoreMap = new HashMap<>();
-
-        for (RssiMeasurements rssiMeasurement : rssiMeasurements) {
-            for (BeaconDistanceCalculator beaconDistanceCalculator : beaconDistanceCalculators) {
-                BeaconDistanceCalculatorBenchmark beaconDistanceCalculatorBenchmark = new BeaconDistanceCalculatorBenchmark(beaconDistanceCalculator, rssiMeasurement);
-                if (!scoreMap.containsKey(beaconDistanceCalculator)) {
-                    scoreMap.put(beaconDistanceCalculator, 0F);
-                }
-                float distanceSum = scoreMap.get(beaconDistanceCalculator);
-                distanceSum += beaconDistanceCalculatorBenchmark.getScore();
-                scoreMap.put(beaconDistanceCalculator, distanceSum);
-            }
-        }
-
-        // mean score
-        for (Map.Entry<BeaconDistanceCalculator, Float> beaconDistanceCalculatorFloatEntry : scoreMap.entrySet()) {
-            scoreMap.put(beaconDistanceCalculatorFloatEntry.getKey(), beaconDistanceCalculatorFloatEntry.getValue() / rssiMeasurements.size());
-        }
-
-        scoreMap = sortByValue(scoreMap, false);
-
-        Table benchmarkTable = createBenchmarkTable(scoreMap, "Mean-Score");
-        System.out.println(benchmarkTable.serialize());
-    }
-
-    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map, boolean ascending) {
-        List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
-        list.sort(Map.Entry.comparingByValue());
-
-        Map<K, V> result = new LinkedHashMap<>();
-        if (ascending) {
-            for (Map.Entry<K, V> entry : list) {
-                result.put(entry.getKey(), entry.getValue());
-            }
-        } else {
-            for (int i = list.size() - 1; i >= 0; i--) {
-                result.put(list.get(i).getKey(), list.get(i).getValue());
-            }
-        }
-
-        return result;
-    }
-
-    private Table createBenchmarkTable(Map<BeaconDistanceCalculator, Float> map, String scoreDescriptor) {
-        Table.Builder tableBuilder = new Table.Builder()
-                .withAlignments(Table.ALIGN_LEFT, Table.ALIGN_RIGHT)
-                .addRow("Calculator", scoreDescriptor);
-
-        for (Map.Entry<BeaconDistanceCalculator, Float> entry : map.entrySet()) {
-            tableBuilder.addRow(entry.getKey().getClass().getSimpleName(), entry.getValue());
-        }
-
-        return tableBuilder.build();
+        createBenchmark(beaconDistanceCalculators, rssiMeasurementsList, new MeanScoreMerger());
     }
 
     @Test
@@ -129,6 +75,49 @@ public class BeaconDistanceCalculatorBenchmarkTest {
             assertEquals(rssis[i], advertisingPackets.get(i).getRssi());
             assertEquals(beaconTransmissionPower, advertisingPackets.get(i).getMeasuredPowerByte());
         }
+    }
+
+    private void createBenchmark(List<BeaconDistanceCalculator> beaconDistanceCalculators, List<RssiMeasurements> rssiMeasurements, ScoreMerger scoreMerger) {
+        Map<BeaconDistanceCalculator, List<Double>> scoreMap = new HashMap<>();
+
+        for (RssiMeasurements rssiMeasurement : rssiMeasurements) {
+            for (BeaconDistanceCalculator beaconDistanceCalculator : beaconDistanceCalculators) {
+                BeaconDistanceCalculatorBenchmark beaconDistanceCalculatorBenchmark = new BeaconDistanceCalculatorBenchmark(beaconDistanceCalculator, rssiMeasurement);
+                if (!scoreMap.containsKey(beaconDistanceCalculator)) {
+                    scoreMap.put(beaconDistanceCalculator, new ArrayList<>());
+                }
+                scoreMap.get(beaconDistanceCalculator).add(beaconDistanceCalculatorBenchmark.getScore());
+            }
+        }
+
+        Map<BeaconDistanceCalculator, Double> finalScoreMap = new HashMap<>();
+        for (Map.Entry<BeaconDistanceCalculator, List<Double>> beaconDistanceCalculatorDoubleEntry : scoreMap.entrySet()) {
+            finalScoreMap.put(beaconDistanceCalculatorDoubleEntry.getKey(), scoreMerger.mergeScores(beaconDistanceCalculatorDoubleEntry.getValue()));
+        }
+
+        finalScoreMap = sortMapByValue(finalScoreMap);
+
+        Table benchmarkTable = createBenchmarkTable(finalScoreMap, scoreMerger.getName());
+        System.out.println(benchmarkTable.serialize());
+    }
+
+    private static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValue(Map<K, V> map) {
+        return map.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+    }
+
+    private Table createBenchmarkTable(Map<BeaconDistanceCalculator, Double> map, String scoreDescriptor) {
+        Table.Builder tableBuilder = new Table.Builder()
+                .withAlignments(Table.ALIGN_LEFT, Table.ALIGN_RIGHT)
+                .addRow("Calculator", scoreDescriptor);
+
+        for (Map.Entry<BeaconDistanceCalculator, Double> entry : map.entrySet()) {
+            tableBuilder.addRow(entry.getKey().getClass().getSimpleName(), String.format("%.04f", entry.getValue()));
+        }
+
+        return tableBuilder.build();
     }
 
     private class MeanPathLossBeaconDistanceCalculator extends PathLossBeaconDistanceCalculator {

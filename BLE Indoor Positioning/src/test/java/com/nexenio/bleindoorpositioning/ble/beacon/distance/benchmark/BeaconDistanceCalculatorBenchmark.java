@@ -67,7 +67,7 @@ public class BeaconDistanceCalculatorBenchmark {
         return advertisingPackets;
     }
 
-    public float getScore() {
+    public double getScore() {
         float referenceDistance = rssiMeasurements.getDistance() == 0 ? 1 : rssiMeasurements.getDistance();
         return Math.max(1 - (Math.abs(calculateDistance() - referenceDistance) / referenceDistance), 0);
     }
