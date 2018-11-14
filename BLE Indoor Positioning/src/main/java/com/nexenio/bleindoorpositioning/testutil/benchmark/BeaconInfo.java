@@ -2,6 +2,8 @@ package com.nexenio.bleindoorpositioning.testutil.benchmark;
 
 public class BeaconInfo {
 
+    // TODO: documentation
+
     private String name;
 
     private String model;

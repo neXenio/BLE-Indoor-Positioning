@@ -25,8 +25,8 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 def releaseVersionCode = 14
 def releaseVersionName = "0.3.8"

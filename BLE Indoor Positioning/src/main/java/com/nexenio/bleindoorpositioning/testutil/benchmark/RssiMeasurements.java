@@ -2,6 +2,9 @@ package com.nexenio.bleindoorpositioning.testutil.benchmark;
 
 public class RssiMeasurements {
 
+    // TODO: rename to RssiMeasurement ?
+    // TODO: documentation
+
     private DeviceInfo deviceInfo;
 
     private BeaconInfo beaconInfo;

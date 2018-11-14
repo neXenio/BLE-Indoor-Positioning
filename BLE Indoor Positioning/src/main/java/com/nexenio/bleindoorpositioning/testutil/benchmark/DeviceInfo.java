@@ -2,6 +2,8 @@ package com.nexenio.bleindoorpositioning.testutil.benchmark;
 
 public class DeviceInfo {
 
+    // TODO: documentation
+
     private String name;
 
     private String model;
