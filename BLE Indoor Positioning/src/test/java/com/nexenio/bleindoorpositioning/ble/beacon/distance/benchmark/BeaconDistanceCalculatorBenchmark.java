@@ -31,29 +31,37 @@ public class BeaconDistanceCalculatorBenchmark {
     protected IBeacon<IBeaconAdvertisingPacket> createBeacon() {
         IBeacon<IBeaconAdvertisingPacket> beacon = new IBeacon<>();
         List<IBeaconAdvertisingPacket> advertisingPackets = createAdvertisingPackets();
+
         if (advertisingPackets.isEmpty()) {
             throw new IllegalArgumentException("No advertising packets were created");
         }
+
         beacon.applyPropertiesFromAdvertisingPacket(advertisingPackets.get(0));
+
         // Maximum package age is defined in beacon with 60s
         // can lead to only keeping the latest advertising packet
         beacon.setTrim(false);
+
         for (IBeaconAdvertisingPacket advertisingPacket : advertisingPackets) {
             beacon.addAdvertisingPacket(advertisingPacket);
         }
+
         return beacon;
     }
 
     protected List<IBeaconAdvertisingPacket> createAdvertisingPackets() {
-        return createAdvertisingPacketsForRssis(rssiMeasurements.getRssis(), beaconInfo.getManufacturerData(), beaconInfo.getTransmissionPower());
+        return createAdvertisingPacketsForRssis(rssiMeasurements.getRssis(), beaconInfo.getManufacturerData(), beaconInfo.getTransmissionPower(), rssiMeasurements.getTimestamp(), beaconInfo.getAdvertisingFrequency());
     }
 
-    protected static List<IBeaconAdvertisingPacket> createAdvertisingPacketsForRssis(int[] rssis, byte[] manufacturerData, int beaconTransmissionPower) {
+    protected static List<IBeaconAdvertisingPacket> createAdvertisingPacketsForRssis(int[] rssis, byte[] manufacturerData, int beaconTransmissionPower, long startTimestamp, int advertisingFrequency) {
         List<IBeaconAdvertisingPacket> advertisingPackets = new ArrayList<>();
-        for (int rssi : rssis) {
+
+        for (int i = 0; i < rssis.length; i++) {
             IBeaconAdvertisingPacket advertisingPacket = new IBeaconAdvertisingPacket(manufacturerData);
             advertisingPacket.setMeasuredPowerByte((byte) beaconTransmissionPower);
-            advertisingPacket.setRssi(rssi);
+            advertisingPacket.setRssi(rssis[i]);
+            long timestampOffset = i / advertisingFrequency * 1000;
+            advertisingPacket.setTimestamp(startTimestamp + timestampOffset);
             advertisingPackets.add(advertisingPacket);
         }
         return advertisingPackets;
