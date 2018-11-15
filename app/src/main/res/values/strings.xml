@@ -34,6 +34,7 @@
     <string name="record_beacon_info">Beacon Info</string>
     <string name="record_notes">Notes</string>
     <string name="record_notes_help">An optional comment</string>
+    <string name="record_id">ID</string>
     <string name="record_name">Name</string>
     <string name="record_manufacturer">Manufacturer</string>
     <string name="record_model">Model</string>

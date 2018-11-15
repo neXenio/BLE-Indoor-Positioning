@@ -2,6 +2,14 @@ package com.nexenio.bleindoorpositioning.testutil.benchmark;
 
 public class RssiMeasurements {
 
+    public static final String KEY_DEVICE_INFO = "deviceInfo";
+    public static final String KEY_BEACON_INFO = "beaconInfo";
+    public static final String KEY_START_TIMESTAMP = "startTimestamp";
+    public static final String KEY_END_TIMESTAMP = "endTimestamp";
+    public static final String KEY_NOTES = "notes";
+    public static final String KEY_DISTANCE = "distance";
+    public static final String KEY_RSSIS = "rssis";
+
     private DeviceInfo deviceInfo;
 
     private BeaconInfo beaconInfo;

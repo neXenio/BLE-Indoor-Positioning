@@ -7,11 +7,11 @@
             style="@style/DefaultHeadingText"/>
 
     <com.google.android.material.textfield.TextInputLayout
-            android:hint="@string/record_name"
+            android:hint="@string/record_id"
             style="@style/DefaultTextInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/recordDeviceNameEditText"
+                android:id="@+id/recordDeviceIdEditText"
                 style="@style/DefaultTextInputEditText"/>
 
     </com.google.android.material.textfield.TextInputLayout>
