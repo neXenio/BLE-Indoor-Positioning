@@ -14,7 +14,9 @@ public class RssiMeasurements {
 
     private BeaconInfo beaconInfo;
 
-    private long timestamp;
+    private long startTimestamp;
+
+    private long endTimestamp;
 
     private String notes;
 
@@ -41,12 +43,20 @@ public class RssiMeasurements {
         this.beaconInfo = beaconInfo;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    public long getStartTimestamp() {
+        return startTimestamp;
     }
 
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+    public void setStartTimestamp(long startTimestamp) {
+        this.startTimestamp = startTimestamp;
+    }
+
+    public long getEndTimestamp() {
+        return endTimestamp;
+    }
+
+    public void setEndTimestamp(long endTimestamp) {
+        this.endTimestamp = endTimestamp;
     }
 
     public String getNotes() {

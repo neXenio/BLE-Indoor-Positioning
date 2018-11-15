@@ -9,36 +9,53 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 
+import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
+import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
+import com.nexenio.bleindoorpositioning.ble.beacon.FilteredBeaconUpdateListener;
+import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioning.testutil.benchmark.BeaconInfo;
 import com.nexenio.bleindoorpositioning.testutil.benchmark.DeviceInfo;
 import com.nexenio.bleindoorpositioning.testutil.benchmark.RssiMeasurements;
+import com.nexenio.bleindoorpositioningdemo.bluetooth.BluetoothClient;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class RecordingActivity extends AppCompatActivity {
 
-    private MaterialButton recordButton;
+    private static final String TAG = RecordingActivity.class.getSimpleName();
 
-    // general
+    private final static UUID RECORDING_UUID = UUID.fromString("61a0523a-a733-4789-ae8f-4f55fcff64f2");
+
+    private RssiMeasurements rssiMeasurements = new RssiMeasurements();
+    private List<Integer> recordedRssiValues;
+    private FilteredBeaconUpdateListener<IBeacon<IBeaconAdvertisingPacket>> recordingBeaconUpdateListener;
+
+    private SharedPreferences sharedPreferences;
+
     private TextInputEditText distanceEditText;
     private TextInputEditText notesEditText;
 
-    // device info
     private TextInputEditText deviceIdEditText;
     private TextInputEditText deviceModelEditText;
     private TextInputEditText deviceManufacturerEditText;
     private TextInputEditText deviceOsVersionEditText;
 
-    // beacon info
     private TextInputEditText beaconNameEditText;
     private TextInputEditText beaconModelEditText;
     private TextInputEditText beaconManufacturerEditText;
     private TextInputEditText beaconTransmissionPowerEditText;
     private TextInputEditText beaconAdvertisingFrequencyEditText;
 
-    private SharedPreferences sharedPreferences;
+    private MaterialButton recordButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +66,7 @@ public class RecordingActivity extends AppCompatActivity {
 
         initializeLayout();
         restoreFormValues();
+        initializeBluetoothScanning();
     }
 
     private void initializeLayout() {
@@ -69,20 +87,104 @@ public class RecordingActivity extends AppCompatActivity {
         beaconAdvertisingFrequencyEditText = findViewById(R.id.recordBeaconAdvertisingFrequencyEditText);
     }
 
+    private void initializeBluetoothScanning() {
+        Log.d(TAG, "Initializing Bluetooth scanning");
+
+        BluetoothClient.initialize(this);
+        IBeaconFilter<IBeacon<IBeaconAdvertisingPacket>> recordingBeaconFilter = new IBeaconFilter<>(RECORDING_UUID);
+        recordingBeaconUpdateListener = new FilteredBeaconUpdateListener<IBeacon<IBeaconAdvertisingPacket>>(recordingBeaconFilter) {
+            @Override
+            public void onMatchingBeaconUpdated(IBeacon<IBeaconAdvertisingPacket> beacon) {
+                onRecordingBeaconUpdated(beacon);
+            }
+        };
+    }
+
+    @Override
+    protected void onStop() {
+        stopRecording();
+        super.onStop();
+    }
+
     public void onRecordButtonClicked(View view) {
         persistFormValues();
+        startRecording();
+    }
+
+    private RssiMeasurements createRssiMeasurements() {
+        RssiMeasurements rssiMeasurements = new RssiMeasurements();
+        rssiMeasurements.setDeviceInfo(createDeviceInfo());
+        rssiMeasurements.setBeaconInfo(createBeaconInfo());
+        rssiMeasurements.setDistance(Float.parseFloat(distanceEditText.getText().toString()));
+        rssiMeasurements.setNotes(notesEditText.getText().toString());
+        rssiMeasurements.setStartTimestamp(System.currentTimeMillis());
+        return rssiMeasurements;
+    }
+
+    private DeviceInfo createDeviceInfo() {
+        DeviceInfo deviceInfo = new DeviceInfo();
+        deviceInfo.setId(deviceIdEditText.getText().toString());
+        deviceInfo.setModel(deviceModelEditText.getText().toString());
+        deviceInfo.setManufacturer(deviceManufacturerEditText.getText().toString());
+        deviceInfo.setOsVersion(deviceOsVersionEditText.getText().toString());
+        return deviceInfo;
+    }
+
+    private BeaconInfo createBeaconInfo() {
+        BeaconInfo beaconInfo = new BeaconInfo();
+        beaconInfo.setName(beaconNameEditText.getText().toString());
+        beaconInfo.setModel(beaconModelEditText.getText().toString());
+        beaconInfo.setManufacturer(beaconManufacturerEditText.getText().toString());
+        beaconInfo.setTransmissionPower(Integer.valueOf(beaconTransmissionPowerEditText.getText().toString()));
+        beaconInfo.setAdvertisingFrequency(Integer.valueOf(beaconAdvertisingFrequencyEditText.getText().toString()));
+        return beaconInfo;
+    }
+
+    private void startRecording() {
+        Log.d(TAG, "Starting recording");
+
+        rssiMeasurements = createRssiMeasurements();
+        recordedRssiValues = new ArrayList<>();
+
+        BluetoothClient.startScanning();
+        BeaconManager.registerBeaconUpdateListener(recordingBeaconUpdateListener);
+    }
+
+    private void stopRecording() {
+        Log.d(TAG, "Stopping recording");
+
+        BluetoothClient.stopScanning();
+        BeaconManager.unregisterBeaconUpdateListener(recordingBeaconUpdateListener);
+
+        rssiMeasurements.setEndTimestamp(System.currentTimeMillis());
+        rssiMeasurements.setRssis(convertIntArray(recordedRssiValues));
+        recordedRssiValues.clear();
+
+        Log.i(TAG, "RSSI measurements:\n" + rssiMeasurements);
+
+        // TODO: persist JSON file
+
+        // TODO: start share intent for persisted JSON file
+    }
+
+    private void onRecordingBeaconUpdated(IBeacon<IBeaconAdvertisingPacket> beacon) {
+        IBeaconAdvertisingPacket latestAdvertisingPacket = beacon.getLatestAdvertisingPacket();
+        recordedRssiValues.add(latestAdvertisingPacket.getRssi());
     }
 
     private void persistFormValues() {
+        Log.d(TAG, "Persisting form values");
+
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         editor.putString(RssiMeasurements.KEY_DISTANCE, distanceEditText.getText().toString());
         editor.putString(RssiMeasurements.KEY_NOTES, notesEditText.getText().toString());
 
-        editor.putString(DeviceInfo.KEY_DEVICE_ID, deviceIdEditText.getText().toString());
-        editor.putString(DeviceInfo.KEY_DEVICE_MODEL, deviceModelEditText.getText().toString());
-        editor.putString(DeviceInfo.KEY_DEVICE_MANUFACTURER, deviceManufacturerEditText.getText().toString());
-        editor.putString(DeviceInfo.KEY_DEVICE_OS_VERSION, deviceOsVersionEditText.getText().toString());
+        // don't persist dynamic fields
+        //editor.putString(DeviceInfo.KEY_DEVICE_ID, deviceIdEditText.getText().toString());
+        //editor.putString(DeviceInfo.KEY_DEVICE_MODEL, deviceModelEditText.getText().toString());
+        //editor.putString(DeviceInfo.KEY_DEVICE_MANUFACTURER, deviceManufacturerEditText.getText().toString());
+        //editor.putString(DeviceInfo.KEY_DEVICE_OS_VERSION, deviceOsVersionEditText.getText().toString());
 
         editor.putString(BeaconInfo.KEY_BEACON_NAME, beaconNameEditText.getText().toString());
         editor.putString(BeaconInfo.KEY_BEACON_MODEL, beaconModelEditText.getText().toString());
@@ -94,7 +196,9 @@ public class RecordingActivity extends AppCompatActivity {
     }
 
     private void restoreFormValues() {
-        distanceEditText.setText(sharedPreferences.getString(RssiMeasurements.KEY_DISTANCE, "1"));
+        Log.d(TAG, "Restoring form values");
+
+        distanceEditText.setText(sharedPreferences.getString(RssiMeasurements.KEY_DISTANCE, ""));
         notesEditText.setText(sharedPreferences.getString(RssiMeasurements.KEY_NOTES, ""));
 
         deviceIdEditText.setText(sharedPreferences.getString(DeviceInfo.KEY_DEVICE_ID, getDeviceId(this)));
@@ -107,6 +211,15 @@ public class RecordingActivity extends AppCompatActivity {
         beaconManufacturerEditText.setText(sharedPreferences.getString(BeaconInfo.KEY_BEACON_MANUFACTURER, ""));
         beaconTransmissionPowerEditText.setText(sharedPreferences.getString(BeaconInfo.KEY_BEACON_TRANSMISSION_POWER, ""));
         beaconAdvertisingFrequencyEditText.setText(sharedPreferences.getString(BeaconInfo.KEY_BEACON_ADVERTISING_FREQUENCY, ""));
+    }
+
+    private static int[] convertIntArray(List<Integer> integerList) {
+        int[] intArray = new int[integerList.size()];
+        Iterator<Integer> iterator = integerList.iterator();
+        for (int i = 0; i < intArray.length; i++) {
+            intArray[i] = iterator.next();
+        }
+        return intArray;
     }
 
     @SuppressLint("HardwareIds")

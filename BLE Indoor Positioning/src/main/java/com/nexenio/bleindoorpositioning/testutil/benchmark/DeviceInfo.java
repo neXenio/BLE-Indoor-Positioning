@@ -7,7 +7,7 @@ public class DeviceInfo {
     public static final String KEY_DEVICE_MANUFACTURER = "deviceManufacturer";
     public static final String KEY_DEVICE_OS_VERSION = "deviceOsVersion";
 
-    private String name;
+    private String id;
 
     private String model;
 
@@ -18,12 +18,12 @@ public class DeviceInfo {
     public DeviceInfo() {
     }
 
-    public String getName() {
-        return name;
+    public String getId() {
+        return id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getModel() {
