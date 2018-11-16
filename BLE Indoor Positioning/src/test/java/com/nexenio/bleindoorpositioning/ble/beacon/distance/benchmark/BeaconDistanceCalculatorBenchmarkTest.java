@@ -124,6 +124,7 @@ public class BeaconDistanceCalculatorBenchmarkTest {
 
         @Override
         public float calculateDistanceTo(Beacon beacon) {
+            // Change beacon default beacon filter to a mean filter
             return calculateDistanceTo(beacon, new MeanFilter(3, TimeUnit.SECONDS, beacon.getLatestTimestamp()));
         }
     }

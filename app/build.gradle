@@ -39,11 +39,12 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-location:16.0.0'
 
-    implementation "com.polidea.rxandroidble:rxandroidble:1.4.3"
+    implementation 'com.polidea.rxandroidble:rxandroidble:1.4.3'
 
     testImplementation 'junit:junit:4.12'
-    testImplementation "com.android.support.test:runner:1.0.2"
-    testImplementation "com.android.support.test:rules:1.0.2"
+    testImplementation 'com.android.support.test:runner:1.0.2'
+    testImplementation 'com.android.support.test:rules:1.0.2'
     testImplementation 'org.robolectric:robolectric:4.0-beta-1'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
