@@ -27,8 +27,7 @@ public class BeaconDistanceCalculatorBenchmarkUtil {
     }
 
     public static RssiMeasurements getRssiMeasurementsFromFile(File file) throws IOException {
-        String json;
-        json = ExternalStorageUtil.readFile(file);
+        String json = ExternalStorageUtil.readFile(file);
         return gson.fromJson(json, RssiMeasurements.class);
     }
 
