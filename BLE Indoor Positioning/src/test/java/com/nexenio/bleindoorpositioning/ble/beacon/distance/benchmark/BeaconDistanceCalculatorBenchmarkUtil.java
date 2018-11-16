@@ -21,7 +21,7 @@ public class BeaconDistanceCalculatorBenchmarkUtil {
         return new File(resourcesPath);
     }
 
-    public static Observable<RssiMeasurements> getRssiMeasurements() throws IOException {
+    public static Observable<RssiMeasurements> getRssiMeasurements() {
         return ExternalStorageUtil.getObservableForJsonFilesInDirectory(getRssiMeasurementsDirectory())
                 .map(BeaconDistanceCalculatorBenchmarkUtil::getRssiMeasurementsFromFile);
     }

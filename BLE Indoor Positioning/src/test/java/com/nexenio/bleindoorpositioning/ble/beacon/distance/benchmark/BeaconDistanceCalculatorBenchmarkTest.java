@@ -32,28 +32,16 @@ public class BeaconDistanceCalculatorBenchmarkTest {
     @Ignore
     @Test // TODO: integrate annotation like benchmark
     public void calculateDistanceTo() {
-        RssiMeasurements rssiMeasurements = new RssiMeasurements();
-
-        BeaconInfo beaconInfo = new BeaconInfo();
-        beaconInfo.setAdvertisingFrequency(100);
-        beaconInfo.setManufacturerData(BeaconTest.IBEACON_ADVERTISING_DATA);
-        rssiMeasurements.setBeaconInfo(beaconInfo);
-
-        DeviceInfo deviceInfo = new DeviceInfo();
-        rssiMeasurements.setDeviceInfo(deviceInfo);
-
-        int[] rssis = new int[]{-62, -65, -68, -61, -64, -65, -59, -61, -63}; // fake data
-        rssiMeasurements.setRssis(rssis);
-
-        float referenceDistance = 2F;
-        rssiMeasurements.setDistance(referenceDistance);
-
         List<BeaconDistanceCalculator> beaconDistanceCalculators = new ArrayList<>();
         beaconDistanceCalculators.add(new PathLossBeaconDistanceCalculator());
         beaconDistanceCalculators.add(new MeanPathLossBeaconDistanceCalculator());
 
         List<RssiMeasurements> rssiMeasurementsList = new ArrayList<>();
-        rssiMeasurementsList.add(rssiMeasurements);
+        // TODO: read real values when exist
+        // BeaconDistanceCalculatorBenchmarkUtil
+        //        .getRssiMeasurements().filter(rssiMeasurements -> rssiMeasurements.getDistance() == 2) // example filter
+        //        .subscribe(rssiMeasurements -> rssiMeasurementsList.add(rssiMeasurements));
+        rssiMeasurementsList.add(createFakeRssiMeasurements());
 
         createBenchmark(beaconDistanceCalculators, rssiMeasurementsList, new MeanScoreMerger());
     }
@@ -118,6 +106,30 @@ public class BeaconDistanceCalculatorBenchmarkTest {
         }
 
         return tableBuilder.build();
+    }
+
+    private RssiMeasurements createFakeRssiMeasurements() {
+        RssiMeasurements rssiMeasurements = new RssiMeasurements();
+
+        rssiMeasurements.setBeaconInfo(createFakeBeaconInfo());
+        rssiMeasurements.setDeviceInfo(createFakeDeviceInfo());
+
+        int[] rssis = new int[]{-62, -65, -68, -61, -64, -65, -59, -61, -63};
+        rssiMeasurements.setRssis(rssis);
+        rssiMeasurements.setDistance(2F);
+        return rssiMeasurements;
+    }
+
+    private BeaconInfo createFakeBeaconInfo() {
+        BeaconInfo beaconInfo = new BeaconInfo();
+        beaconInfo.setAdvertisingFrequency(100);
+        beaconInfo.setManufacturerData(BeaconTest.IBEACON_ADVERTISING_DATA);
+        return beaconInfo;
+    }
+
+    private DeviceInfo createFakeDeviceInfo() {
+        DeviceInfo deviceInfo = new DeviceInfo();
+        return deviceInfo;
     }
 
     private class MeanPathLossBeaconDistanceCalculator extends PathLossBeaconDistanceCalculator {
