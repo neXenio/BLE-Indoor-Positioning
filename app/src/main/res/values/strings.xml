@@ -29,6 +29,8 @@
 
     <!-- Record -->
     <string name="title_record">Record</string>
+    <string name="action_start_recording">Start Recording</string>
+    <string name="action_stop_recording">Stop Recording</string>
     <string name="record_general_info">General Info</string>
     <string name="record_device_info">Device Info</string>
     <string name="record_beacon_info">Beacon Info</string>

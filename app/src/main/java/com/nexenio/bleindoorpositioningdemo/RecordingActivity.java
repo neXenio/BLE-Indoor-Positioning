@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.IBeaconAdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
@@ -56,6 +57,8 @@ public class RecordingActivity extends AppCompatActivity {
     private TextInputEditText beaconAdvertisingFrequencyEditText;
 
     private MaterialButton recordButton;
+
+    private boolean isRecording;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +111,11 @@ public class RecordingActivity extends AppCompatActivity {
 
     public void onRecordButtonClicked(View view) {
         persistFormValues();
-        startRecording();
+        if (isRecording) {
+            stopRecording();
+        } else {
+            startRecording();
+        }
     }
 
     private RssiMeasurements createRssiMeasurements() {
@@ -148,10 +155,15 @@ public class RecordingActivity extends AppCompatActivity {
 
         BluetoothClient.startScanning();
         BeaconManager.registerBeaconUpdateListener(recordingBeaconUpdateListener);
+
+        isRecording = true;
+        recordButton.setText(getString(R.string.action_stop_recording));
     }
 
     private void stopRecording() {
         Log.d(TAG, "Stopping recording");
+        isRecording = false;
+        recordButton.setText(getString(R.string.action_start_recording));
 
         BluetoothClient.stopScanning();
         BeaconManager.unregisterBeaconUpdateListener(recordingBeaconUpdateListener);
