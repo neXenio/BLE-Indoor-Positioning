@@ -222,7 +222,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     public static Comparator<Beacon> RssiComparator = new Comparator<Beacon>() {
 
         public int compare(Beacon firstBeacon, Beacon secondBeacon) {
-            return firstBeacon.rssi - secondBeacon.rssi;
+            return secondBeacon.rssi - firstBeacon.rssi;
         }
 
     };
