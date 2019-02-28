@@ -4,6 +4,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
 
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -154,5 +155,23 @@ public abstract class BeaconUtil {
     public static String getReadableBeaconType(Class<? extends Beacon> beaconClass) {
         return beaconClass.getSimpleName();
     }
+
+    /**
+     * Used to sort beacons from highest rssi to lowest rssi.
+     */
+    public static Comparator<Beacon> DescendingRssiComparator = new Comparator<Beacon>() {
+        public int compare(Beacon firstBeacon, Beacon secondBeacon) {
+            return secondBeacon.rssi - firstBeacon.rssi;
+        }
+    };
+
+    /**
+     * Used to sort beacons from lowest rssi to highest rssi.
+     */
+    public static Comparator<Beacon> AscendingRssiComparator = new Comparator<Beacon>() {
+        public int compare(Beacon firstBeacon, Beacon secondBeacon) {
+            return firstBeacon.rssi - secondBeacon.rssi;
+        }
+    };
 
 }

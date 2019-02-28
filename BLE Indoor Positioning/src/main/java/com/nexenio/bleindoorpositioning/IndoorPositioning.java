@@ -3,6 +3,7 @@ package com.nexenio.bleindoorpositioning;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
+import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUtil;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.GenericBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
@@ -89,7 +90,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         if (usableBeacons.size() < MINIMUM_BEACON_COUNT) {
             return;
         } else if (usableBeacons.size() > MINIMUM_BEACON_COUNT) {
-            Collections.sort(usableBeacons, Beacon.RssiHighToLowComparator);
+            Collections.sort(usableBeacons, BeaconUtil.DescendingRssiComparator);
             int maximumBeaconIndex = Math.min(MAXIMUM_BEACON_COUNT, usableBeacons.size());
             int firstRemovableBeaconIndex = maximumBeaconIndex;
             for (int beaconIndex = MINIMUM_BEACON_COUNT; beaconIndex < maximumBeaconIndex; beaconIndex++) {
