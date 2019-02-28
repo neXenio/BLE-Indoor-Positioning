@@ -89,7 +89,7 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
         if (usableBeacons.size() < MINIMUM_BEACON_COUNT) {
             return;
         } else if (usableBeacons.size() > MINIMUM_BEACON_COUNT) {
-            Collections.sort(usableBeacons, Beacon.RssiComparator);
+            Collections.sort(usableBeacons, Beacon.RssiHighToLowComparator);
             int maximumBeaconIndex = Math.min(MAXIMUM_BEACON_COUNT, usableBeacons.size());
             int firstRemovableBeaconIndex = maximumBeaconIndex;
             for (int beaconIndex = MINIMUM_BEACON_COUNT; beaconIndex < maximumBeaconIndex; beaconIndex++) {

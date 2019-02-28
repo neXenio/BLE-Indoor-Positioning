@@ -219,12 +219,27 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return new KalmanFilter(getLatestTimestamp());
     }
 
+    /**
+     * RssiComparator is deprecated because its name is unintuitive with the sorting it provides.
+     * RssiLowToHighComparator has the same functionality, sorting beacons from lowest rssi to highest rssi.
+      */
+    @Deprecated
     public static Comparator<Beacon> RssiComparator = new Comparator<Beacon>() {
+        public int compare(Beacon firstBeacon, Beacon secondBeacon) {
+            return firstBeacon.rssi - secondBeacon.rssi;
+        }
+    };
 
+    public static Comparator<Beacon> RssiHighToLowComparator = new Comparator<Beacon>() {
         public int compare(Beacon firstBeacon, Beacon secondBeacon) {
             return secondBeacon.rssi - firstBeacon.rssi;
         }
+    };
 
+    public static Comparator<Beacon> RssiLowToHighComparator = new Comparator<Beacon>() {
+        public int compare(Beacon firstBeacon, Beacon secondBeacon) {
+            return firstBeacon.rssi - secondBeacon.rssi;
+        }
     };
 
     /*
