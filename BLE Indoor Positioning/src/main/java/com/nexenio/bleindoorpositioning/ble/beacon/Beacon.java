@@ -219,12 +219,15 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return new KalmanFilter(getLatestTimestamp());
     }
 
+    /**
+     * This function and its reverse are implemented with indicative naming in BeaconUtil.
+     * @deprecated use {@link BeaconUtil.AscendingRssiComparator} instead
+     */
+    @Deprecated
     public static Comparator<Beacon> RssiComparator = new Comparator<Beacon>() {
-
         public int compare(Beacon firstBeacon, Beacon secondBeacon) {
             return firstBeacon.rssi - secondBeacon.rssi;
         }
-
     };
 
     /*
