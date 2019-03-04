@@ -221,7 +221,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     /**
      * This function and its reverse are implemented with indicative naming in BeaconUtil.
-     * @deprecated use {@link BeaconUtil.AscendingRssiComparator} instead
+     * @deprecated use {@link BeaconUtil#AscendingRssiComparator} instead
      */
     @Deprecated
     public static Comparator<Beacon> RssiComparator = new Comparator<Beacon>() {
