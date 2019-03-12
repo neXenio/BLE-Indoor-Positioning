@@ -4,6 +4,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUtil;
+import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.GenericBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
@@ -51,7 +52,6 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private GenericBeaconFilter usableIndoorPositioningBeaconFilter = createUsableIndoorPositioningBeaconFilter();
 
     private LocationPredictor locationPredictor = new LocationPredictor();
-
 
     private IndoorPositioning() {
         BeaconManager.registerBeaconUpdateListener(this);
@@ -151,6 +151,9 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
             @Override
             public boolean matches(Beacon beacon) {
+                if (!(beacon instanceof IBeacon)) {
+                    return false;
+                }
                 if (getInstance().indoorPositioningBeaconFilter != null && !getInstance().indoorPositioningBeaconFilter.matches(beacon)) {
                     return false;
                 }
@@ -225,4 +228,5 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public void setMinimumRssiThreshold(int minimumRssiThreshold) {
         this.minimumRssiThreshold = minimumRssiThreshold;
     }
+
 }
