@@ -7,11 +7,12 @@
             style="@style/DefaultHeadingText"/>
 
     <com.google.android.material.textfield.TextInputLayout
-            android:hint="@string/record_name"
+            android:hint="@string/record_id"
             style="@style/DefaultTextInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/recordDeviceNameEditText"
+                android:id="@+id/recordDeviceIdEditText"
+                android:enabled="false"
                 style="@style/DefaultTextInputEditText"/>
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -22,6 +23,7 @@
 
         <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/recordDeviceModelEditText"
+                android:enabled="false"
                 style="@style/DefaultTextInputEditText"/>
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -32,6 +34,7 @@
 
         <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/recordDeviceManufacturerEditText"
+                android:enabled="false"
                 style="@style/DefaultTextInputEditText"/>
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -42,6 +45,7 @@
 
         <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/recordDeviceOsVersionEditText"
+                android:enabled="false"
                 style="@style/DefaultTextInputEditText"/>
 
     </com.google.android.material.textfield.TextInputLayout>

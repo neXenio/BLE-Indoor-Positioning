@@ -2,13 +2,19 @@ package com.nexenio.bleindoorpositioning.testutil.benchmark;
 
 public class BeaconInfo {
 
+    public static final String KEY_BEACON_NAME = "beaconName";
+    public static final String KEY_BEACON_MODEL = "beaconModel";
+    public static final String KEY_BEACON_MANUFACTURER = "beaconManufacturer";
+    public static final String KEY_BEACON_ADVERTISING_FREQUENCY = "beaconAdvertisingFrequency";
+    public static final String KEY_BEACON_TRANSMISSION_POWER = "beaconTransmissionPower";
+
     private String name;
 
     private String model;
 
     private String manufacturer;
 
-    private int advertizingFrequency;
+    private int advertisingFrequency;
 
     private int transmissionPower;
 
@@ -39,12 +45,12 @@ public class BeaconInfo {
         this.manufacturer = manufacturer;
     }
 
-    public int getAdvertizingFrequency() {
-        return advertizingFrequency;
+    public int getAdvertisingFrequency() {
+        return advertisingFrequency;
     }
 
-    public void setAdvertizingFrequency(int advertizingFrequency) {
-        this.advertizingFrequency = advertizingFrequency;
+    public void setAdvertisingFrequency(int advertisingFrequency) {
+        this.advertisingFrequency = advertisingFrequency;
     }
 
     public int getTransmissionPower() {

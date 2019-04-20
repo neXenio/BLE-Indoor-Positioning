@@ -12,7 +12,7 @@
             style="@style/DefaultTextInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/recordDeviceNameEditText"
+                android:id="@+id/recordBeaconNameEditText"
                 style="@style/DefaultTextInputEditText"/>
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -22,7 +22,7 @@
             style="@style/DefaultTextInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/recordDeviceModelEditText"
+                android:id="@+id/recordBeaconModelEditText"
                 style="@style/DefaultTextInputEditText"/>
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -32,7 +32,7 @@
             style="@style/DefaultTextInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/recordDeviceManufacturerEditText"
+                android:id="@+id/recordBeaconManufacturerEditText"
                 style="@style/DefaultTextInputEditText"/>
 
     </com.google.android.material.textfield.TextInputLayout>
