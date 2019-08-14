@@ -20,7 +20,7 @@ public abstract class BeaconUtil {
      * @param transmissionPower the tx power (in dBm) of the beacon
      * @return estimated range in meters
      * @see <a href="https://support.kontakt.io/hc/en-gb/articles/201621521-Transmission-power-Range-and-RSSI">Kontakt.io
-     * Knowledge Base</a>
+     *         Knowledge Base</a>
      */
     public static float getAdvertisingRange(int transmissionPower) {
         if (transmissionPower < -30) {
@@ -161,7 +161,10 @@ public abstract class BeaconUtil {
      */
     public static Comparator<Beacon> DescendingRssiComparator = new Comparator<Beacon>() {
         public int compare(Beacon firstBeacon, Beacon secondBeacon) {
-            return secondBeacon.rssi - firstBeacon.rssi;
+            if (firstBeacon.equals(secondBeacon)) {
+                return 0;
+            }
+            return Integer.compare(secondBeacon.rssi, firstBeacon.rssi);
         }
     };
 
@@ -170,7 +173,10 @@ public abstract class BeaconUtil {
      */
     public static Comparator<Beacon> AscendingRssiComparator = new Comparator<Beacon>() {
         public int compare(Beacon firstBeacon, Beacon secondBeacon) {
-            return firstBeacon.rssi - secondBeacon.rssi;
+            if (firstBeacon.equals(secondBeacon)) {
+                return 0;
+            }
+            return Integer.compare(firstBeacon.rssi, secondBeacon.rssi);
         }
     };
 
