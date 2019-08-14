@@ -80,11 +80,7 @@ public class BeaconManager {
         beacon.addAdvertisingPacket(advertisingPacket);
         //TODO move outside method
         processClosestBeacon(beacon);
-        try {
-            instance.notifyBeaconUpdateListeners(beacon);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        instance.notifyBeaconUpdateListeners(beacon);
         return advertisingPacket;
     }
 
