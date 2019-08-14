@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         tools:context="com.nexenio.bleindoorpositioningdemo.HomeActivity">
 
-    <android.support.design.widget.CoordinatorLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:id="@+id/coordinatorLayout"
             android:layout_width="match_parent"
             android:layout_height="0dip"
@@ -21,9 +21,9 @@
                 android:layout_height="match_parent"
                 android:animateLayoutChanges="true"/>
 
-    </android.support.design.widget.CoordinatorLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <android.support.design.widget.BottomNavigationView
+    <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottomNavigationView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
