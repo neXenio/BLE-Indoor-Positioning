@@ -4,7 +4,6 @@ import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconManager;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUpdateListener;
 import com.nexenio.bleindoorpositioning.ble.beacon.BeaconUtil;
-import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.BeaconFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.GenericBeaconFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
@@ -17,6 +16,7 @@ import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -118,7 +118,11 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     }
 
     public static <B extends Beacon> List<B> getUsableBeacons(Collection<B> availableBeacons) {
-        return getInstance().usableIndoorPositioningBeaconFilter.getMatches(availableBeacons);
+        BeaconFilter beaconFilter = getInstance().usableIndoorPositioningBeaconFilter;
+        if (availableBeacons.isEmpty() || !beaconFilter.canMatch(availableBeacons.iterator().next())) {
+            return new ArrayList<>();
+        }
+        return beaconFilter.getMatches(availableBeacons);
     }
 
     private void onLocationUpdated(Location location) {
@@ -151,10 +155,11 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
             @Override
             public boolean matches(Beacon beacon) {
-                if (!(beacon instanceof IBeacon)) {
+                BeaconFilter beaconFilter = getInstance().indoorPositioningBeaconFilter;
+                if (!beaconFilter.canMatch(beacon)) {
                     return false;
                 }
-                if (getInstance().indoorPositioningBeaconFilter != null && !getInstance().indoorPositioningBeaconFilter.matches(beacon)) {
+                if (!beaconFilter.matches(beacon)) {
                     return false;
                 }
                 if (!beacon.hasLocation()) {
