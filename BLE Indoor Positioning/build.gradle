@@ -3,13 +3,13 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.8.1"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.9.8"
     }
 }
 
 plugins {
     id 'net.researchgate.release' version '2.6.0'
-    id 'com.jfrog.bintray' version '1.7.3'
+    id 'com.jfrog.bintray' version '1.8.4'
 }
 
 apply plugin: 'java-library'
@@ -112,33 +112,33 @@ artifacts {
     archives javadocJar
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            groupId projectGroupId
-            artifact sourcesJar
-            artifactId projectArtifactId
-        }
-        BintrayPublication(MavenPublication) {
-            from components.java
-            groupId projectGroupId
-            artifact sourcesJar
-            artifact javadocJar
-            artifactId projectArtifactId
-            version releaseVersionName
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('name', projectName)
-                root.appendNode('description', projectDescription)
-                root.appendNode('url', repositoryUrl)
-                root.children().last() + pomConfig
+project.afterEvaluate {
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                groupId projectGroupId
+                artifact sourcesJar
+                artifactId projectArtifactId
+            }
+            BintrayPublication(MavenPublication) {
+                from components.java
+                groupId projectGroupId
+                artifact sourcesJar
+                artifact javadocJar
+                artifactId projectArtifactId
+                version releaseVersionName
+                pom.withXml {
+                    def root = asNode()
+                    root.appendNode('name', projectName)
+                    root.appendNode('description', projectDescription)
+                    root.appendNode('url', repositoryUrl)
+                    root.children().last() + pomConfig
+                }
             }
         }
     }
 }
-
-
 
 // configure release plugin. See https://github.com/researchgate/gradle-release#configuration
 release {

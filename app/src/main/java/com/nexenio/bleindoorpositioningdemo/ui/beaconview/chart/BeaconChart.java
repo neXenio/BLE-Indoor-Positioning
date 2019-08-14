@@ -1,8 +1,8 @@
 package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 
 import android.content.Context;
-import android.support.annotation.IntDef;
-import android.support.annotation.Nullable;
+import androidx.annotation.IntDef;
+import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.BeaconView;
