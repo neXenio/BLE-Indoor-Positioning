@@ -3,7 +3,7 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.support.annotation.CallSuper;
+import androidx.annotation.CallSuper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
