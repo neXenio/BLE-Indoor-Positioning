@@ -156,11 +156,13 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
             @Override
             public boolean matches(Beacon beacon) {
                 BeaconFilter beaconFilter = getInstance().indoorPositioningBeaconFilter;
-                if (!beaconFilter.canMatch(beacon)) {
-                    return false;
-                }
-                if (!beaconFilter.matches(beacon)) {
-                    return false;
+                if (beaconFilter != null) {
+                    if (!beaconFilter.canMatch(beacon)) {
+                        return false;
+                    }
+                    if (!beaconFilter.matches(beacon)) {
+                        return false;
+                    }
                 }
                 if (!beacon.hasLocation()) {
                     return false; // beacon has no location assigned, can't use it for multilateration
