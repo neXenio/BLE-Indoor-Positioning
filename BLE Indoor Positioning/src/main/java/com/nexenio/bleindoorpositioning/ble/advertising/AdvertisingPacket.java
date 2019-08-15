@@ -40,7 +40,11 @@ public abstract class AdvertisingPacket {
 
     @Override
     public String toString() {
-        return AdvertisingPacketUtil.toHexadecimalString(data);
+        return "AdvertisingPacket{" +
+                "data=" + Arrays.hashCode(data) +
+                ", rssi=" + rssi +
+                ", timestamp=" + timestamp +
+                '}';
     }
 
     /*

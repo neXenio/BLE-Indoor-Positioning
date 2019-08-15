@@ -46,6 +46,20 @@ public class IBeacon<P extends IBeaconAdvertisingPacket> extends Beacon<P> {
         setCalibratedRssi(advertisingPacket.getMeasuredPowerByte());
     }
 
+    @Override
+    public String toString() {
+        return "IBeacon{" +
+                "proximityUuid=" + proximityUuid +
+                ", major=" + major +
+                ", minor=" + minor +
+                ", macAddress='" + macAddress + '\'' +
+                ", rssi=" + rssi +
+                ", calibratedRssi=" + calibratedRssi +
+                ", transmissionPower=" + transmissionPower +
+                ", advertisingPackets=" + advertisingPackets +
+                '}';
+    }
+
     /*
         Getter & Setter
      */

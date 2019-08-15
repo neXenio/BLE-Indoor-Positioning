@@ -6,6 +6,7 @@ import com.nexenio.bleindoorpositioning.ble.beacon.signal.MeanFilter;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -126,23 +127,11 @@ public class BeaconManager {
     }
 
     public static String getBeaconKey(String macAddress, AdvertisingPacket advertisingPacket) {
-        return getBeaconKey(macAddress, BeaconUtil.getReadableBeaconType(advertisingPacket));
+        return macAddress + "-" + Arrays.hashCode(advertisingPacket.getData());
     }
 
-    private static String getBeaconKey(String macAddress, String beaconType) {
-        return macAddress + "-" + beaconType;
-    }
-
-    public static IBeacon getIBeacon(String macAddress) {
-        return (IBeacon) getBeacon(macAddress, IBeacon.class);
-    }
-
-    public static Eddystone getEddystone(String macAddress) {
-        return (Eddystone) getBeacon(macAddress, Eddystone.class);
-    }
-
-    public static Beacon getBeacon(String macAddress, Class<? extends Beacon> beaconClass) {
-        String key = getBeaconKey(macAddress, BeaconUtil.getReadableBeaconType(beaconClass));
+    public static Beacon getBeacon(String macAddress, AdvertisingPacket advertisingPacket) {
+        String key = getBeaconKey(macAddress, advertisingPacket);
         return getInstance().beaconMap.get(key);
     }
 
