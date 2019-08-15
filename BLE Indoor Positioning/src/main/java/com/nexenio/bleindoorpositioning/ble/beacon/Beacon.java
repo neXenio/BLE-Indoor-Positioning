@@ -127,7 +127,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
                 applyPropertiesFromAdvertisingPacket(advertisingPacket);
             }
 
-            if (latestAdvertisingPacket.getTimestamp() > advertisingPacket.getTimestamp()) {
+            if (latestAdvertisingPacket != null && latestAdvertisingPacket.getTimestamp() > advertisingPacket.getTimestamp()) {
                 return;
             }
 
