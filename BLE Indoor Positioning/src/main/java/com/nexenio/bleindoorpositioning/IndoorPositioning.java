@@ -16,6 +16,7 @@ import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -51,7 +52,6 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     private GenericBeaconFilter usableIndoorPositioningBeaconFilter = createUsableIndoorPositioningBeaconFilter();
 
     private LocationPredictor locationPredictor = new LocationPredictor();
-
 
     private IndoorPositioning() {
         BeaconManager.registerBeaconUpdateListener(this);
@@ -118,7 +118,11 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     }
 
     public static <B extends Beacon> List<B> getUsableBeacons(Collection<B> availableBeacons) {
-        return getInstance().usableIndoorPositioningBeaconFilter.getMatches(availableBeacons);
+        BeaconFilter beaconFilter = getInstance().usableIndoorPositioningBeaconFilter;
+        if (availableBeacons.isEmpty() || !beaconFilter.canMatch(availableBeacons.iterator().next())) {
+            return new ArrayList<>();
+        }
+        return beaconFilter.getMatches(availableBeacons);
     }
 
     private void onLocationUpdated(Location location) {
@@ -151,8 +155,14 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
 
             @Override
             public boolean matches(Beacon beacon) {
-                if (getInstance().indoorPositioningBeaconFilter != null && !getInstance().indoorPositioningBeaconFilter.matches(beacon)) {
-                    return false;
+                BeaconFilter beaconFilter = getInstance().indoorPositioningBeaconFilter;
+                if (beaconFilter != null) {
+                    if (!beaconFilter.canMatch(beacon)) {
+                        return false;
+                    }
+                    if (!beaconFilter.matches(beacon)) {
+                        return false;
+                    }
                 }
                 if (!beacon.hasLocation()) {
                     return false; // beacon has no location assigned, can't use it for multilateration
@@ -225,4 +235,5 @@ public class IndoorPositioning implements LocationProvider, BeaconUpdateListener
     public void setMinimumRssiThreshold(int minimumRssiThreshold) {
         this.minimumRssiThreshold = minimumRssiThreshold;
     }
+
 }
