@@ -106,8 +106,8 @@ public class BeaconManager {
             for (BeaconUpdateListener beaconUpdateListener : beaconUpdateListeners) {
                 try {
                     beaconUpdateListener.onBeaconUpdated(beacon);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (ClassCastException e) {
+                    // meh
                 }
             }
         }
