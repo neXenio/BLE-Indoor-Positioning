@@ -17,6 +17,11 @@ public class GenericBeaconFilter<B extends Beacon> implements BeaconFilter<B> {
     protected boolean matchMacAddress;
 
     @Override
+    public boolean canMatch(Beacon beacon) {
+        return true;
+    }
+
+    @Override
     public boolean matches(B beacon) {
         if (matchMacAddress) {
             if (!macAddress.equals(beacon.getMacAddress())) {
@@ -55,4 +60,5 @@ public class GenericBeaconFilter<B extends Beacon> implements BeaconFilter<B> {
     public void setMatchMacAddress(boolean matchMacAddress) {
         this.matchMacAddress = matchMacAddress;
     }
+
 }

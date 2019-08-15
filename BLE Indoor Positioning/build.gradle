@@ -3,13 +3,13 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.8.1"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.9.8"
     }
 }
 
 plugins {
-    id 'net.researchgate.release' version '2.4.0'
-    id 'com.jfrog.bintray' version '1.7.3'
+    id 'net.researchgate.release' version '2.6.0'
+    id 'com.jfrog.bintray' version '1.8.4'
 }
 
 apply plugin: 'java-library'
@@ -28,8 +28,8 @@ dependencies {
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
-def releaseVersionCode = 14
-def releaseVersionName = "0.3.8"
+def releaseVersionCode = 16
+def releaseVersionName = "0.4.0"
 
 def projectName = 'BLE Indoor Positioning'
 def projectDescription = 'Java library for indoor positioing using bluetooth beacons'
@@ -97,32 +97,6 @@ def pomConfig = {
     }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            groupId projectGroupId
-            artifact sourcesJar
-            artifactId projectArtifactId
-        }
-        BintrayPublication(MavenPublication) {
-            from components.java
-            groupId projectGroupId
-            artifact sourcesJar
-            artifact javadocJar
-            artifactId projectArtifactId
-            version releaseVersionName
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('name', projectName)
-                root.appendNode('description', projectDescription)
-                root.appendNode('url', repositoryUrl)
-                root.children().last() + pomConfig
-            }
-        }
-    }
-}
-
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allJava
@@ -136,6 +110,34 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 artifacts {
     archives sourcesJar
     archives javadocJar
+}
+
+project.afterEvaluate {
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                groupId projectGroupId
+                artifact sourcesJar
+                artifactId projectArtifactId
+            }
+            BintrayPublication(MavenPublication) {
+                from components.java
+                groupId projectGroupId
+                artifact sourcesJar
+                artifact javadocJar
+                artifactId projectArtifactId
+                version releaseVersionName
+                pom.withXml {
+                    def root = asNode()
+                    root.appendNode('name', projectName)
+                    root.appendNode('description', projectDescription)
+                    root.appendNode('url', repositoryUrl)
+                    root.children().last() + pomConfig
+                }
+            }
+        }
+    }
 }
 
 // configure release plugin. See https://github.com/researchgate/gradle-release#configuration

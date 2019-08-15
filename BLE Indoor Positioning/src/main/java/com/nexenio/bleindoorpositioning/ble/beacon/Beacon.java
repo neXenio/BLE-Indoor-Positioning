@@ -15,7 +15,6 @@ import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -26,7 +25,6 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public static final long MAXIMUM_PACKET_AGE = TimeUnit.SECONDS.toMillis(60);
 
-    protected UUID uuid;
     protected String macAddress;
     protected int rssi; // in dBm
     protected int calibratedRssi; // in dBm
@@ -76,7 +74,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     public abstract BeaconLocationProvider<? extends Beacon> createLocationProvider();
 
     public boolean hasAnyAdvertisingPacket() {
-        return advertisingPackets != null && !advertisingPackets.isEmpty();
+        return !advertisingPackets.isEmpty();
     }
 
     public P getOldestAdvertisingPacket() {
@@ -123,9 +121,16 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     public void addAdvertisingPacket(P advertisingPacket) {
         synchronized (advertisingPackets) {
             rssi = advertisingPacket.getRssi();
-            if (!hasAnyAdvertisingPacket() || !advertisingPacket.dataEquals(getLatestAdvertisingPacket())) {
+
+            P latestAdvertisingPacket = getLatestAdvertisingPacket();
+            if (latestAdvertisingPacket == null || !advertisingPacket.dataEquals(latestAdvertisingPacket)) {
                 applyPropertiesFromAdvertisingPacket(advertisingPacket);
             }
+
+            if (latestAdvertisingPacket != null && latestAdvertisingPacket.getTimestamp() > advertisingPacket.getTimestamp()) {
+                return;
+            }
+
             advertisingPackets.add(advertisingPacket);
             trimAdvertisingPackets();
             invalidateDistance();
@@ -219,25 +224,36 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         return new KalmanFilter(getLatestTimestamp());
     }
 
+    /**
+     * This function and its reverse are implemented with indicative naming in BeaconUtil.
+     *
+     * @deprecated use {@link BeaconUtil#AscendingRssiComparator} instead
+     */
+    @Deprecated
     public static Comparator<Beacon> RssiComparator = new Comparator<Beacon>() {
-
         public int compare(Beacon firstBeacon, Beacon secondBeacon) {
-            return firstBeacon.rssi - secondBeacon.rssi;
+            if (firstBeacon.equals(secondBeacon)) {
+                return 0;
+            }
+            return Integer.compare(firstBeacon.rssi, secondBeacon.rssi);
         }
-
     };
+
+    @Override
+    public String toString() {
+        return "Beacon{" +
+                ", macAddress='" + macAddress + '\'' +
+                ", rssi=" + rssi +
+                ", calibratedRssi=" + calibratedRssi +
+                ", calibratedDistance=" + calibratedDistance +
+                ", transmissionPower=" + transmissionPower +
+                ", advertisingPackets=" + advertisingPackets +
+                '}';
+    }
 
     /*
         Getter & Setter
      */
-
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
-    }
 
     public String getMacAddress() {
         return macAddress;
@@ -293,4 +309,5 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     public void setLocationProvider(BeaconLocationProvider<? extends Beacon> locationProvider) {
         this.locationProvider = locationProvider;
     }
+
 }

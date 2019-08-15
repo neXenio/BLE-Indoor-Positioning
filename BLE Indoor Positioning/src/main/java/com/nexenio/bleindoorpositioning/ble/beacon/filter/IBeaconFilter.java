@@ -1,5 +1,6 @@
 package com.nexenio.bleindoorpositioning.ble.beacon.filter;
 
+import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 
 import java.util.ArrayList;
@@ -31,6 +32,11 @@ public class IBeaconFilter<B extends IBeacon> extends GenericBeaconFilter<B> {
     public IBeaconFilter(List<UUID> proximityUuids) {
         this.proximityUuids.addAll(proximityUuids);
         matchProximityUuid = true;
+    }
+
+    @Override
+    public boolean canMatch(Beacon beacon) {
+        return super.canMatch(beacon) && beacon instanceof IBeacon;
     }
 
     @Override
