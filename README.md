@@ -16,7 +16,7 @@ Release artefacts are available through [Bintray][bintray].
 
 ```groovy
 dependencies {
-    compile 'com.nexenio.bleindoorpositioning:core:0.3.0'
+    compile 'com.nexenio.bleindoorpositioning:core:0.4.0'
 }
 ```
 
@@ -39,7 +39,7 @@ dependencies {
 <dependency>
   <groupId>com.nexenio.bleindoorpositioning</groupId>
   <artifactId>core</artifactId>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
 </dependency>
 ```
 
