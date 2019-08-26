@@ -8,7 +8,7 @@ buildscript {
 }
 
 plugins {
-    id 'net.researchgate.release' version '2.4.0'
+    id 'net.researchgate.release' version '2.6.0'
     id 'com.jfrog.bintray' version '1.7.3'
 }
 
@@ -24,7 +24,7 @@ dependencies {
     testCompile 'net.steppschuh.markdowngenerator:markdowngenerator:1.3.0.0'
     testImplementation 'junit:junit:4.12'
 
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.3'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.9'
 }
 
 sourceCompatibility = '1.8'
@@ -99,6 +99,16 @@ def pomConfig = {
     }
 }
 
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -123,16 +133,6 @@ publishing {
             }
         }
     }
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allJava
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
 }
 
 artifacts {

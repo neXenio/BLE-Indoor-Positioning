@@ -139,6 +139,7 @@ public class BeaconDistanceCalculatorBenchmarkTest {
             // Change beacon default beacon filter to a mean filter
             return calculateDistanceTo(beacon, new MeanFilter(3, TimeUnit.SECONDS, beacon.getLatestTimestamp()));
         }
+
     }
 
 }
