@@ -47,6 +47,8 @@
     <string name="record_advertising_frequency_help">Advertising frequency in Hz (e.g. 10)</string>
     <string name="record_distance">Distance</string>
     <string name="record_distance_help">The measured distance in meters (e.g. 3)</string>
+    <string name="record_share_intent">Export json file</string>
+    <string name="record_retry">Retry</string>
 
     <!-- Filter -->
     <string name="title_filter">Filter</string>

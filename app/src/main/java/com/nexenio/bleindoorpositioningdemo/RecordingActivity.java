@@ -1,14 +1,21 @@
 package com.nexenio.bleindoorpositioningdemo;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -23,20 +30,32 @@ import com.nexenio.bleindoorpositioning.testutil.benchmark.DeviceInfo;
 import com.nexenio.bleindoorpositioning.testutil.benchmark.RssiMeasurements;
 import com.nexenio.bleindoorpositioningdemo.bluetooth.BluetoothClient;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class RecordingActivity extends AppCompatActivity {
 
     private static final String TAG = RecordingActivity.class.getSimpleName();
+    private static final String RECORDING_DIRECTORY_NAME = "Rssi_Recordings";
+    public static final int REQUEST_CODE_STORAGE_PERMISSIONS = 1;
 
     private final static UUID RECORDING_UUID = UUID.fromString("61a0523a-a733-4789-ae8f-4f55fcff64f2");
 
     private RssiMeasurements rssiMeasurements = new RssiMeasurements();
+
+    @Nullable
     private List<Integer> recordedRssiValues;
     private FilteredBeaconUpdateListener<IBeacon<IBeaconAdvertisingPacket>> recordingBeaconUpdateListener;
 
@@ -60,6 +79,10 @@ public class RecordingActivity extends AppCompatActivity {
 
     private boolean isRecording;
 
+    @Nullable
+    protected Snackbar errorSnackBar;
+    protected CoordinatorLayout coordinatorLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,11 +93,30 @@ public class RecordingActivity extends AppCompatActivity {
         initializeLayout();
         restoreFormValues();
         initializeBluetoothScanning();
+
+        if (!hasStoragePermission()) {
+            requestStoragePermission();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_STORAGE_PERMISSIONS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "Storage permission granted");
+                } else {
+                    showStoragePermissionMissingError();
+                }
+                break;
+            }
+        }
     }
 
     private void initializeLayout() {
-        recordButton = findViewById(R.id.recordButton);
+        coordinatorLayout = getWindow().getDecorView().findViewById(R.id.coordinatorLayout);
 
+        recordButton = findViewById(R.id.recordButton);
         distanceEditText = findViewById(R.id.recordDistanceEditText);
         notesEditText = findViewById(R.id.recordNotesEditText);
 
@@ -88,6 +130,14 @@ public class RecordingActivity extends AppCompatActivity {
         beaconManufacturerEditText = findViewById(R.id.recordBeaconManufacturerEditText);
         beaconTransmissionPowerEditText = findViewById(R.id.recordBeaconTransmissionPowerEditText);
         beaconAdvertisingFrequencyEditText = findViewById(R.id.recordBeaconAdvertisingFrequencyEditText);
+
+        // Limit numbers to avoid overflow
+        InputFilter[] FilterArray = new InputFilter[1];
+        FilterArray[0] = new InputFilter.LengthFilter(6);
+
+        distanceEditText.setFilters(FilterArray);
+        beaconTransmissionPowerEditText.setFilters(FilterArray);
+        beaconAdvertisingFrequencyEditText.setFilters(FilterArray);
     }
 
     private void initializeBluetoothScanning() {
@@ -148,9 +198,16 @@ public class RecordingActivity extends AppCompatActivity {
     }
 
     private void startRecording() {
-        Log.d(TAG, "Starting recording");
+        try {
+            rssiMeasurements = createRssiMeasurements();
+        } catch (IllegalArgumentException | NullPointerException e) {
+            if (!showInvalidFields()) {
+                throw e;
+            }
+            return;
+        }
 
-        rssiMeasurements = createRssiMeasurements();
+        Log.d(TAG, "Starting recording");
         recordedRssiValues = new ArrayList<>();
 
         BluetoothClient.startScanning();
@@ -161,6 +218,9 @@ public class RecordingActivity extends AppCompatActivity {
     }
 
     private void stopRecording() {
+        if (!isRecording) {
+            return;
+        }
         Log.d(TAG, "Stopping recording");
         isRecording = false;
         recordButton.setText(getString(R.string.action_start_recording));
@@ -170,13 +230,119 @@ public class RecordingActivity extends AppCompatActivity {
 
         rssiMeasurements.setEndTimestamp(System.currentTimeMillis());
         rssiMeasurements.setRssis(convertIntArray(recordedRssiValues));
-        recordedRssiValues.clear();
+
+        if (recordedRssiValues != null) {
+            recordedRssiValues.clear();
+        }
 
         Log.i(TAG, "RSSI measurements:\n" + rssiMeasurements);
+        exportMeasurements();
+    }
 
-        // TODO: persist JSON file
+    /**
+     * Indicate text edit fields with missing text.
+     *
+     * @return False if no invalid field was found, else true
+     */
+    private boolean showInvalidFields() {
+        Toast.makeText(this, "Not all information were provided", Toast.LENGTH_LONG).show();
+        List<TextInputEditText> textInputEditTexts = getTextInputEditTexts();
+        boolean invalidTextField = false;
+        for (TextInputEditText textInputEditText : textInputEditTexts) {
+            if (textInputEditText.getText() != null && textInputEditText.getText().toString().equals("")) {
+                String errorString = "This field cannot be empty";
+                textInputEditText.setError(errorString);
+                invalidTextField = true;
+            }
+        }
+        return invalidTextField;
+    }
 
-        // TODO: start share intent for persisted JSON file
+    private List<TextInputEditText> getTextInputEditTexts() {
+        return Arrays.asList(distanceEditText,
+                notesEditText,
+                deviceIdEditText,
+                deviceModelEditText,
+                deviceManufacturerEditText,
+                deviceOsVersionEditText,
+                beaconNameEditText,
+                beaconModelEditText,
+                beaconManufacturerEditText,
+                beaconTransmissionPowerEditText,
+                beaconAdvertisingFrequencyEditText);
+    }
+
+    private void exportMeasurements() {
+        String jsonString = createJsonString(rssiMeasurements);
+        String fileName = "rssiMeasurements_" + rssiMeasurements.getStartTimestamp() + "_" + rssiMeasurements.getEndTimestamp() + ".json";
+        File file = persistJsonFile(fileName, jsonString);
+
+        ExternalStorageUtils.shareFile(file, this);
+    }
+
+    private static String createJsonString(RssiMeasurements rssiMeasurements) {
+        GsonBuilder gsonBuilder = new GsonBuilder()
+                .setPrettyPrinting();
+
+        Gson gson = gsonBuilder.create();
+        return gson.toJson(rssiMeasurements);
+    }
+
+    private File persistJsonFile(String fileName, String jsonString) {
+        File documentsDirectory = ExternalStorageUtils.getDocumentsDirectory(RECORDING_DIRECTORY_NAME);
+        File file = new File(documentsDirectory, fileName);
+
+        System.out.println(jsonString);
+
+        try {
+            if (!documentsDirectory.exists()) {
+                System.out.println("Creating directory");
+                boolean mkdirs = documentsDirectory.mkdirs();
+                System.out.println("Directory created: " + mkdirs);
+            }
+            System.out.println("Writing file");
+            ExternalStorageUtils.writeStringToFile(jsonString, file, false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
+
+    private boolean hasStoragePermission() {
+        int permissionResult = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        return permissionResult == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @SuppressLint("CheckResult")
+    private void requestStoragePermission() {
+        Log.d(TAG, "Requesting storage permission");
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        }, REQUEST_CODE_STORAGE_PERMISSIONS);
+    }
+
+    private void showStoragePermissionMissingError() {
+        // find a container for the snackbar
+        if (errorSnackBar != null) {
+            errorSnackBar.dismiss();
+            errorSnackBar = null;
+        }
+
+        View container = coordinatorLayout;
+        if (container == null) {
+            container = getWindow().getDecorView();
+        }
+        // create the snackbar
+        errorSnackBar = Snackbar.make(container, "Permission not granted", Snackbar.LENGTH_LONG);
+
+        errorSnackBar.setDuration(BaseTransientBottomBar.LENGTH_INDEFINITE)
+                .setActionTextColor(ContextCompat.getColor(this, R.color.primary))
+                .setAction(getString(R.string.record_retry), new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        requestStoragePermission();
+                    }
+                }).show();
     }
 
     private void onRecordingBeaconUpdated(IBeacon<IBeaconAdvertisingPacket> beacon) {
@@ -225,7 +391,12 @@ public class RecordingActivity extends AppCompatActivity {
         beaconAdvertisingFrequencyEditText.setText(sharedPreferences.getString(BeaconInfo.KEY_BEACON_ADVERTISING_FREQUENCY, ""));
     }
 
-    private static int[] convertIntArray(List<Integer> integerList) {
+    private static int[] convertIntArray(@Nullable List<Integer> integerList) {
+        if (integerList == null) {
+            Log.w(TAG, "Can't convert null to int array.");
+            return new int[0];
+        }
+
         int[] intArray = new int[integerList.size()];
         Iterator<Integer> iterator = integerList.iterator();
         for (int i = 0; i < intArray.length; i++) {

@@ -14,7 +14,7 @@
 
         <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/recordDistanceEditText"
-                android:inputType="number"
+                android:inputType="numberDecimal"
                 style="@style/DefaultTextInputEditText"/>
 
     </com.google.android.material.textfield.TextInputLayout>
