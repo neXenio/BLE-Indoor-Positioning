@@ -3,7 +3,7 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PointF;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;

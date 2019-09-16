@@ -2,7 +2,11 @@ package com.nexenio.bleindoorpositioning.testutil.benchmark;
 
 public class BeaconInfo {
 
-    // TODO: documentation
+    public static final String KEY_BEACON_NAME = "beaconName";
+    public static final String KEY_BEACON_MODEL = "beaconModel";
+    public static final String KEY_BEACON_MANUFACTURER = "beaconManufacturer";
+    public static final String KEY_BEACON_ADVERTISING_FREQUENCY = "beaconAdvertisingFrequency";
+    public static final String KEY_BEACON_TRANSMISSION_POWER = "beaconTransmissionPower";
 
     private String name;
 

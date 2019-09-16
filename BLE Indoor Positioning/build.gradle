@@ -8,8 +8,8 @@ buildscript {
 }
 
 plugins {
-    id 'net.researchgate.release' version '2.6.0'
-    id 'com.jfrog.bintray' version '1.7.3'
+    id 'net.researchgate.release' version '2.7.0'
+    id 'com.jfrog.bintray' version '1.8.4'
 }
 
 apply plugin: 'java-library'
@@ -21,6 +21,7 @@ apply plugin: 'jacoco'
 dependencies {
     compile 'com.lemmingapex.trilateration:trilateration:1.0.2'
     compile 'com.google.code.gson:gson:2.8.5'
+
     testCompile 'net.steppschuh.markdowngenerator:markdowngenerator:1.3.0.0'
     testImplementation 'junit:junit:4.12'
 
@@ -109,6 +110,11 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -133,11 +139,6 @@ publishing {
             }
         }
     }
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
 }
 
 // configure release plugin. See https://github.com/researchgate/gradle-release#configuration
