@@ -229,14 +229,13 @@ public class RecordingActivity extends AppCompatActivity {
     }
 
     private void startRecording() {
-        try {
-            rssiMeasurements = createRssiMeasurements();
-        } catch (IllegalArgumentException | NullPointerException e) {
-            if (!showInvalidFields()) {
-                throw e;
-            }
+        List<TextInputEditText> invalidTextEdits = getInvalidTextEdits();
+        if (!invalidTextEdits.isEmpty()) {
+            showInvalidFields(invalidTextEdits);
             return;
         }
+
+        rssiMeasurements = createRssiMeasurements();
 
         if (!hasStoragePermission()) {
             requestStoragePermission();
@@ -290,23 +289,26 @@ public class RecordingActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Indicate text edit fields with missing text.
-     *
-     * @return False if no invalid field was found, else true
-     */
-    private boolean showInvalidFields() {
-        Toast.makeText(this, "Not all information were provided", Toast.LENGTH_LONG).show();
+    private List<TextInputEditText> getInvalidTextEdits() {
         List<TextInputEditText> textInputEditTexts = getNecessaryTextInputEditTexts();
-        boolean invalidTextField = false;
+        List<TextInputEditText> invalidInputEdits = new ArrayList<>();
         for (TextInputEditText textInputEditText : textInputEditTexts) {
             if (textInputEditText.getText() != null && textInputEditText.getText().toString().equals("")) {
-                String errorString = "This field cannot be empty";
-                textInputEditText.setError(errorString);
-                invalidTextField = true;
+                invalidInputEdits.add(textInputEditText);
             }
         }
-        return invalidTextField;
+        return invalidInputEdits;
+    }
+
+    /**
+     * Indicate text edit fields with missing text.
+     */
+    private void showInvalidFields(List<TextInputEditText> textInputEditTexts) {
+        Toast.makeText(this, "Not all information were provided", Toast.LENGTH_LONG).show();
+        String errorString = "This field cannot be empty";
+        for (TextInputEditText textInputEditText : textInputEditTexts) {
+            textInputEditText.setError(errorString);
+        }
     }
 
     private List<TextInputEditText> getNecessaryTextInputEditTexts() {
