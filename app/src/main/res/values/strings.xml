@@ -31,6 +31,7 @@
     <string name="title_record">Record</string>
     <string name="action_start_recording">Start Recording</string>
     <string name="action_stop_recording">Stop Recording</string>
+    <string name="action_clear_recordings">Delete all recordings</string>
     <string name="record_general_info">General Info</string>
     <string name="record_device_info">Device Info</string>
     <string name="record_beacon_info">Beacon Info</string>
@@ -49,6 +50,8 @@
     <string name="record_distance_help">The measured distance in meters (e.g. 3)</string>
     <string name="record_share_intent">Export json file</string>
     <string name="record_retry">Retry</string>
+    <string name="record_uuid">Recording Uuid</string>
+    <string name="record_uuid_help">Copy recording uuid to clipboard</string>
 
     <!-- Filter -->
     <string name="title_filter">Filter</string>

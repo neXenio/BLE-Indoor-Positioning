@@ -9,12 +9,16 @@ import com.google.gson.GsonBuilder;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +44,7 @@ import java.util.UUID;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
@@ -74,6 +79,8 @@ public class RecordingActivity extends AppCompatActivity {
     private TextInputEditText beaconManufacturerEditText;
     private TextInputEditText beaconTransmissionPowerEditText;
     private TextInputEditText beaconAdvertisingFrequencyEditText;
+
+    private TextInputEditText recordingUuidCopyEditText;
 
     private MaterialButton recordButton;
 
@@ -131,6 +138,9 @@ public class RecordingActivity extends AppCompatActivity {
         beaconTransmissionPowerEditText = findViewById(R.id.recordBeaconTransmissionPowerEditText);
         beaconAdvertisingFrequencyEditText = findViewById(R.id.recordBeaconAdvertisingFrequencyEditText);
 
+        recordingUuidCopyEditText = findViewById(R.id.recordingUuidCopyEditText);
+        setupUuidEditText();
+
         // Limit numbers to avoid overflow
         InputFilter[] FilterArray = new InputFilter[1];
         FilterArray[0] = new InputFilter.LengthFilter(6);
@@ -168,12 +178,33 @@ public class RecordingActivity extends AppCompatActivity {
         }
     }
 
+    public void onClearRecordingsButtonClicked(View view) {
+        new AlertDialog.Builder(this)
+                .setTitle("Remove Recordings")
+                .setMessage("Do you really want to remove all recordings?")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        File documentsDirectory = ExternalStorageUtils.getDocumentsDirectory(RECORDING_DIRECTORY_NAME);
+                        List<File> jsonFilesInDirectory = ExternalStorageUtils.getJsonFilesInDirectory(documentsDirectory);
+                        ExternalStorageUtils.removeFiles(jsonFilesInDirectory);
+                        Toast.makeText(RecordingActivity.this, "Removed " + jsonFilesInDirectory.size() + " file(s)", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, null).show();
+    }
+
     private RssiMeasurements createRssiMeasurements() {
         RssiMeasurements rssiMeasurements = new RssiMeasurements();
         rssiMeasurements.setDeviceInfo(createDeviceInfo());
         rssiMeasurements.setBeaconInfo(createBeaconInfo());
         rssiMeasurements.setDistance(Float.parseFloat(distanceEditText.getText().toString()));
-        rssiMeasurements.setNotes(notesEditText.getText().toString());
+
+        Editable optionalNotes = notesEditText.getText();
+        if (optionalNotes != null) {
+            rssiMeasurements.setNotes(optionalNotes.toString());
+        }
+
         rssiMeasurements.setStartTimestamp(System.currentTimeMillis());
         return rssiMeasurements;
     }
@@ -204,6 +235,11 @@ public class RecordingActivity extends AppCompatActivity {
             if (!showInvalidFields()) {
                 throw e;
             }
+            return;
+        }
+
+        if (!hasStoragePermission()) {
+            requestStoragePermission();
             return;
         }
 
@@ -239,6 +275,21 @@ public class RecordingActivity extends AppCompatActivity {
         exportMeasurements();
     }
 
+    private void setupUuidEditText() {
+        recordingUuidCopyEditText.setText(RECORDING_UUID.toString());
+        recordingUuidCopyEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("Recording Uuid", ((TextInputEditText) v).getText());
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(RecordingActivity.this, "Copied to Clipboard", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
     /**
      * Indicate text edit fields with missing text.
      *
@@ -246,7 +297,7 @@ public class RecordingActivity extends AppCompatActivity {
      */
     private boolean showInvalidFields() {
         Toast.makeText(this, "Not all information were provided", Toast.LENGTH_LONG).show();
-        List<TextInputEditText> textInputEditTexts = getTextInputEditTexts();
+        List<TextInputEditText> textInputEditTexts = getNecessaryTextInputEditTexts();
         boolean invalidTextField = false;
         for (TextInputEditText textInputEditText : textInputEditTexts) {
             if (textInputEditText.getText() != null && textInputEditText.getText().toString().equals("")) {
@@ -258,9 +309,8 @@ public class RecordingActivity extends AppCompatActivity {
         return invalidTextField;
     }
 
-    private List<TextInputEditText> getTextInputEditTexts() {
+    private List<TextInputEditText> getNecessaryTextInputEditTexts() {
         return Arrays.asList(distanceEditText,
-                notesEditText,
                 deviceIdEditText,
                 deviceModelEditText,
                 deviceManufacturerEditText,
@@ -291,16 +341,10 @@ public class RecordingActivity extends AppCompatActivity {
     private File persistJsonFile(String fileName, String jsonString) {
         File documentsDirectory = ExternalStorageUtils.getDocumentsDirectory(RECORDING_DIRECTORY_NAME);
         File file = new File(documentsDirectory, fileName);
-
-        System.out.println(jsonString);
-
         try {
             if (!documentsDirectory.exists()) {
-                System.out.println("Creating directory");
-                boolean mkdirs = documentsDirectory.mkdirs();
-                System.out.println("Directory created: " + mkdirs);
+                documentsDirectory.mkdirs();
             }
-            System.out.println("Writing file");
             ExternalStorageUtils.writeStringToFile(jsonString, file, false);
         } catch (IOException e) {
             e.printStackTrace();
@@ -336,7 +380,6 @@ public class RecordingActivity extends AppCompatActivity {
         errorSnackBar = Snackbar.make(container, "Permission not granted", Snackbar.LENGTH_LONG);
 
         errorSnackBar.setDuration(BaseTransientBottomBar.LENGTH_INDEFINITE)
-                .setActionTextColor(ContextCompat.getColor(this, R.color.primary))
                 .setAction(getString(R.string.record_retry), new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

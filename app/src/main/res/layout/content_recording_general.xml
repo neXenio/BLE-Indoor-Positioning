@@ -30,4 +30,16 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+            android:hint="@string/record_uuid"
+            app:helperText="@string/record_uuid_help"
+            style="@style/DefaultTextInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/recordingUuidCopyEditText"
+                android:editable="false"
+                style="@style/DefaultTextInputEditText"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
 </LinearLayout>
