@@ -18,6 +18,8 @@ public class BeaconInfo {
 
     private int transmissionPower;
 
+    private byte[] manufacturerData;
+
     public BeaconInfo() {
     }
 
@@ -61,4 +63,11 @@ public class BeaconInfo {
         this.transmissionPower = transmissionPower;
     }
 
+    public byte[] getManufacturerData() {
+        return manufacturerData;
+    }
+
+    public void setManufacturerData(byte[] manufacturerData) {
+        this.manufacturerData = manufacturerData;
+    }
 }
