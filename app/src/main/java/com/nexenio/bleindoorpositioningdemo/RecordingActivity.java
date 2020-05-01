@@ -186,9 +186,9 @@ public class RecordingActivity extends AppCompatActivity {
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         File documentsDirectory = ExternalStorageUtils.getDocumentsDirectory(RECORDING_DIRECTORY_NAME);
-                        List<File> jsonFilesInDirectory = ExternalStorageUtils.getJsonFilesInDirectory(documentsDirectory);
-                        ExternalStorageUtils.removeFiles(jsonFilesInDirectory);
-                        Toast.makeText(RecordingActivity.this, "Removed " + jsonFilesInDirectory.size() + " file(s)", Toast.LENGTH_SHORT).show();
+                        List<File> files = ExternalStorageUtils.getFilesInDirectory(documentsDirectory);
+                        ExternalStorageUtils.removeFiles(files);
+                        Toast.makeText(RecordingActivity.this, "Removed " + files.size() + " file(s)", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton(android.R.string.no, null).show();
@@ -324,6 +324,31 @@ public class RecordingActivity extends AppCompatActivity {
                 beaconAdvertisingFrequencyEditText);
     }
 
+    public void onExportAllRecordingsButtonClicked(View view) {
+        exportAllRecordings();
+    }
+
+    private void exportAllRecordings() {
+        File documentsDirectory = ExternalStorageUtils.getDocumentsDirectory(RECORDING_DIRECTORY_NAME);
+        List<File> jsonFiles = ExternalStorageUtils.getJsonFilesInDirectory(documentsDirectory);
+
+        String fileName = "measurements.zip";
+        File zipFile = new File(documentsDirectory, fileName);
+
+        if (zipFile.exists()) {
+            zipFile.delete();
+        }
+
+        try {
+            ExternalStorageUtils.zip(jsonFiles, zipFile.getAbsolutePath());
+        } catch (IOException e) {
+            Toast.makeText(this, "Unable to export files", Toast.LENGTH_LONG).show();
+            Log.e(TAG, "Unable to export measurements", e);
+            return;
+        }
+        ExternalStorageUtils.shareFile(zipFile, this);
+    }
+
     private void exportMeasurements() {
         String jsonString = createJsonString(rssiMeasurements);
         String fileName = "rssiMeasurements_" + rssiMeasurements.getStartTimestamp() + "_" + rssiMeasurements.getEndTimestamp() + ".json";
@@ -349,6 +374,7 @@ public class RecordingActivity extends AppCompatActivity {
             }
             ExternalStorageUtils.writeStringToFile(jsonString, file, false);
         } catch (IOException e) {
+            // TODO: log + toast
             e.printStackTrace();
         }
         return file;

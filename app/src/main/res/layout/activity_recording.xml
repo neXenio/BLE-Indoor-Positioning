@@ -37,6 +37,13 @@
                     android:text="@string/action_start_recording"/>
 
             <com.google.android.material.button.MaterialButton
+                    android:id="@+id/exportAllRecordingsButton"
+                    android:onClick="onExportAllRecordingsButtonClicked"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_export_all_recordings"/>
+
+            <com.google.android.material.button.MaterialButton
                     android:id="@+id/clearRecordingsButton"
                     android:onClick="onClearRecordingsButtonClicked"
                     android:layout_width="match_parent"

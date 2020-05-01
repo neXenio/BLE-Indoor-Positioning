@@ -31,6 +31,7 @@
     <string name="title_record">Record</string>
     <string name="action_start_recording">Start Recording</string>
     <string name="action_stop_recording">Stop Recording</string>
+    <string name="action_export_all_recordings">Export all recordings</string>
     <string name="action_clear_recordings">Delete all recordings</string>
     <string name="record_general_info">General Info</string>
     <string name="record_device_info">Device Info</string>
