@@ -2,10 +2,10 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.annotation.ColorInt;
-import android.support.annotation.IntDef;
-import android.support.annotation.NonNull;
-import android.support.v4.content.res.ResourcesCompat;
+import androidx.annotation.ColorInt;
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.nexenio.bleindoorpositioningdemo.R;
 

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/tools"
+        android:id="@id/coordinatorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:ignore="NamespaceTypo">
+    <!--android:background="@color/primary"-->
+    <ScrollView
+            xmlns:tools="http://schemas.android.com/tools"
+            tools:context="com.nexenio.bleindoorpositioningdemo.RecordingActivity"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <LinearLayout
+                android:paddingStart="@dimen/activity_horizontal_margin"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <include layout="@layout/content_recording_general"/>
+
+            <include layout="@layout/content_recording_device"/>
+
+            <include layout="@layout/content_recording_beacon"/>
+
+            <com.google.android.material.button.MaterialButton
+                    android:id="@+id/recordButton"
+                    android:onClick="onRecordButtonClicked"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_start_recording"/>
+
+            <com.google.android.material.button.MaterialButton
+                    android:id="@+id/exportAllRecordingsButton"
+                    android:onClick="onExportAllRecordingsButtonClicked"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_export_all_recordings"/>
+
+            <com.google.android.material.button.MaterialButton
+                    android:id="@+id/clearRecordingsButton"
+                    android:onClick="onClearRecordingsButtonClicked"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_clear_recordings"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -27,6 +27,33 @@
     <string name="axis_label_frequency">Frequency in Hz</string>
     <string name="axis_label_variance">Variance in dBm</string>
 
+    <!-- Record -->
+    <string name="title_record">Record</string>
+    <string name="action_start_recording">Start Recording</string>
+    <string name="action_stop_recording">Stop Recording</string>
+    <string name="action_export_all_recordings">Export all recordings</string>
+    <string name="action_clear_recordings">Delete all recordings</string>
+    <string name="record_general_info">General Info</string>
+    <string name="record_device_info">Device Info</string>
+    <string name="record_beacon_info">Beacon Info</string>
+    <string name="record_notes">Notes</string>
+    <string name="record_notes_help">An optional comment</string>
+    <string name="record_id">ID</string>
+    <string name="record_name">Name</string>
+    <string name="record_manufacturer">Manufacturer</string>
+    <string name="record_model">Model</string>
+    <string name="record_os_version">OS Version</string>
+    <string name="record_transmission_power">TX Power</string>
+    <string name="record_transmission_power_help">The transmission power in dBm (e.g. -20)</string>
+    <string name="record_advertising_frequency">Advertising Frequency</string>
+    <string name="record_advertising_frequency_help">Advertising frequency in Hz (e.g. 10)</string>
+    <string name="record_distance">Distance</string>
+    <string name="record_distance_help">The measured distance in meters (e.g. 3)</string>
+    <string name="record_share_intent">Export json file</string>
+    <string name="record_retry">Retry</string>
+    <string name="record_uuid">Recording Uuid</string>
+    <string name="record_uuid_help">Copy recording uuid to clipboard</string>
+
     <!-- Filter -->
     <string name="title_filter">Filter</string>
     <string name="filter_type">Beacon Type</string>
@@ -39,6 +66,7 @@
     <string name="filter_major">@string/beacon_major</string>
 
     <!-- Menu -->
+    <string name="menu_record">@string/title_record</string>
     <string name="menu_filter">@string/title_filter</string>
     <string name="menu_color">Coloring</string>
     <string name="menu_color_by_instance">Instances</string>

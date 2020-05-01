@@ -3,8 +3,13 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+            android:id="@+id/menu_record"
+            android:title="@string/menu_record"
+            android:icon="@drawable/filter"/>
+
+    <item
             android:id="@+id/menu_filter"
-            android:title="@string/title_filter"
+            android:title="@string/menu_filter"
             android:icon="@drawable/filter"/>
 
     <item

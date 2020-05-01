@@ -2,7 +2,7 @@ package com.nexenio.bleindoorpositioningdemo.ui;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationListener;
