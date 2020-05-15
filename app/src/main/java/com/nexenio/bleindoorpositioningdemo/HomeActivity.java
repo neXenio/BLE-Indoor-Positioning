@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 
 import com.nexenio.bleindoorpositioningdemo.bluetooth.BluetoothClient;
 import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
@@ -56,8 +57,12 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.menu_record:
+                Intent intent = new Intent(this, RecordingActivity.class);
+                startActivity(intent);
+                return true;
             case R.id.menu_filter:
-                Log.w(TAG, "BeaconFilter");
+                Log.w(TAG, "Filter");
                 return true;
             default:
                 break;

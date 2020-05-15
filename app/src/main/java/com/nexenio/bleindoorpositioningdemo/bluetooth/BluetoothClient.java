@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
@@ -126,7 +127,7 @@ public class BluetoothClient {
         AdvertisingPacket advertisingPacket = BeaconManager.processAdvertisingData(macAddress, data, scanResult.getRssi());
 
         if (advertisingPacket != null) {
-            Beacon beacon = BeaconManager.getBeacon(macAddress, advertisingPacket);
+            Beacon beacon = BeaconManager.getBeacon(macAddress, advertisingPacket.getBeaconClass());
             if (beacon instanceof IBeacon && !beacon.hasLocation()) {
                 beacon.setLocationProvider(createDebuggingLocationProvider((IBeacon) beacon));
             }

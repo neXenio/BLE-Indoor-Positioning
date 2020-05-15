@@ -34,8 +34,8 @@ public abstract class AdvertisingPacketUtil {
 
     public static float calculateMean(int[] values) {
         int sum = 0;
-        for (int i = 0; i < values.length; i++) {
-            sum += values[i];
+        for (int value : values) {
+            sum += value;
         }
         return sum / (float) values.length;
     }
@@ -43,8 +43,8 @@ public abstract class AdvertisingPacketUtil {
     public static float calculateVariance(int[] values) {
         float mean = calculateMean(values);
         float squaredDistanceSum = 0;
-        for (int i = 0; i < values.length; i++) {
-            squaredDistanceSum += Math.pow(values[i] - mean, 2);
+        for (int value : values) {
+            squaredDistanceSum += Math.pow(value - mean, 2);
         }
         int sampleLength = Math.max(values.length - 1, 1);
         return squaredDistanceSum / sampleLength;

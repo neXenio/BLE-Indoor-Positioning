@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              style="@style/RecordingContentContainer">
+
+    <TextView
+            android:text="@string/record_device_info"
+            style="@style/DefaultHeadingText"/>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:hint="@string/record_id"
+            style="@style/DefaultTextInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/recordDeviceIdEditText"
+                android:enabled="false"
+                style="@style/DefaultTextInputEditText"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:hint="@string/record_model"
+            style="@style/DefaultTextInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/recordDeviceModelEditText"
+                android:enabled="false"
+                style="@style/DefaultTextInputEditText"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:hint="@string/record_manufacturer"
+            style="@style/DefaultTextInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/recordDeviceManufacturerEditText"
+                android:enabled="false"
+                style="@style/DefaultTextInputEditText"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:hint="@string/record_os_version"
+            style="@style/DefaultTextInputLayout">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/recordDeviceOsVersionEditText"
+                android:enabled="false"
+                style="@style/DefaultTextInputEditText"/>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

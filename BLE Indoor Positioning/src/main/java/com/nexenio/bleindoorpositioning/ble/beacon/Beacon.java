@@ -15,6 +15,7 @@ import com.nexenio.bleindoorpositioning.location.provider.LocationProvider;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -25,6 +26,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public static final long MAXIMUM_PACKET_AGE = TimeUnit.SECONDS.toMillis(60);
 
+    protected UUID uuid;
     protected String macAddress;
     protected int rssi; // in dBm
     protected int calibratedRssi; // in dBm
@@ -32,6 +34,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     protected int transmissionPower; // in dBm
     protected float distance; // in m
     protected boolean shouldUpdateDistance = true;
+    protected boolean trim = true;
     protected final ArrayList<P> advertisingPackets = new ArrayList<>();
     protected BeaconLocationProvider<? extends Beacon> locationProvider;
 
@@ -74,7 +77,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     public abstract BeaconLocationProvider<? extends Beacon> createLocationProvider();
 
     public boolean hasAnyAdvertisingPacket() {
-        return !advertisingPackets.isEmpty();
+        return advertisingPackets != null && !advertisingPackets.isEmpty();
     }
 
     public P getOldestAdvertisingPacket() {
@@ -121,15 +124,13 @@ public abstract class Beacon<P extends AdvertisingPacket> {
     public void addAdvertisingPacket(P advertisingPacket) {
         synchronized (advertisingPackets) {
             rssi = advertisingPacket.getRssi();
-
-            P latestAdvertisingPacket = getLatestAdvertisingPacket();
-            if (latestAdvertisingPacket == null || !advertisingPacket.dataEquals(latestAdvertisingPacket)) {
+            if (!hasAnyAdvertisingPacket() || !advertisingPacket.dataEquals(getLatestAdvertisingPacket())) {
                 applyPropertiesFromAdvertisingPacket(advertisingPacket);
             }
 
-            if (latestAdvertisingPacket != null && latestAdvertisingPacket.getTimestamp() > advertisingPacket.getTimestamp()) {
-                return;
-            }
+            // if (latestAdvertisingPacket != null && latestAdvertisingPacket.getTimestamp() > advertisingPacket.getTimestamp()) {
+            //     return;
+            // }
 
             advertisingPackets.add(advertisingPacket);
             trimAdvertisingPackets();
@@ -143,7 +144,7 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public void trimAdvertisingPackets() {
         synchronized (advertisingPackets) {
-            if (!hasAnyAdvertisingPacket()) {
+            if (!hasAnyAdvertisingPacket() || !trim) {
                 return;
             }
             List<P> removableAdvertisingPackets = new ArrayList<>();
@@ -252,6 +253,14 @@ public abstract class Beacon<P extends AdvertisingPacket> {
         Getter & Setter
      */
 
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
     public String getMacAddress() {
         return macAddress;
     }
@@ -305,6 +314,14 @@ public abstract class Beacon<P extends AdvertisingPacket> {
 
     public void setLocationProvider(BeaconLocationProvider<? extends Beacon> locationProvider) {
         this.locationProvider = locationProvider;
+    }
+
+    public boolean shouldTrim() {
+        return trim;
+    }
+
+    public void setTrim(boolean trim) {
+        this.trim = trim;
     }
 
 }
