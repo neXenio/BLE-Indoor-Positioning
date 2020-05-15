@@ -17,7 +17,7 @@ import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacketUtil;
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
 import com.nexenio.bleindoorpositioning.location.Location;
-import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
+import com.nexenio.bleindoorpositioning.ble.beacon.distance.BeaconDistanceCalculatorManager;
 import com.nexenio.bleindoorpositioningdemo.R;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.ColorUtil;
 
@@ -403,7 +403,7 @@ public class BeaconLineChart extends BeaconChart {
                 return rssi;
             }
             case VALUE_TYPE_DISTANCE: {
-                return BeaconDistanceCalculator.calculateDistanceTo(beacon, rssi);
+                return BeaconDistanceCalculatorManager.getInstance().calculateDistanceTo(beacon, rssi);
             }
             case VALUE_TYPE_FREQUENCY: {
                 long windowLength = Math.max(this.windowLength, MINIMUM_WINDOW_LENGTH_FREQUENCY);

@@ -1,14 +1,14 @@
-package com.nexenio.bleindoorpositioning.location.distance;
+package com.nexenio.bleindoorpositioning.ble.beacon.distance;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.Eddystone;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 
 /**
- * Created by steppschuh on 22.11.17.
+ * Calculates the distance to the specified beacon using the <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
+ * path loss model</a>.
  */
-
-public abstract class BeaconDistanceCalculator {
+public class PathLossBeaconDistanceCalculator extends BaseBeaconDistanceCalculator {
 
     /**
      * Different Path Loss Exponent parameters for different environments.
@@ -22,15 +22,7 @@ public abstract class BeaconDistanceCalculator {
     public static final int CALIBRATED_RSSI_AT_ONE_METER = -62;
     public static final int SIGNAL_LOSS_AT_ONE_METER = -41;
 
-    private static float pathLossParameter = PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION;
-
-    /**
-     * Calculates the distance to the specified beacon using the <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
-     * path loss model</a>.
-     */
-    public static float calculateDistanceTo(Beacon beacon) {
-        return calculateDistanceTo(beacon, beacon.getFilteredRssi());
-    }
+    private float pathLossParameter = PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION;
 
     /**
      * Use this method to remove the elevation delta from the distance between device and beacon.
@@ -38,7 +30,7 @@ public abstract class BeaconDistanceCalculator {
      * distance is double the elevation delta. The elevation expected refers to the distance above
      * the floor ground, rather than the altitude above sea level.
      */
-    public static float calculateDistanceWithoutElevationDeltaToDevice(Beacon beacon, float rssi, double deviceElevation) {
+    public float calculateDistanceWithoutElevationDeltaToDevice(Beacon beacon, float rssi, double deviceElevation) {
         float distance = calculateDistanceTo(beacon, rssi);
         if (beacon.hasLocation() && beacon.getLocation().hasElevation()) {
             double elevationDelta = Math.abs(beacon.getLocation().getElevation() - deviceElevation);
@@ -54,11 +46,8 @@ public abstract class BeaconDistanceCalculator {
         }
     }
 
-    /**
-     * Calculates the distance to the specified beacon using the <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">log-distance
-     * path loss model</a>.
-     */
-    public static float calculateDistanceTo(Beacon beacon, float rssi) {
+    @Override
+    public float calculateDistanceTo(Beacon beacon, float rssi) {
         return calculateDistance(rssi, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), pathLossParameter);
     }
 
@@ -99,11 +88,12 @@ public abstract class BeaconDistanceCalculator {
         return (float) Math.pow(10, (calibratedRssi - rssi) / (10 * pathLossParameter));
     }
 
-    public static void setPathLossParameter(float pathLossParameter) {
-        BeaconDistanceCalculator.pathLossParameter = pathLossParameter;
+    public void setPathLossParameter(float pathLossParameter) {
+        this.pathLossParameter = pathLossParameter;
     }
 
-    public static float getPathLossParameter() {
-        return BeaconDistanceCalculator.pathLossParameter;
+    public float getPathLossParameter() {
+        return pathLossParameter;
     }
+
 }

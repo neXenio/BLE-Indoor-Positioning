@@ -1,11 +1,13 @@
-package com.nexenio.bleindoorpositioning.location.distance;
+package com.nexenio.bleindoorpositioning.ble.beacon.distance;
 
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
+import com.nexenio.bleindoorpositioning.ble.beacon.distance.PathLossBeaconDistanceCalculator;
 import com.nexenio.bleindoorpositioning.location.Location;
 import com.nexenio.bleindoorpositioning.location.LocationTest;
 import com.nexenio.bleindoorpositioning.location.provider.IBeaconLocationProvider;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -13,15 +15,22 @@ import static org.junit.Assert.assertEquals;
 /**
  * Created by steppschuh on 22.11.17.
  */
-public class BeaconDistanceCalculatorTest {
+public class PathLossBeaconDistanceCalculatorTest {
+
+    private PathLossBeaconDistanceCalculator pathLossBeaconDistanceCalculator;
+
+    @Before
+    public void setUp() {
+        pathLossBeaconDistanceCalculator = new PathLossBeaconDistanceCalculator();
+    }
 
     @Test
     public void calculateDistanceWithoutElevationDeltaToFloor_smallDistanceLowAltitude_correctDistance() throws Exception {
         Beacon lowDummyBeacon = createLowElevationDummyBeacon();
         // without pythagoras
         lowDummyBeacon.setRssi(-65);
-        float expectedDistance = BeaconDistanceCalculator.calculateDistanceTo(lowDummyBeacon, lowDummyBeacon.getRssi());
-        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(lowDummyBeacon, lowDummyBeacon.getRssi(), 0);
+        float expectedDistance = pathLossBeaconDistanceCalculator.calculateDistanceTo(lowDummyBeacon, lowDummyBeacon.getRssi());
+        float actualDistance = pathLossBeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(lowDummyBeacon, lowDummyBeacon.getRssi(), 0);
         assertEquals(expectedDistance, actualDistance, 0);
     }
 
@@ -30,9 +39,9 @@ public class BeaconDistanceCalculatorTest {
         Beacon lowDummyBeacon = createLowElevationDummyBeacon();
         // with pythagoras
         lowDummyBeacon.setRssi(-90);
-        float absoluteDistance = BeaconDistanceCalculator.calculateDistanceTo(lowDummyBeacon, lowDummyBeacon.getRssi());
+        float absoluteDistance = pathLossBeaconDistanceCalculator.calculateDistanceTo(lowDummyBeacon, lowDummyBeacon.getRssi());
         float expectedDistance = (float) Math.sqrt(Math.pow(absoluteDistance, 2) - Math.pow(lowDummyBeacon.getLocation().getElevation(), 2));
-        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(lowDummyBeacon, lowDummyBeacon.getRssi(), 0);
+        float actualDistance = pathLossBeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(lowDummyBeacon, lowDummyBeacon.getRssi(), 0);
         assertEquals(expectedDistance, actualDistance, 0);
     }
 
@@ -41,8 +50,8 @@ public class BeaconDistanceCalculatorTest {
         Beacon highDummyBeacon = createHighElevationDummyBeacon();
         // without pythagoras
         highDummyBeacon.setRssi(-65);
-        float expectedDistance = BeaconDistanceCalculator.calculateDistanceTo(highDummyBeacon, highDummyBeacon.getRssi());
-        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(highDummyBeacon, highDummyBeacon.getRssi(), 0);
+        float expectedDistance = pathLossBeaconDistanceCalculator.calculateDistanceTo(highDummyBeacon, highDummyBeacon.getRssi());
+        float actualDistance = pathLossBeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(highDummyBeacon, highDummyBeacon.getRssi(), 0);
         assertEquals(expectedDistance, actualDistance, 0);
     }
 
@@ -51,31 +60,31 @@ public class BeaconDistanceCalculatorTest {
         Beacon highDummyBeacon = createHighElevationDummyBeacon();
         // with pythagoras
         highDummyBeacon.setRssi(-90);
-        float absoluteDistance = BeaconDistanceCalculator.calculateDistanceTo(highDummyBeacon, highDummyBeacon.getRssi());
+        float absoluteDistance = pathLossBeaconDistanceCalculator.calculateDistanceTo(highDummyBeacon, highDummyBeacon.getRssi());
         float expectedDistance = (float) Math.sqrt(Math.pow(absoluteDistance, 2) - Math.pow(highDummyBeacon.getLocation().getElevation(), 2));
-        float actualDistance = BeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(highDummyBeacon, highDummyBeacon.getRssi(), 0);
+        float actualDistance = pathLossBeaconDistanceCalculator.calculateDistanceWithoutElevationDeltaToDevice(highDummyBeacon, highDummyBeacon.getRssi(), 0);
         assertEquals(expectedDistance, actualDistance, 0);
     }
 
     @Test
-    public void calculateDistance() throws Exception {
+    public void calculateDistance() {
         int rssiAtZeroMeters = -45;
         int rssiAtOneMeter = -65;
 
-        float calculatedDistance = BeaconDistanceCalculator.calculateDistance(-80, rssiAtOneMeter, BeaconDistanceCalculator.PATH_LOSS_PARAMETER_INDOOR);
+        float calculatedDistance = PathLossBeaconDistanceCalculator.calculateDistance(-80, rssiAtOneMeter, PathLossBeaconDistanceCalculator.PATH_LOSS_PARAMETER_INDOOR);
         assertEquals(8, calculatedDistance, 1);
 
-        calculatedDistance = BeaconDistanceCalculator.calculateDistance(-100, rssiAtOneMeter, BeaconDistanceCalculator.PATH_LOSS_PARAMETER_INDOOR);
+        calculatedDistance = PathLossBeaconDistanceCalculator.calculateDistance(-100, rssiAtOneMeter, PathLossBeaconDistanceCalculator.PATH_LOSS_PARAMETER_INDOOR);
         assertEquals(110, calculatedDistance, 10);
     }
 
     @Test
-    public void calculateDistance_calibratedRssi_calibratedDistance() throws Exception {
+    public void calculateDistance_calibratedRssi_calibratedDistance() {
         int rssiAtZeroMeters = -45;
         int rssiAtOneMeter = -65;
-        float calculatedDistance = BeaconDistanceCalculator.calculateDistance(rssiAtZeroMeters, rssiAtOneMeter, BeaconDistanceCalculator.PATH_LOSS_PARAMETER_INDOOR);
+        float calculatedDistance = PathLossBeaconDistanceCalculator.calculateDistance(rssiAtZeroMeters, rssiAtOneMeter, PathLossBeaconDistanceCalculator.PATH_LOSS_PARAMETER_INDOOR);
         assertEquals(0, calculatedDistance, 0.1);
-        calculatedDistance = BeaconDistanceCalculator.calculateDistance(rssiAtOneMeter, rssiAtOneMeter, BeaconDistanceCalculator.PATH_LOSS_PARAMETER_INDOOR);
+        calculatedDistance = PathLossBeaconDistanceCalculator.calculateDistance(rssiAtOneMeter, rssiAtOneMeter, PathLossBeaconDistanceCalculator.PATH_LOSS_PARAMETER_INDOOR);
         assertEquals(1, calculatedDistance, 0.1);
     }
 

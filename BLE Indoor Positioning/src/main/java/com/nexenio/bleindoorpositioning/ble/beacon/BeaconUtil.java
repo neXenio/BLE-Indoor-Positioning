@@ -2,7 +2,7 @@ package com.nexenio.bleindoorpositioning.ble.beacon;
 
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 import com.nexenio.bleindoorpositioning.ble.beacon.signal.WindowFilter;
-import com.nexenio.bleindoorpositioning.location.distance.BeaconDistanceCalculator;
+import com.nexenio.bleindoorpositioning.ble.beacon.distance.PathLossBeaconDistanceCalculator;
 
 import java.util.Comparator;
 import java.util.List;
@@ -108,7 +108,7 @@ public abstract class BeaconUtil {
      * @return Estimated rssi for the given distance
      */
     public static int calculateRssiForDistance(Beacon beacon, float distance) {
-        return calculateRssi(distance, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), BeaconDistanceCalculator.getPathLossParameter());
+        return calculateRssi(distance, beacon.getCalibratedRssi(), beacon.getCalibratedDistance(), PathLossBeaconDistanceCalculator.PATH_LOSS_PARAMETER_OFFICE_HARD_PARTITION);
     }
 
     /**
@@ -122,7 +122,7 @@ public abstract class BeaconUtil {
      * @return Estimated rssi for the given distance
      */
     public static int calculateRssi(float distance, float calibratedRssi, int calibratedDistance, float pathLossParameter) {
-        return calculateRssi(distance, BeaconDistanceCalculator.getCalibratedRssiAtOneMeter(calibratedRssi, calibratedDistance), pathLossParameter);
+        return calculateRssi(distance, PathLossBeaconDistanceCalculator.getCalibratedRssiAtOneMeter(calibratedRssi, calibratedDistance), pathLossParameter);
     }
 
     /**
