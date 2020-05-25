@@ -31,10 +31,14 @@
     <string name="title_record">Record</string>
     <string name="action_start_recording">Start Recording</string>
     <string name="action_stop_recording">Stop Recording</string>
+    <string name="action_export_all_recordings">Export all recordings</string>
     <string name="action_clear_recordings">Delete all recordings</string>
     <string name="record_general_info">General Info</string>
     <string name="record_device_info">Device Info</string>
     <string name="record_beacon_info">Beacon Info</string>
+    <string name="record_duration">Duration</string>
+    <string name="record_duration_help">Leave blank for manual stop</string>
+    <string name="record_offset">Offset</string>
     <string name="record_notes">Notes</string>
     <string name="record_notes_help">An optional comment</string>
     <string name="record_id">ID</string>

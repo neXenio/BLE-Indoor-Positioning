@@ -1,5 +1,11 @@
 package com.nexenio.bleindoorpositioning.testutil.benchmark;
 
+import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
+
+import java.util.Map;
+
+import io.reactivex.annotations.Nullable;
+
 public class RssiMeasurements {
 
     public static final String KEY_DEVICE_INFO = "deviceInfo";
@@ -23,6 +29,9 @@ public class RssiMeasurements {
     private float distance;
 
     private int[] rssis;
+
+    @Nullable
+    private Map<Long, AdvertisingPacket> advertisingPacketMap;
 
     public RssiMeasurements() {
     }
@@ -81,6 +90,14 @@ public class RssiMeasurements {
 
     public void setRssis(int[] rssis) {
         this.rssis = rssis;
+    }
+
+    public Map<Long, AdvertisingPacket> getAdvertisingPacketMap() {
+        return advertisingPacketMap;
+    }
+
+    public void setAdvertisingPacketMap(Map<Long, AdvertisingPacket> advertisingPacketMap) {
+        this.advertisingPacketMap = advertisingPacketMap;
     }
 
 }

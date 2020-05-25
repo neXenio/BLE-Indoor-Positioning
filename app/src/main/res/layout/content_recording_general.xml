@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              style="@style/RecordingContentContainer">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        style="@style/RecordingContentContainer">
 
     <TextView
-            android:text="@string/record_general_info"
-            style="@style/DefaultHeadingText"/>
+            style="@style/DefaultHeadingText"
+            android:text="@string/record_general_info" />
 
     <com.google.android.material.textfield.TextInputLayout
+            style="@style/DefaultTextInputLayout"
             android:hint="@string/distance"
-            app:helperText="@string/record_distance_help"
-            style="@style/DefaultTextInputLayout">
+            app:helperText="@string/record_distance_help">
 
         <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/recordDistanceEditText"
-                android:inputType="numberDecimal"
-                style="@style/DefaultTextInputEditText"/>
+                style="@style/DefaultTextInputEditText"
+                android:inputType="numberDecimal" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -31,14 +31,14 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
+            style="@style/DefaultTextInputLayout"
             android:hint="@string/record_uuid"
-            app:helperText="@string/record_uuid_help"
-            style="@style/DefaultTextInputLayout">
+            app:helperText="@string/record_uuid_help">
 
         <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/recordingUuidCopyEditText"
-                android:editable="false"
-                style="@style/DefaultTextInputEditText"/>
+                style="@style/DefaultTextInputEditText"
+                android:editable="false" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

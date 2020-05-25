@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              style="@style/RecordingContentContainer">
+        style="@style/RecordingContentContainer">
 
     <TextView
             android:text="@string/record_device_info"

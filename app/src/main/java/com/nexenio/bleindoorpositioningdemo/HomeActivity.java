@@ -1,26 +1,27 @@
 package com.nexenio.bleindoorpositioningdemo;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 
 import com.nexenio.bleindoorpositioningdemo.bluetooth.BluetoothClient;
 import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.chart.BeaconChartFragment;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.map.BeaconMapFragment;
 import com.nexenio.bleindoorpositioningdemo.ui.beaconview.radar.BeaconRadarFragment;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.fragment.app.Fragment;
 
 public class HomeActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -126,31 +127,26 @@ public class HomeActivity extends AppCompatActivity implements BottomNavigationV
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case AndroidLocationProvider.REQUEST_CODE_LOCATION_PERMISSIONS: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG, "Location permission granted");
-                    AndroidLocationProvider.startRequestingLocationUpdates();
-                } else {
-                    Log.d(TAG, "Location permission not granted. Wut?");
-                }
-                break;
+        if (requestCode == AndroidLocationProvider.REQUEST_CODE_LOCATION_PERMISSIONS) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Location permission granted");
+                AndroidLocationProvider.startRequestingLocationUpdates();
+            } else {
+                Log.d(TAG, "Location permission not granted. Wut?");
             }
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case BluetoothClient.REQUEST_CODE_ENABLE_BLUETOOTH: {
-                if (resultCode == RESULT_OK) {
-                    Log.d(TAG, "Bluetooth enabled, starting to scan");
-                    BluetoothClient.startScanning();
-                } else {
-                    Log.d(TAG, "Bluetooth not enabled, invoking new request");
-                    BluetoothClient.requestBluetoothEnabling(this);
-                }
-                break;
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == BluetoothClient.REQUEST_CODE_ENABLE_BLUETOOTH) {
+            if (resultCode == RESULT_OK) {
+                Log.d(TAG, "Bluetooth enabled, starting to scan");
+                BluetoothClient.startScanning();
+            } else {
+                Log.d(TAG, "Bluetooth not enabled, invoking new request");
+                BluetoothClient.requestBluetoothEnabling(this);
             }
         }
     }
