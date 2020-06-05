@@ -109,7 +109,9 @@ public class NotificationManager {
                 .setOnlyAlertOnce(true)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-                .setCategory(Notification.CATEGORY_STATUS);
+                .setCategory(Notification.CATEGORY_STATUS)
+                .setUsesChronometer(true)
+                .setWhen(System.currentTimeMillis());
     }
 
     /**

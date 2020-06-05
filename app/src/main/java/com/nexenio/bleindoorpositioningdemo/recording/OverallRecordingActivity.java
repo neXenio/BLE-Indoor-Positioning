@@ -29,6 +29,7 @@ import com.nexenio.bleindoorpositioningdemo.location.AndroidLocationProvider;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -186,6 +187,11 @@ public class OverallRecordingActivity extends AppCompatActivity {
             return;
         }
 
+        if (showInvalidFields()) {
+            Toast.makeText(this, "Not all information were provided", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Intent intent = new Intent(this, RecordingService.class);
         long id = getLongFromEditText(recordingIdEditText);
         long duration = getLongFromEditText(durationEditText);
@@ -318,6 +324,32 @@ public class OverallRecordingActivity extends AppCompatActivity {
         ExternalStorageUtils.shareFile(zipFile, this);
     }
 
+    /**
+     * Indicate text edit fields with missing text.
+     *
+     * @return False if no invalid field was found, else true
+     */
+    private boolean showInvalidFields() {
+        List<TextInputEditText> textInputEditTexts = getNecessaryTextInputEditTexts();
+        boolean invalidTextField = false;
+        for (TextInputEditText textInputEditText : textInputEditTexts) {
+            if (textInputEditText.getText() != null && textInputEditText.getText().toString().equals("")) {
+                String errorString = "This field cannot be empty";
+                textInputEditText.setError(errorString);
+                invalidTextField = true;
+            }
+        }
+        return invalidTextField;
+    }
+
+    private List<TextInputEditText> getNecessaryTextInputEditTexts() {
+        return Arrays.asList(
+                durationEditText,
+                offsetEditText,
+                recordingIdEditText
+        );
+    }
+
     /*
      * Permissions
      */
@@ -372,7 +404,7 @@ public class OverallRecordingActivity extends AppCompatActivity {
                     String fileName = resultData.getString("fileName");
                     File documentsDirectory = ExternalStorageUtils.getDocumentsDirectory(RECORDING_DIRECTORY_NAME);
                     File file = new File(documentsDirectory, fileName);
-                     ExternalStorageUtils.shareFile(file, OverallRecordingActivity.this);
+                    ExternalStorageUtils.shareFile(file, OverallRecordingActivity.this);
                     break;
                 case RECORDING_STARTED:
                     // TODO: show toast about recording started
