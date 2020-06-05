@@ -1,16 +1,21 @@
 package com.nexenio.bleindoorpositioningdemo.recording;
 
+import com.google.gson.annotations.Expose;
+
 import com.nexenio.bleindoorpositioning.ble.advertising.AdvertisingPacket;
 
-import java.util.Map;
+import java.util.List;
 
 public class IndoorPositioningRecording {
 
+    @Expose
     private long startTimestamp;
 
+    @Expose
     private long endTimestamp;
 
-    private Map<Long, AdvertisingPacket> advertisingPacketMap;
+    @Expose
+    private List<AdvertisingPacket> advertisingPacketList;
 
     public IndoorPositioningRecording() {
     }
@@ -31,12 +36,12 @@ public class IndoorPositioningRecording {
         this.endTimestamp = endTimestamp;
     }
 
-    public Map<Long, AdvertisingPacket> getAdvertisingPacketMap() {
-        return advertisingPacketMap;
+    public List<AdvertisingPacket> getAdvertisingPacketList() {
+        return advertisingPacketList;
     }
 
-    public void setAdvertisingPacketMap(Map<Long, AdvertisingPacket> advertisingPacketMap) {
-        this.advertisingPacketMap = advertisingPacketMap;
+    public void setAdvertisingPacketList(List<AdvertisingPacket> advertisingPacketMap) {
+        this.advertisingPacketList = advertisingPacketMap;
     }
 
 }

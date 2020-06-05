@@ -3,6 +3,7 @@ package com.nexenio.bleindoorpositioningdemo.recording;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,23 +20,21 @@ import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.filter.IBeaconFilter;
 import com.nexenio.bleindoorpositioningdemo.ExternalStorageUtils;
 import com.nexenio.bleindoorpositioningdemo.bluetooth.BluetoothClient;
+import com.nexenio.bleindoorpositioningdemo.notification.NotificationManager;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.Nullable;
+import io.reactivex.rxjava3.core.Completable;
 
 import static com.nexenio.bleindoorpositioningdemo.recording.OverallRecordingActivity.RECORDING_FINISHED;
 
 public class RecordingService extends Service {
-
-    // Todo: Timestamps already in advertising data
-    // Todo: send something more readable maybe ? -> import are rssi, major, minor
-
 
     private static final String TAG = RecordingService.class.getSimpleName();
     private static final String RECORDING_DIRECTORY_NAME = "Indoor Positioning Recording";
@@ -46,11 +45,15 @@ public class RecordingService extends Service {
 
     private FilteredBeaconUpdateListener<IBeacon<IBeaconAdvertisingPacket>> recordingBeaconUpdateListener;
 
+    long id;
+
     @Nullable
     ResultReceiver resultReceiver;
 
     @Nullable
-    private Map<Long, AdvertisingPacket> advertisingPacketMap;
+    private List<AdvertisingPacket> advertisingPacketList;
+
+    private NotificationManager notificationManager;
 
     @Nullable
     @Override
@@ -61,31 +64,49 @@ public class RecordingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        notificationManager = new NotificationManager();
+        notificationManager.initialize(this).blockingAwait();
+        promoteToForeground();
+    }
+
+    protected void promoteToForeground() {
+        startForeground(NotificationManager.NOTIFICATION_ID_STATUS, createForegroundNotification());
+    }
+
+    protected Notification createForegroundNotification() {
+        return notificationManager
+                .createStatusNotificationBuilder(this.getClass(), OverallRecordingActivity.class)
+                .build();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        int i = super.onStartCommand(intent, flags, startId);
+        // if (advertisingPacketList != null) {
+        //    resultReceiver = intent.getParcelableExtra("receiverTag");
+        // } else {
+        super.onStartCommand(intent, flags, startId);
         resultReceiver = intent.getParcelableExtra("receiverTag");
+        id = intent.getLongExtra("id", -1);
         long duration = intent.getLongExtra("duration", 0);
         long offset = intent.getLongExtra("offset", 0);
 
         Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                startRecording();
-            }
-        }, TimeUnit.SECONDS.toMillis(offset));
+        handler.postDelayed(this::startRecording, TimeUnit.SECONDS.toMillis(offset));
 
         if (duration > 0) {
-            handler.postDelayed(new Runnable() {
-                public void run() {
-                    stopRecording();
-                }
-            }, TimeUnit.SECONDS.toMillis(duration + offset));
+            handler.postDelayed(this::stopRecording, TimeUnit.SECONDS.toMillis(duration + offset));
         }
+        // }
 
-        return i;
+        NotificationManager.getBundleFromIntent(intent)
+                .flatMap(NotificationManager::getActionFromBundle)
+                .flatMapCompletable(this::processNotificationAction)
+                .subscribe(
+                        () -> Log.d(TAG, "Processed notification action"),
+                        throwable -> Log.w(TAG, "Unable to process notification action", throwable)
+                );
+
+        return START_STICKY;
     }
 
     @Override
@@ -112,12 +133,12 @@ public class RecordingService extends Service {
 
     private void onRecordingBeaconUpdated(IBeacon<IBeaconAdvertisingPacket> beacon) {
         IBeaconAdvertisingPacket latestAdvertisingPacket = beacon.getLatestAdvertisingPacket();
-        advertisingPacketMap.put(System.currentTimeMillis(), latestAdvertisingPacket);
+        advertisingPacketList.add(latestAdvertisingPacket);
     }
 
     private void startRecording() {
         Log.d(TAG, "Starting recording");
-        advertisingPacketMap = new HashMap<>();
+        advertisingPacketList = new ArrayList<>();
         indoorPositioningRecording.setStartTimestamp(System.currentTimeMillis());
 
         initializeBluetoothScanning();
@@ -130,17 +151,16 @@ public class RecordingService extends Service {
         BeaconManager.unregisterBeaconUpdateListener(recordingBeaconUpdateListener);
 
         indoorPositioningRecording.setEndTimestamp(System.currentTimeMillis());
-        indoorPositioningRecording.setAdvertisingPacketMap(advertisingPacketMap);
-
+        indoorPositioningRecording.setAdvertisingPacketList(advertisingPacketList);
 
         Log.i(TAG, "Indoor Positioning Recording:\n" + indoorPositioningRecording);
 
         String jsonString = createJsonString(indoorPositioningRecording);
-        String fileName = "indoorRecording" + indoorPositioningRecording.getStartTimestamp() + "_" + indoorPositioningRecording.getEndTimestamp() + ".json";
+        String fileName = "indoor-recording_" + id + "_" + indoorPositioningRecording.getStartTimestamp() + "_" + indoorPositioningRecording.getEndTimestamp() + ".json";
         persistJsonFile(fileName, jsonString);
 
-        if (advertisingPacketMap != null) {
-            advertisingPacketMap.clear();
+        if (advertisingPacketList != null) {
+            advertisingPacketList.clear();
         }
 
         Bundle bundle = new Bundle();
@@ -167,10 +187,24 @@ public class RecordingService extends Service {
 
     private static String createJsonString(IndoorPositioningRecording indoorPositioningRecording) {
         GsonBuilder gsonBuilder = new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
                 .setPrettyPrinting();
 
         Gson gson = gsonBuilder.create();
         return gson.toJson(indoorPositioningRecording);
+    }
+
+    protected Completable processNotificationAction(int action) {
+        return Completable.fromAction(() -> {
+            switch (action) {
+                case NotificationManager.ACTION_STOP:
+                    stopSelf();
+                    System.exit(0);
+                    break;
+                default:
+                    Log.w(TAG, "Unknown notification action: " + action);
+            }
+        });
     }
 
 }

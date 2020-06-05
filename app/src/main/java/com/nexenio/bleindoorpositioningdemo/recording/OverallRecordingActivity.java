@@ -12,6 +12,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
@@ -40,7 +41,8 @@ import androidx.core.content.ContextCompat;
 
 public class OverallRecordingActivity extends AppCompatActivity {
 
-    // TODO: Bluetooth and location permission and activation
+    // TODO: block start if fields are missing (app is crashing)
+    // TODO: find out why app is crashing for that
 
     private static final String TAG = OverallRecordingActivity.class.getSimpleName();
     // This must be configured for the file provider; adjust file_paths.xml
@@ -52,11 +54,12 @@ public class OverallRecordingActivity extends AppCompatActivity {
     public static final int RECORDING_STARTED = 2;
 
     // TODO: 24.05.20 change recording uuid to mp-project-specific-value
-    private final static UUID RECORDING_UUID = UUID.fromString("61a0523a-a733-4789-ae8f-4f55fcff64f2");
+    public final static UUID RECORDING_UUID = UUID.fromString("61a0523a-a733-4789-ae8f-4f55fcff64f2");
 
     private TextInputEditText recordingUuidCopyEditText;
     private TextInputEditText durationEditText;
     private TextInputEditText offsetEditText;
+    private TextInputEditText recordingIdEditText;
     private MaterialButton recordButton;
 
     private boolean isRecording;
@@ -99,6 +102,7 @@ public class OverallRecordingActivity extends AppCompatActivity {
                     Log.d(TAG, "Location permission granted");
                     AndroidLocationProvider.startRequestingLocationUpdates();
                 } else {
+                    requestLocationServices();
                     Log.d(TAG, "Location permission not granted. Wut?");
                 }
             }
@@ -111,6 +115,7 @@ public class OverallRecordingActivity extends AppCompatActivity {
         recordButton = findViewById(R.id.recordButton);
 
         recordingUuidCopyEditText = findViewById(R.id.recordingUuidCopyEditText);
+        recordingIdEditText = findViewById(R.id.recordingIdEditText);
         durationEditText = findViewById(R.id.recordingDurationEditText);
         offsetEditText = findViewById(R.id.offsetEditText);
 
@@ -134,23 +139,36 @@ public class OverallRecordingActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        stopRecording();
+        // stopRecording();
         super.onDestroy();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+    }
+
+    private boolean hasAllPermissionsAndSettingsEnabled() {
+        boolean everythingAvailable = true;
         // observe location
         if (!AndroidLocationProvider.hasLocationPermission(this)) {
             AndroidLocationProvider.requestLocationPermission(this);
+            everythingAvailable = false;
         } else if (!AndroidLocationProvider.isLocationEnabled(this)) {
             requestLocationServices();
+            everythingAvailable = false;
         }
         // observe bluetooth
         if (!BluetoothClient.isBluetoothEnabled()) {
             requestBluetooth();
+            everythingAvailable = false;
         }
+        // setup storage
+        if (!hasStoragePermission()) {
+            requestStoragePermission();
+            everythingAvailable = false;
+        }
+        return everythingAvailable;
     }
 
     @Override
@@ -176,43 +194,36 @@ public class OverallRecordingActivity extends AppCompatActivity {
     }
 
     private void startRecording() {
-        // TODO: bluetooth and location need to be checked too
-        if (!hasStoragePermission()) {
-            requestStoragePermission();
+        if (!hasAllPermissionsAndSettingsEnabled()) {
             return;
         }
 
         Intent intent = new Intent(this, RecordingService.class);
-        Editable text = durationEditText.getText();
-        long duration;
-        if (text == null) {
-            duration = 0;
-        } else {
-            duration = Long.parseLong(text.toString());
-        }
-        // TODO: beautify
-        text = offsetEditText.getText();
-        long offset;
-        if (text == null) {
-            offset = 0;
-        } else {
-            offset = Long.parseLong(text.toString());
-        }
+        long id = getLongFromEditText(recordingIdEditText);
+        long duration = getLongFromEditText(durationEditText);
+        long offset = getLongFromEditText(offsetEditText);
+
+        intent.putExtra("id", id);
         intent.putExtra("duration", duration);
         intent.putExtra("offset", offset);
         intent.putExtra("receiverTag", new RecorderResultReceiver(new Handler()));
-        startService(intent);
-        /*
-        Log.d(TAG, "Starting recording");
-        advertisingPacketMap = new HashMap<>();
-        indoorPositioningRecording.setStartTimestamp(System.currentTimeMillis());
 
-        BluetoothClient.startScanning();
-        BeaconManager.registerBeaconUpdateListener(recordingBeaconUpdateListener);
-        */
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
         isRecording = true;
         recordButton.setText(getString(R.string.action_stop_recording));
+    }
+
+    private long getLongFromEditText(TextInputEditText editText) {
+        Editable text = editText.getText();
+        if (text == null) {
+            return 0;
+        } else {
+            return Long.parseLong(text.toString());
+        }
     }
 
     private void stopRecording() {
@@ -226,7 +237,6 @@ public class OverallRecordingActivity extends AppCompatActivity {
         Log.d(TAG, "Stopping recording");
 
         if (!serviceStopped) {
-            // TODO: stopService
             stopService(new Intent(this, RecordingService.class));
         }
 
@@ -374,7 +384,7 @@ public class OverallRecordingActivity extends AppCompatActivity {
                     String fileName = resultData.getString("fileName");
                     File documentsDirectory = ExternalStorageUtils.getDocumentsDirectory(RECORDING_DIRECTORY_NAME);
                     File file = new File(documentsDirectory, fileName);
-                    ExternalStorageUtils.shareFile(file, OverallRecordingActivity.this);
+                     ExternalStorageUtils.shareFile(file, OverallRecordingActivity.this);
                     break;
                 case RECORDING_STARTED:
                     // TODO: show toast about recording started

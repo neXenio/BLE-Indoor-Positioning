@@ -1,5 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.advertising;
 
+import com.google.gson.annotations.Expose;
+
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 import com.nexenio.bleindoorpositioning.ble.beacon.IBeacon;
 
@@ -31,12 +33,18 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
     private byte[] minorBytes;
     private byte measuredPowerByte;
 
+    @Expose
     private UUID proximityUuid;
+    @Expose
     private int major;
+    @Expose
     private int minor;
 
     public IBeaconAdvertisingPacket(byte[] data) {
         super(data);
+        major = getMajor();
+        minor = getMinor();
+        proximityUuid = getProximityUuid();
     }
 
     private void parseData() {
@@ -117,7 +125,7 @@ public class IBeaconAdvertisingPacket extends AdvertisingPacket {
     }
 
     public static byte[] getProximityUuidBytes(byte[] data) {
-        return Arrays.copyOfRange(data, 9, 9 + 24);
+        return Arrays.copyOfRange(data, 9, 9 + 16);
     }
 
     public static byte[] getMajorBytes(byte[] data) {

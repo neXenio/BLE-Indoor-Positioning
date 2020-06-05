@@ -16,6 +16,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
     android {
         lintOptions {
             abortOnError false
@@ -40,6 +44,11 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:17.0.0'
 
     implementation "com.polidea.rxandroidble:rxandroidble:1.4.3"
+
+    // Reactive
+    api "io.reactivex.rxjava3:rxjava:3.0.3"
+    api "io.reactivex.rxjava3:rxandroid:3.0.0"
+    api 'com.github.akarnokd:rxjava3-bridge:3.0.0'
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'androidx.test:runner:1.2.0'

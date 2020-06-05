@@ -1,5 +1,7 @@
 package com.nexenio.bleindoorpositioning.ble.advertising;
 
+import com.google.gson.annotations.Expose;
+
 import com.nexenio.bleindoorpositioning.ble.beacon.Beacon;
 
 import java.util.Arrays;
@@ -10,8 +12,11 @@ import java.util.Arrays;
 
 public abstract class AdvertisingPacket {
 
+    @Expose
     protected byte[] data;
+    @Expose
     protected int rssi;
+    @Expose
     protected long timestamp;
 
     public AdvertisingPacket(byte[] data) {

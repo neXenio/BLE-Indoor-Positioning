@@ -37,7 +37,7 @@
     <string name="record_device_info">Device Info</string>
     <string name="record_beacon_info">Beacon Info</string>
     <string name="record_duration">Duration</string>
-    <string name="record_duration_help">Leave blank for manual stop</string>
+    <string name="record_duration_help">Recording time in seconds. 0 means manual stop.</string>
     <string name="record_offset">Offset</string>
     <string name="record_notes">Notes</string>
     <string name="record_notes_help">An optional comment</string>
@@ -86,5 +86,8 @@
     <string name="error_location_disabled">Location services disabled</string>
     <string name="error_bluetooth_disabled">Bluetooth disabled</string>
     <string name="action_enable">Enable</string>
+    <string name="action_stop">Stop Recording</string>
+    <string name="notification_service_title">Indoor Positioning</string>
+    <string name="notification_service_description">Indoor Positioning Recording running</string>
 
 </resources>

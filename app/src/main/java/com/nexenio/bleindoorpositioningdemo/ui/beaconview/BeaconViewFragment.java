@@ -2,11 +2,6 @@ package com.nexenio.bleindoorpositioningdemo.ui.beaconview;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.CallSuper;
-import androidx.annotation.LayoutRes;
-import androidx.annotation.Nullable;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,6 +24,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import androidx.annotation.CallSuper;
+import androidx.annotation.LayoutRes;
+import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.fragment.app.Fragment;
+
+import static com.nexenio.bleindoorpositioningdemo.recording.OverallRecordingActivity.RECORDING_UUID;
+
 public abstract class BeaconViewFragment extends Fragment {
 
     protected BeaconManager beaconManager = BeaconManager.getInstance();
@@ -38,7 +41,7 @@ public abstract class BeaconViewFragment extends Fragment {
 
     // TODO: Remove legacy uuid once all beacons are updated
     // protected IBeaconFilter uuidFilter = new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID);
-    protected IBeaconFilter uuidFilter = new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID, UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01"));
+    protected IBeaconFilter uuidFilter = new IBeaconFilter(IndoorPositioningAdvertisingPacket.INDOOR_POSITIONING_UUID, UUID.fromString("acfd065e-c3c0-11e3-9bbe-1a514932ac01"), RECORDING_UUID);
 
     protected CoordinatorLayout coordinatorLayout;
 
