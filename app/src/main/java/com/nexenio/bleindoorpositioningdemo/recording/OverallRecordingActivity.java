@@ -132,18 +132,6 @@ public class OverallRecordingActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        // stopRecording();
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        // stopRecording();
-        super.onDestroy();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
     }

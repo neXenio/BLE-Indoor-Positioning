@@ -101,7 +101,7 @@ public class NotificationManager {
         return new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_STATUS)
                 .setContentTitle(context.getText(R.string.notification_service_title))
                 .setContentText(context.getText(R.string.notification_service_description))
-                .setSmallIcon(R.drawable.code_braces)
+                .setSmallIcon(R.drawable.bluetooth)
                 .setContentIntent(createActivityIntent(activityClass))
                 .addAction(createStopServiceAction(serviceClass))
                 .setAutoCancel(false)
