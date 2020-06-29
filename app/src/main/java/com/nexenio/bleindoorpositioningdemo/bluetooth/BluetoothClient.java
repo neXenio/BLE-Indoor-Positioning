@@ -20,6 +20,7 @@ import com.polidea.rxandroidble.scan.ScanSettings;
 import androidx.annotation.NonNull;
 import rx.Observer;
 import rx.Subscription;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by steppschuh on 24.11.17.
@@ -32,10 +33,8 @@ public class BluetoothClient {
 
     private static BluetoothClient instance;
 
-    private Context context;
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
-    private BeaconManager beaconManager = BeaconManager.getInstance();
 
     private RxBleClient rxBleClient;
     private Subscription scanningSubscription;
@@ -76,6 +75,7 @@ public class BluetoothClient {
                 .build();
 
         instance.scanningSubscription = instance.rxBleClient.scanBleDevices(scanSettings)
+                .subscribeOn(Schedulers.io())
                 .subscribe(new Observer<ScanResult>() {
                     @Override
                     public void onCompleted() {

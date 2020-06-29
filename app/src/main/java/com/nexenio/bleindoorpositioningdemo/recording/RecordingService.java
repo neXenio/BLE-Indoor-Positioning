@@ -93,6 +93,7 @@ public class RecordingService extends Service {
         return Completable.fromAction(() -> {
             switch (action) {
                 case NotificationManager.ACTION_STOP:
+                    onDestroy();
                     stopSelf();
                     System.exit(0);
                     break;
