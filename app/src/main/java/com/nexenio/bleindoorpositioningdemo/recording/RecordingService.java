@@ -67,7 +67,8 @@ public class RecordingService extends Service implements AdvertisingPacketRecord
                     advertisingPacketRecorder.initializeBluetoothScanning(this);
                     advertisingPacketRecorder.startRecording();
                     break;
-                } case ACTION_RECORDING_STOP: {
+                }
+                case ACTION_RECORDING_STOP: {
                     advertisingPacketRecorder.stopRecording();
                 }
             }
@@ -95,16 +96,18 @@ public class RecordingService extends Service implements AdvertisingPacketRecord
         advertisingPacketRecorder = new AdvertisingPacketRecorder(comment, duration, offset, this);
     }
 
-    private void recordingStopped(Bundle bundle) {
-        if (bundle != null) {
-            String fileName = bundle.getString("fileName");
-            File documentsDirectory = ExternalStorageUtils.getDocumentsDirectory(RECORDING_DIRECTORY_NAME);
-            File file = new File(documentsDirectory, fileName);
-            ExternalStorageUtils.shareFile(file, RecordingService.this);
-        }
-        if (resultReceiver != null) {
-            resultReceiver.send(RECORDING_FINISHED, bundle);
-        }
+    private Completable recordingStopped(Bundle bundle) {
+        return Completable.fromAction(() -> {
+            if (bundle != null) {
+                String fileName = bundle.getString("fileName");
+                File documentsDirectory = ExternalStorageUtils.getDocumentsDirectory(RECORDING_DIRECTORY_NAME);
+                File file = new File(documentsDirectory, fileName);
+                ExternalStorageUtils.shareFile(file, RecordingService.this);
+            }
+            if (resultReceiver != null) {
+                resultReceiver.send(RECORDING_FINISHED, bundle);
+            }
+        });
     }
 
     protected Completable processNotificationAction(int action) {
@@ -121,8 +124,9 @@ public class RecordingService extends Service implements AdvertisingPacketRecord
 
     @Override
     public void onRecordingStopped(@Nullable Bundle bundle) {
-        recordingStopped(bundle);
-        stopSelf();
+        recordingStopped(bundle)
+                .doOnComplete(this::stopSelf)
+                .subscribe();
     }
 
 }
