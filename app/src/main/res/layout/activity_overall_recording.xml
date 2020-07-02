@@ -36,17 +36,18 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                    android:hint="@string/record_id"
+                    android:hint="@string/record_comment"
                     style="@style/DefaultTextInputLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/recordingIdEditText"
+                        android:id="@+id/recordingCommentEditText"
                         style="@style/DefaultTextInputEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                     android:hint="@string/record_duration"
                     app:helperText="@string/record_duration_help"
+                    android:inputType="number"
                     style="@style/DefaultTextInputLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -56,6 +57,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                     android:hint="@string/record_offset"
+                    android:inputType="number"
                     style="@style/DefaultTextInputLayout">
 
                 <com.google.android.material.textfield.TextInputEditText

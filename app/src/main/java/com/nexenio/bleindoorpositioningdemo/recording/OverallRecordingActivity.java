@@ -47,7 +47,9 @@ public class OverallRecordingActivity extends AppCompatActivity {
 
     private static final String TAG = OverallRecordingActivity.class.getSimpleName();
     // This must be configured for the file provider; adjust file_paths.xml
-    private static final String RECORDING_DIRECTORY_NAME = "Indoor Positioning Recording";
+    public static final String RECORDING_DIRECTORY_NAME = "Indoor Positioning Recording";
+    public static final String ACTION_RECORDING_START = "Start_Recording";
+    public static final String ACTION_RECORDING_STOP = "Stop_Recording";
     public static final int REQUEST_CODE_STORAGE_PERMISSIONS = 0; // changed from 1 to 0 on 25.05
 
     public static final int RESULT_CODE_ERROR = 0;
@@ -60,7 +62,7 @@ public class OverallRecordingActivity extends AppCompatActivity {
     private TextInputEditText recordingUuidCopyEditText;
     private TextInputEditText durationEditText;
     private TextInputEditText offsetEditText;
-    private TextInputEditText recordingIdEditText;
+    private TextInputEditText recordingCommentEditText;
     private MaterialButton recordButton;
 
     private boolean isRecording;
@@ -116,7 +118,7 @@ public class OverallRecordingActivity extends AppCompatActivity {
         recordButton = findViewById(R.id.recordButton);
 
         recordingUuidCopyEditText = findViewById(R.id.recordingUuidCopyEditText);
-        recordingIdEditText = findViewById(R.id.recordingIdEditText);
+        recordingCommentEditText = findViewById(R.id.recordingCommentEditText);
         durationEditText = findViewById(R.id.recordingDurationEditText);
         offsetEditText = findViewById(R.id.offsetEditText);
 
@@ -193,14 +195,16 @@ public class OverallRecordingActivity extends AppCompatActivity {
         }
 
         Intent intent = new Intent(this, RecordingService.class);
-        long id = getLongFromEditText(recordingIdEditText);
+        String comment = recordingCommentEditText.getText() == null ? "test" : recordingCommentEditText.getText().toString();
         long duration = getLongFromEditText(durationEditText);
         long offset = getLongFromEditText(offsetEditText);
 
-        intent.putExtra("id", id);
+        intent.putExtra("comment", comment);
         intent.putExtra("duration", duration);
         intent.putExtra("offset", offset);
         intent.putExtra("receiverTag", new RecorderResultReceiver(new Handler()));
+
+        intent.setAction(ACTION_RECORDING_START);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent);
@@ -231,7 +235,9 @@ public class OverallRecordingActivity extends AppCompatActivity {
         Log.d(TAG, "Stopping recording");
 
         if (!serviceStopped) {
-            stopService(new Intent(this, RecordingService.class));
+            Intent intent = new Intent(this, RecordingService.class);
+            intent.setAction(ACTION_RECORDING_STOP);
+            startService(intent);
         }
 
         isRecording = false;
@@ -346,7 +352,7 @@ public class OverallRecordingActivity extends AppCompatActivity {
         return Arrays.asList(
                 durationEditText,
                 offsetEditText,
-                recordingIdEditText
+                recordingCommentEditText
         );
     }
 
@@ -396,15 +402,19 @@ public class OverallRecordingActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            stopRecording(true);
+        protected void onReceiveResult(int resultCode, @Nullable Bundle resultData) {
             switch (resultCode) {
                 case RECORDING_FINISHED:
+                    stopRecording(true);
                     // try exporting new file
-                    String fileName = resultData.getString("fileName");
-                    File documentsDirectory = ExternalStorageUtils.getDocumentsDirectory(RECORDING_DIRECTORY_NAME);
-                    File file = new File(documentsDirectory, fileName);
-                    ExternalStorageUtils.shareFile(file, OverallRecordingActivity.this);
+                    /*
+                    if (resultData != null) {
+                        String fileName = resultData.getString("fileName");
+                        File documentsDirectory = ExternalStorageUtils.getDocumentsDirectory(RECORDING_DIRECTORY_NAME);
+                        File file = new File(documentsDirectory, fileName);
+                        ExternalStorageUtils.shareFile(file, OverallRecordingActivity.this);
+                    }
+                    */
                     break;
                 case RECORDING_STARTED:
                     // TODO: show toast about recording started

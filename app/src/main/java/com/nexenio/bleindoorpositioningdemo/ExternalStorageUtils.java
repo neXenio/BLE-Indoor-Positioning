@@ -187,8 +187,6 @@ public abstract class ExternalStorageUtils {
         shareIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
         shareIntent.putExtra(Intent.EXTRA_TEXT, text);
         shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
-        // Todo: Remove
-        shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"marvin.mirtschin@nexenio.com"});
 
         Intent chooserIntent = Intent.createChooser(shareIntent, "Share file");
         chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

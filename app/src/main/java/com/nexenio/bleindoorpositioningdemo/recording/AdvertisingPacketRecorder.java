@@ -40,12 +40,21 @@ public class AdvertisingPacketRecorder {
 
     private long duration;
     private long offset;
-    private long id;
+    private String comment;
+    @Nullable
+    private RecordingObserver observer;
 
-    public AdvertisingPacketRecorder(long id, long duration, long offset) {
-        this.id = id;
+    private boolean isRecording = false;
+
+    public AdvertisingPacketRecorder(String comment, long duration, long offset) {
+        this.comment = comment;
         this.duration = duration;
         this.offset = offset;
+    }
+
+    public AdvertisingPacketRecorder(String comment, long duration, long offset, @Nullable RecordingObserver observer) {
+        this(comment, duration, offset);
+        this.observer = observer;
     }
 
     public void initializeBluetoothScanning(Context context) {
@@ -62,17 +71,25 @@ public class AdvertisingPacketRecorder {
         }
     }
 
-    public Bundle stopRecording() {
+    public void stopRecording() {
+        if (!isRecording) {
+            return;
+        }
         BluetoothClient.stopScanning();
         BeaconManager.unregisterBeaconUpdateListener(recordingBeaconUpdateListener);
 
         indoorPositioningRecording.setEndTimestamp(System.currentTimeMillis());
         indoorPositioningRecording.setAdvertisingPacketList(advertisingPacketList);
 
+        isRecording = false;
+
         Log.i(TAG, "Indoor Positioning Recording:\n" + indoorPositioningRecording);
 
         String jsonString = createJsonString(indoorPositioningRecording);
-        String fileName = "indoor-recording_" + id + "_" + indoorPositioningRecording.getStartTimestamp() + "_" + indoorPositioningRecording.getEndTimestamp() + ".json";
+
+        String comment = this.comment.replace(" ", "-");
+        comment = comment.replace("_", "-");
+        String fileName = "indoor-recording_" + comment + "_" + indoorPositioningRecording.getStartTimestamp() + "_" + indoorPositioningRecording.getEndTimestamp() + ".json";
         persistJsonFile(fileName, jsonString);
 
         if (advertisingPacketList != null) {
@@ -81,7 +98,10 @@ public class AdvertisingPacketRecorder {
 
         Bundle bundle = new Bundle();
         bundle.putString("fileName", fileName);
-        return bundle;
+
+        if (observer != null) {
+            observer.onRecordingStopped(bundle);
+        }
     }
 
     private void onRecordingBeaconUpdated(IBeacon<IBeaconAdvertisingPacket> beacon) {
@@ -92,12 +112,16 @@ public class AdvertisingPacketRecorder {
     }
 
     private void record() {
+        if (isRecording) {
+            return;
+        }
         Log.d(TAG, "Starting recording");
         advertisingPacketList = new ArrayList<>();
         indoorPositioningRecording.setStartTimestamp(System.currentTimeMillis());
         setupUuidFilter();
         BluetoothClient.startScanning();
         BeaconManager.registerBeaconUpdateListener(recordingBeaconUpdateListener);
+        isRecording = true;
     }
 
     private void setupUuidFilter() {
@@ -136,6 +160,16 @@ public class AdvertisingPacketRecorder {
 
         Gson gson = gsonBuilder.create();
         return gson.toJson(indoorPositioningRecording);
+    }
+
+    public long getOffset() {
+        return offset;
+    }
+
+    public interface RecordingObserver {
+
+        void onRecordingStopped(Bundle bundle);
+
     }
 
 }

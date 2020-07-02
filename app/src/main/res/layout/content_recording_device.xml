@@ -7,7 +7,7 @@
             style="@style/DefaultHeadingText"/>
 
     <com.google.android.material.textfield.TextInputLayout
-            android:hint="@string/record_id"
+            android:hint="@string/record_comment"
             style="@style/DefaultTextInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText

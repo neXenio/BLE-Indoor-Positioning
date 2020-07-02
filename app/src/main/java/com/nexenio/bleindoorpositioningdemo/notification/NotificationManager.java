@@ -98,6 +98,14 @@ public class NotificationManager {
      * service notification.
      */
     public NotificationCompat.Builder createStatusNotificationBuilder(Class serviceClass, Class activityClass) {
+        return createStatusNotificationBuilder(serviceClass, activityClass, 0);
+    }
+
+    /**
+     * Creates the default status notification builder, intended to serve the ongoing foreground
+     * service notification.
+     */
+    public NotificationCompat.Builder createStatusNotificationBuilder(Class serviceClass, Class activityClass, long offset) {
         return new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_STATUS)
                 .setContentTitle(context.getText(R.string.notification_service_title))
                 .setContentText(context.getText(R.string.notification_service_description))
@@ -111,7 +119,7 @@ public class NotificationManager {
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                 .setCategory(Notification.CATEGORY_STATUS)
                 .setUsesChronometer(true)
-                .setWhen(System.currentTimeMillis());
+                .setWhen(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(offset));
     }
 
     /**

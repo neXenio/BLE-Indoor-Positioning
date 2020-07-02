@@ -41,7 +41,7 @@
     <string name="record_offset">Offset</string>
     <string name="record_notes">Notes</string>
     <string name="record_notes_help">An optional comment</string>
-    <string name="record_id">ID</string>
+    <string name="record_comment">Comment</string>
     <string name="record_name">Name</string>
     <string name="record_manufacturer">Manufacturer</string>
     <string name="record_model">Model</string>
